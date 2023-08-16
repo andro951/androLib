@@ -1,0 +1,3 @@
+displayName = androLib
+author = andro951
+version = 1.0
