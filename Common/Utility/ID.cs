@@ -21,4 +21,61 @@ namespace androLib.Common.Utility
 		Rogue,
 		Ki
 	} //Located in DamageClassLoader.cs
+
+	public enum CommonUITextID {
+		Search
+	}
+
+	/*
+	public enum L_ID1_C {
+		UIText
+	}
+	*/
+
+
+	public enum L_ID1
+	{
+		Items,
+		Tooltip,
+		Buffs,
+		Dialogue,
+		NPCNames,
+		Bestiary,
+		TownNPCMood,
+		Ores,
+		TableText,
+		EnchantmentStorageText,
+		Config,
+		UIText
+	}
+	public enum L_ID2
+	{
+		None,
+		Witch,
+		EffectDisplayName,
+		EnchantmentEffects,
+		EnchantmentCustomTooltips,
+		EnchantmentTypeNames,
+		EnchantmentShortTooltip,
+		EnchantmentGeneralTooltips,
+		ItemType,
+		ArmorSlotNames,
+		DamageClassNames,
+		VanillaBuffs,
+		Header,
+		DisplayName
+	}
+	public enum L_ID3
+	{
+		Label,
+		Tooltip
+	}
+	public enum L_ID_V
+	{
+		Item,
+		Projectile,
+		NPC,
+		Buff,
+		BuffDescription
+	}
 }

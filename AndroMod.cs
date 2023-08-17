@@ -2,7 +2,7 @@ using Terraria.ModLoader;
 
 namespace androLib
 {
-	public class androLib : Mod
-	{
+	public class AndroMod : Mod {
+
 	}
 }

@@ -1,0 +1,29 @@
+Configs: {
+	ClientConfig: {
+		DisplayName: "{$Mods.WeaponEnchantments.Config.ClientConfig.Label}"
+
+		UITransparency: {
+			Label: "{$Mods.WeaponEnchantments.Config.UITransparency.Label}"
+			Tooltip: ""
+		}
+	}
+
+	SharedServerConfig: {
+		DisplayName: "{$Mods.WeaponEnchantments.Config.ServerConfig.Label}"
+
+		DCUStart: {
+			Label: "{$Mods.WeaponEnchantments.Config.DCUStart.Label}"
+			Tooltip: "{$Mods.WeaponEnchantments.Config.DCUStart.Tooltip}"
+		}
+
+		DisableResearch: {
+			Label: "{$Mods.WeaponEnchantments.Config.DisableResearch.Label}"
+			Tooltip: ""
+		}
+
+		PrintWikiInfo: {
+			Label: "{$Mods.WeaponEnchantments.Config.PrintWikiInfo.Label}"
+			Tooltip: "{$Mods.WeaponEnchantments.Config.PrintWikiInfo.Tooltip}"
+		}
+	}
+}
