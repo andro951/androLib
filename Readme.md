@@ -1,4 +1,4 @@
-androLib is a library mod created by andro951.  It doesn't add anything to the game by itself.
+﻿androLib is a library mod created by andro951.  It doesn't add anything to the game by itself.
 
 Used to handle the storage systems for bags and other forms of storage as well as other utility functions.
 
