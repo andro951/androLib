@@ -653,7 +653,7 @@ namespace androLib.UI
 		public void ClickInteractions(ref Item item, int context = MasterUIManager.ItemSlotInteractContext) => MasterUIManager.ItemSlotClickInteractions(ref item, context);
 	}
 	public static class UI_ID {
-		public const int None = -1;
+		public const int None = -1000;
 	}
 	public static class ItemSlotContextID
 	{

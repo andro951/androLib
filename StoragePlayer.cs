@@ -59,9 +59,6 @@ namespace androLib
 
 			return false;
 		}
-		public override void PostSavePlayer() {
-			StorageManager.CloseAllStorageUI();
-		}
 	}
 	public static class StoragePlayerFunctions {
 		public static Item[] GetChestItems(this Player player, int chest = int.MinValue) {
