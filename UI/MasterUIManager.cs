@@ -53,6 +53,7 @@ namespace androLib.UI
 		public static int UI_IDToTypeID(int ui_id) => ui_id / 1000;
 
 		public static bool DisplayingAnyUI => IsDisplayingUI.Invoke();
+		public static bool LastDisplayingAnyUI = false;
 		public static bool NoPanelBeingDragged => PanelBeingDragged == UI_ID.None;
 		public static bool NoUIBeingHovered => UIBeingHovered == UI_ID.None;
 		private static int mouseOffsetX = 0;
@@ -87,10 +88,6 @@ namespace androLib.UI
 		public static int SearchBarInUse = UI_ID.None;
 		public static bool TypingOnAnySearchBar = false;
 		public static void PostDrawInterface(SpriteBatch spriteBatch) {
-			UpdateUIAlpha?.Invoke();
-
-
-
 			StoragePlayer genericModPlayer = StoragePlayer.LocalStoragePlayer;
 			if (genericModPlayer.disableLeftShiftTrashCan) {
 				ItemSlot.Options.DisableLeftShiftTrashCan = true;
@@ -98,7 +95,6 @@ namespace androLib.UI
 			}
 
 			if (DisplayingAnyUI) {
-				UpdateUIAlpha?.Invoke();
 				if (NoPanelBeingDragged) {
 					if (!NoUIBeingHovered && UIBeingHovered == LastUIBeingHovered) {
 						HoverTime++;
@@ -124,6 +120,11 @@ namespace androLib.UI
 				FocusRecipe = Main.focusRecipe;
 				float savedInventoryScale = Main.inventoryScale;
 				Main.inventoryScale = 0.86f;
+
+				//If UI just opened, reset scroll wheel to prevent sudden scroll wheel change on opening
+				if (!LastDisplayingAnyUI)
+					LastScrollWheel = ScrollWheel;
+
 				bool preventTrashingItem = ShouldPreventTrashingItem.Invoke();
 				if (preventTrashingItem) {
 					//Disable Left Shift to Quick trash
@@ -140,6 +141,7 @@ namespace androLib.UI
 
 			lastMouseLeft = Main.mouseLeft;
 			lastMouseRight = Main.mouseRight;
+			LastDisplayingAnyUI = DisplayingAnyUI;
 		}
 		
 		public static void PostUpdateEverything() {

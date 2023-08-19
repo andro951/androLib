@@ -12,6 +12,7 @@ using Terraria.ModLoader.IO;
 using Microsoft.Xna.Framework;
 using Terraria.Localization;
 using androLib.Common.Utility;
+using System.Runtime.CompilerServices;
 
 namespace androLib
 {
@@ -22,6 +23,7 @@ namespace androLib
 		public Func<Item, bool> ItemAllowedToBeStored { get; set; }
 		public string NameLocalizationKey { get; set; }
 		public int StorageSize { get; set; }
+		public bool IsVacuumBag { get; }
 		public bool ShouldVacuum { get; set; }
 		private Func<int> StorageItemTypeGetter { get; set; }
 		public Func<Color> GetUIColor { get; set; }
@@ -32,6 +34,8 @@ namespace androLib
 		public int UILeft;
 		public int UITop;
 		public Item[] Items;
+		public int RegisteredUI_ID { get; }
+		public bool DisplayBagUI = false;
 
 		public Storage(
 				Mod mod, 
@@ -39,7 +43,7 @@ namespace androLib
 				Func<Item, bool> itemAllowedToBeStored, 
 				string nameLocalizationKey,
 				int storageSize, 
-				bool shouldVacuum, 
+				bool isVacuumBag, 
 				Func<int> storageItemTypeGetter, 
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
@@ -52,7 +56,7 @@ namespace androLib
 			ItemAllowedToBeStored = itemAllowedToBeStored;
 			NameLocalizationKey = nameLocalizationKey;
 			StorageSize = storageSize;
-			ShouldVacuum = shouldVacuum;
+			IsVacuumBag = isVacuumBag;
 			StorageItemTypeGetter = storageItemTypeGetter;
 			GetUIColor = getUIColor;
 			GetScrollBarColor = getScrollBarColor;
@@ -61,7 +65,8 @@ namespace androLib
 			UITopDefault = uiTopDefault;
 			UILeft = UILeftDefault;
 			UITop = UITopDefault;
-			Items = new Item[storageSize];
+			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
+			ShouldVacuum = IsVacuumBag;
 		}
 
 		public string GetModFullName() => $"{Mod.Name}_{VacuumStorageType.Name}";
@@ -82,7 +87,7 @@ namespace androLib
 				items = items.Concat(Enumerable.Repeat(new Item(), itemCount - items.Length)).ToArray();
 
 			Items = items;
-
+			
 			int uiLeft = tag.Get<int>($"{modFullName}_UILeft");
 			int uiTop = tag.Get<int>($"{modFullName}_UITop");
 			MasterUIManager.CheckOutOfBoundsRestoreDefaultPosition(ref uiLeft, ref uiTop, UILeftDefault, UITopDefault);
@@ -90,6 +95,30 @@ namespace androLib
 			UITop = uiTop;
 
 			ShouldVacuum = tag.Get<bool>($"{modFullName}_ShouldVacuumItems");
+		}
+		public Storage Clone() {
+			Storage clone = new Storage(
+				Mod,
+				VacuumStorageType,
+				ItemAllowedToBeStored,
+				NameLocalizationKey,
+				StorageSize,
+				IsVacuumBag,
+				StorageItemTypeGetter,
+				GetUIColor,
+				GetScrollBarColor,
+				GetButtonHoverColor,
+				UILeftDefault,
+				UITopDefault
+			);
+
+			clone.UILeft = UILeft;
+			clone.UITop = UITop;
+			clone.Items = new Item[StorageSize];
+			Array.Copy(Items, clone.Items, StorageSize);
+			ShouldVacuum = IsVacuumBag;
+
+			return clone;
 		}
 		public string GetLocalizedName() {
 			if (NameLocalizationKey != "-") {
@@ -137,7 +166,15 @@ namespace androLib
 		#region Lists and Dictionaries
 
 		private static SortedDictionary<string, int> vacuumStorageIndexes = new();
-		public static List<BagUI> BagUIs { get; } = new();
+		public static List<BagUI> BagUIs = new();
+		public static List<Storage> RegisteredStorages = new();
+		public static void PopulateStorages(ref List<Storage> storages) {
+			storages = new();
+			for (int i = 0; i < RegisteredStorages.Count; i++) {
+				Storage storage = RegisteredStorages[i].Clone();
+				storages.Add(storage);
+			}
+		}
 
 		public static SortedDictionary<int, int> StorageItemTypes {
 			get {
@@ -172,6 +209,10 @@ namespace androLib
 				int uiLeft, 
 				int uiTop
 			) {
+			int storageID = BagUIs.Count;
+
+			int registeredUI_ID = MasterUIManager.RegisterUI_ID();
+
 			Storage storage = new Storage(
 				mod, 
 				vacuumStorageType, 
@@ -187,11 +228,10 @@ namespace androLib
 				uiTop
 			);
 
-			int registeredUI_ID = MasterUIManager.RegisterUI_ID();
-			BagUI bagUI = new BagUI(storage, registeredUI_ID);
-			BagUIs.Add(bagUI);
+			RegisteredStorages.Add(storage);
+			vacuumStorageIndexes.Add(storage.GetModFullName(), storageID);
+			BagUI bagUI = new(storageID, registeredUI_ID);
 
-			vacuumStorageIndexes.Add(storage.GetModFullName(), BagUIs.Count - 1);
 			CanVacuumItemHandler.Add(bagUI.CanVacuumItem);
 			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
 			TryQuickStackItemHandler.Add((Item item) => bagUI.QuickStack(ref item));
@@ -204,7 +244,9 @@ namespace androLib
 			MasterUIManager.DrawAllInterfaces += bagUI.PostDrawInterface;
 			MasterUIManager.ShouldPreventRecipeScrolling.Add(() => bagUI.Hovering);
 
-			return BagUIs.Count - 1;
+			BagUIs.Add(bagUI);
+
+			return storageID;
 		}
 		public static Item[] GetItems(int modID) {
 			if (!ValidModID(modID))
@@ -248,7 +290,39 @@ namespace androLib
 			return true;
 		}
 		public static IEnumerable<Item[]> AllItems => BagUIs.Select(bagUI => bagUI.Storage.Items);
-		public class MagicStorageItemsGatherer {
+		
+
+
+		public static void TryUpdateMouseOverrideForDeposit(Item item) {
+			if (item.IsAir)
+				return;
+
+			if (CanVacuumItem(item, Main.LocalPlayer))
+				Main.cursorOverride = CursorOverrideID.InventoryToChest;
+		}
+		public static bool TryReturnItemToPlayer(ref Item item, Player player, bool allowQuickSpawn = false) {
+			if (TryVacuumItem(ref item, player))
+				return true;
+
+			item = player.GetItem(player.whoAmI, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
+			if (item.IsAir)
+				return true;
+
+			if (!allowQuickSpawn)
+				return false;
+
+			player.QuickSpawnItem(player.GetSource_Misc("PlayerDropItemCheck"), item, item.stack);
+
+			return true;
+		}
+		public static void GiveNewItemToPlayer(int itemType, Player player) {
+			Item item = new Item(itemType);
+			TryReturnItemToPlayer(ref item, player, true);
+		}
+
+
+		public class MagicStorageItemsGatherer
+		{
 			private event Func<IEnumerable<Item>> eventHandler;
 
 			public void Add(Func<IEnumerable<Item>> func) {
@@ -256,37 +330,17 @@ namespace androLib
 			}
 
 			public IEnumerable<Item> Invoke() {
-				//IEnumerable<Item> items = new List<Item>();
-
 				if (eventHandler == null)
 					return new List<Item>();
 
 				return eventHandler.GetInvocationList().SelectMany(i => ((Func<IEnumerable<Item>>)i).Invoke());
-
-				//foreach (Func<IEnumerable<Item>> func in eventHandler.GetInvocationList()) {
-				//	items = items.Concat(func.Invoke()).ToList();
-				//}
-
-				//return ref items;
 			}
 		}
 		public static MagicStorageItemsGatherer MagicStorageItemsHandler = new();
 		public static IEnumerable<Item> GetMagicStorageItems => MagicStorageItemsHandler.Invoke();
-		public static void SaveData(TagCompound tag) {
-			for (int i = 0; i < BagUIs.Count; i++) {
-				BagUIs[i].Storage.SaveData(tag);
-			}
-		}
-		public static void LoadData(TagCompound tag) {
-			for(int i = 0; i < BagUIs.Count; i++) {
-				BagUIs[i].Storage.LoadData(tag);
-			}
-		}
 
-
-
-
-		public class AllowedToStoreInStorageConditions {
+		public class AllowedToStoreInStorageConditions
+		{
 			private event Func<Item, bool> eventHandler;
 
 			public void Add(Func<Item, bool> func) {
@@ -306,7 +360,7 @@ namespace androLib
 			}
 		}
 		public static AllowedToStoreInStorageConditions AllowedToStoreInStorage = new();
-		public static bool CanBeStored(Item item) {
+		public static bool AllowedToBeStored(Item item) {
 			return AllowedToStoreInStorage.Invoke(item);
 		}
 
@@ -331,7 +385,8 @@ namespace androLib
 		public static CanVacuumItemConditions CanVacuumItemHandler = new();
 		public static bool CanVacuumItem(Item item, Player player) => CanVacuumItemHandler.Invoke(item, player);
 
-		public class TryVacuumItemFunc {
+		public class TryVacuumItemFunc
+		{
 			private event Func<Item, Player, bool> eventHandler;
 			public void Add(Func<Item, Player, bool> func) {
 				eventHandler += func;
@@ -350,7 +405,8 @@ namespace androLib
 		}
 		public static TryVacuumItemFunc TryVacuumItemHandler = new();
 		public static bool TryVacuumItem(ref Item item, Player player) => TryVacuumItemHandler.Invoke(ref item, player);
-		public class TryQuickStackItemFunc {
+		public class TryQuickStackItemFunc
+		{
 			private event Func<Item, bool> eventHandler;
 			public void Add(Func<Item, bool> func) {
 				eventHandler += func;
@@ -369,38 +425,10 @@ namespace androLib
 		}
 		public static TryQuickStackItemFunc TryQuickStackItemHandler = new();
 		public static bool TryQuickStack(ref Item item) => TryQuickStackItemHandler.Invoke(ref item);
-		public static void TryUpdateMouseOverrideForDeposit(Item item) {
-			if (item.IsAir)
-				return;
-
-			if (CanVacuumItemHandler.Invoke(item, Main.LocalPlayer))
-				Main.cursorOverride = CursorOverrideID.InventoryToChest;
-		}
-		public static bool TryReturnItemToPlayer(ref Item item, Player player, bool allowQuickSpawn = false) {
-			if (TryVacuumItem(ref item, player))
-				return true;
-
-			item = player.GetItem(player.whoAmI, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
-			if (item.IsAir)
-				return true;
-
-			if (!allowQuickSpawn)
-				return false;
-
-			player.QuickSpawnItem(player.GetSource_Misc("PlayerDropItemCheck"), item, item.stack);
-
-			return true;
-		}
-		public static void GiveNewItemToPlayer(int itemType, Player player) {
-			Item item = new Item(itemType);
-			TryReturnItemToPlayer(ref item, player, true);
-		}
 
 		public static event Action CloseAllStorageUIEvent;
 		public static void CloseAllStorageUI() {
 			CloseAllStorageUIEvent?.Invoke();
 		}
-
-
 	}
 }

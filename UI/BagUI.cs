@@ -21,6 +21,7 @@ using Terraria.WorldBuilding;
 //using WeaponEnchantments.ModIntegration;
 using androLib.Common.Utility;
 using androLib.Common.Globals;
+using androLib.ModIntegration;
 
 namespace androLib.UI
 {
@@ -44,9 +45,11 @@ namespace androLib.UI
 
 		//private int BagStorageID = -1;
 		//public static Item[] Inventory => (Item[])WEMod.AndroLib.Call("GetItems", BagStorageID);
-		public Storage Storage { get; }
+		//public Storage Storage { get; }
 		public Item[] Inventory => Storage.Items;
+		public Storage Storage => StoragePlayer.LocalStoragePlayer.Storages[StorageID];
 		public int RegisteredUI_ID { get; }
+		public int StorageID { get; }
 		private int GetUI_ID(int id) => MasterUIManager.GetUI_ID(id, RegisteredUI_ID);
 		public class BagButtonID {
 			public const int LootAll = 0;
@@ -74,10 +77,10 @@ namespace androLib.UI
 		private float glowHue = 0f;
 		private int scrollPanelY = int.MinValue;
 		private int scrollPanelPosition = 0;
-		public bool DisplayBagUI = false;
+		public bool DisplayBagUI => Storage.DisplayBagUI;
 
-		public BagUI(Storage storage, int registeredUI_ID) {
-			Storage = storage;
+		public BagUI(int storageID, int registeredUI_ID) {
+			StorageID = storageID;
 			RegisteredUI_ID = registeredUI_ID;
 		}
 
@@ -150,11 +153,13 @@ namespace androLib.UI
 			//Text buttons Data
 			int buttonsLeft = scrollBarLeft + scrollBarWidth + Spacing;
 			int currentButtonTop = nameTop;
-			UITextData[] textButtons = new UITextData[BagButtonID.Count];
+			List<UITextData> textButtons = new();
 			int longestButtonNameWidth = 0;
 			for (int buttonIndex = 0; buttonIndex < BagButtonID.Count; buttonIndex++) {
-				string text = ((StorageTextID)buttonIndex).ToString().Lang(AndroMod.ModName, L_ID1.StorageText);//TODO: change EnchantmentStorageTextID to be in androLib or separate
-				//string text = $"Button {buttonIndex}";
+				if (buttonIndex == BagButtonID.ToggleVacuum && !Storage.IsVacuumBag)
+					continue;
+
+				string text = ((StorageTextID)buttonIndex).ToString().Lang(AndroMod.ModName, L_ID1.StorageText);
 				float scale = ButtonScale[buttonIndex];
 				Color color;
 				if (buttonIndex == BagButtonID.ToggleVacuum && Storage.ShouldVacuum) {
@@ -165,7 +170,7 @@ namespace androLib.UI
 				}
 
 				UITextData thisButton = new(GetUI_ID(Bag_UI_ID.BagLootAll) + buttonIndex, buttonsLeft, currentButtonTop, text, scale, color, ancorBotomLeft: true);
-				textButtons[buttonIndex] = thisButton;
+				textButtons.Add(thisButton);
 				longestButtonNameWidth = Math.Max(longestButtonNameWidth, thisButton.Width);
 				currentButtonTop += (int)(thisButton.BaseHeight * 0.95f);
 			}
@@ -270,7 +275,7 @@ namespace androLib.UI
 			}
 
 			//Text Buttons Draw
-			for (int buttonIndex = 0; buttonIndex < BagButtonID.Count; buttonIndex++) {
+			for (int buttonIndex = 0; buttonIndex < textButtons.Count; buttonIndex++) {
 				UITextData textButton = textButtons[buttonIndex];
 				textButton.Draw(spriteBatch);
 				if (MasterUIManager.MouseHovering(textButton, true)) {
@@ -363,14 +368,16 @@ namespace androLib.UI
 		}
 		
 		public void OpenBag() {
+			scrollPanelY = int.MinValue;
 			Main.playerInventory = true;
-			DisplayBagUI = true;
+			Storage.DisplayBagUI = true;
 			Main.LocalPlayer.chest = -1;
-			//if (MagicStorageIntegration.MagicStorageIsOpen())//TODO: Move magic storage integration to a androLib
-			//	MagicStorageIntegration.TryClosingMagicStorage();
+			if (MagicStorageIntegration.MagicStorageIsOpen())
+				MagicStorageIntegration.TryClosingMagicStorage();
 		}
 		public void CloseBag(bool noSound = false) {
-			DisplayBagUI = false;
+			scrollPanelY = int.MinValue;
+			Storage.DisplayBagUI = false;
 			MasterUIManager.TryResetSearch(SearchID);
 			if (Main.LocalPlayer.chest == -1) {
 				if (!noSound)
@@ -388,7 +395,6 @@ namespace androLib.UI
 			if (player.whoAmI != Main.myPlayer)
 				return false;
 
-			//Item[] inv = player.GetWEPlayer().oreBagItems;
 			Item[] inv = Inventory;
 			int stack = item.stack;
 			for (int i = 0; i < inv.Length; i++) {
@@ -527,8 +533,8 @@ namespace androLib.UI
 		}
 		private void ToggleVacuum() {
 			Storage.ShouldVacuum = !Storage.ShouldVacuum;
+			if (!Storage.IsVacuumBag)
+				Storage.ShouldVacuum = false;
 		}
-		
 	}
-	
 }

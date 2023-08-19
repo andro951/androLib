@@ -16,12 +16,27 @@ namespace androLib
 	public class StoragePlayer : ModPlayer {
 		public static StoragePlayer LocalStoragePlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 		public bool disableLeftShiftTrashCan = ItemSlot.Options.DisableLeftShiftTrashCan;
+		public List<Storage> Storages {
+			get {
+				if (storages == null)
+					StorageManager.PopulateStorages(ref storages);
 
+				return storages;
+			}
+		}
+		private List<Storage> storages = null;
 		public override void SaveData(TagCompound tag) {
-			StorageManager.SaveData(tag);
+			string name = Player.name;
+			for (int i = 0; i < Storages.Count; i++) {
+				Storages[i].SaveData(tag);
+			}
 		}
 		public override void LoadData(TagCompound tag) {
-			StorageManager.LoadData(tag);
+			string name = Player.name;//, PlayerStorageManager);
+
+			for (int i = 0; i < Storages.Count; i++) {
+				Storages[i].LoadData(tag);
+			}
 		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot) {
@@ -43,6 +58,9 @@ namespace androLib
 			}
 
 			return false;
+		}
+		public override void PostSavePlayer() {
+			StorageManager.CloseAllStorageUI();
 		}
 	}
 	public static class StoragePlayerFunctions {
