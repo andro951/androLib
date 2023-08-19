@@ -23,3 +23,9 @@ androLib is required by these mods:
 		Steam: 
 	-Vacuum Bags (In progress)
 		Steam:
+
+Please give us your feedback!!!!!!
+https://discord.gg/mPywEhyV9b
+
+Patreon:
+https://www.patreon.com/andro951
