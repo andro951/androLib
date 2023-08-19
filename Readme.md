@@ -2,7 +2,7 @@
 
 Used to handle the storage systems for bags and other forms of storage as well as other utility functions.
 
-<size=16>**Want to make your own vacuum bag?**</size>
+**Want to make your own vacuum bag?**
 This mod is set up to allow other mod creators to easily create their own bags.  (Bags are compatible with Magic Storage)
 If you would like to see what is required and what the bag would be like, check out the Vacuum Ore Bag mod.
 It is possible to create the bags without a hard dependency on this mod with the Register Call() if desired.
