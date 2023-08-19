@@ -24,7 +24,18 @@ namespace androLib
 		public string NameLocalizationKey { get; set; }
 		public int StorageSize { get; set; }
 		public bool IsVacuumBag { get; }
-		public bool ShouldVacuum { get; set; }
+		public bool ShouldVacuum {
+			get => shouldVacuum;
+			set {
+				if (!IsVacuumBag) {
+					shouldVacuum = false;
+					return;
+				}
+
+				shouldVacuum = value;
+			}
+		}
+		private bool shouldVacuum = true;
 		private Func<int> StorageItemTypeGetter { get; set; }
 		public Func<Color> GetUIColor { get; set; }
 		public Func<Color> GetScrollBarColor { get; set; }
@@ -201,7 +212,7 @@ namespace androLib
 				Func<Item, bool> itemAllowedToBeStored,
 				string nameLocalizationKey, 
 				int storageSize, 
-				bool shouldVacuum,
+				bool isVacuumBag,
 				Func<int> storageItemTypeGetter, 
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
@@ -219,7 +230,7 @@ namespace androLib
 				itemAllowedToBeStored, 
 				nameLocalizationKey,
 				storageSize, 
-				shouldVacuum, 
+				isVacuumBag, 
 				storageItemTypeGetter, 
 				getUIColor,
 				getScrollBarColor,

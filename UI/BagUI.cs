@@ -533,8 +533,6 @@ namespace androLib.UI
 		}
 		private void ToggleVacuum() {
 			Storage.ShouldVacuum = !Storage.ShouldVacuum;
-			if (!Storage.IsVacuumBag)
-				Storage.ShouldVacuum = false;
 		}
 	}
 }
