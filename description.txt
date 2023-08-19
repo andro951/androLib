@@ -8,7 +8,7 @@ If you would like to see what is required and what the bag would be like, check 
 It is possible to create the bags without a hard dependency on this mod with the Register Call() if desired.
 
 I'm planning to create a text tutorial and potentially create a wiki for this mod.
-If you would like to create a bag for your mod before then, look at the Vacuum Ore Bag mod for an example.  It only requires the 1 item file.
+If you would like to create a bag for your mod before then, look at the Vacuum Ore Bag mod for an example.  It only requires the 1 simple ModItem file and a Mod.Load() call.
 
 Feel free to reach out if you would like help creating a bag for your mod ore if you find any issues with this mod.
 
