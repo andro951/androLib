@@ -15,7 +15,6 @@ namespace androLib.Common.Globals
 	public class VacuumToStorageItem : GlobalItem {
 		public bool favorited;
 		public override bool InstancePerEntity => true;
-		bool? canBeStored = null;
 		public override bool AppliesToEntity(Item entity, bool lateInstantiation) {
 			return true;
 		}
