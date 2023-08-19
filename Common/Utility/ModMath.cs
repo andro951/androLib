@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static androLib.Common.Utility.UtilityMethods;
+using static androLib.Common.Utility.AndroUtilityMethods;
 
 namespace androLib.Common.Utility
 {

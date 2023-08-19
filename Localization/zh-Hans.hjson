@@ -1,0 +1,46 @@
+#
+Mods: {
+	androLib: {
+		Config: {
+			DisplaySettings: 显示设置
+			LoggingInformation: 记录信息
+
+			PrintLocalizationLists: {
+				Label: 记录所有翻译列表
+				Tooltip:
+					'''
+					当您进入世界时，这些列表将打印到 client.log 中。
+					client.log 默认位置为 C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
+					'''
+			}
+
+			UITransparency.Label: 用户界面透明度
+		}
+
+		StorageText: {
+			ButtonCount: 按钮数量
+			DepositAll: 全部存入
+			LootAll: 掠夺全部
+			QuickStack: 快速堆叠
+			Search: 搜索
+			Sort: 种类
+			ToggleVacuum: 切换真空
+		}
+
+		Configs: {
+			AndroClientConfig: {
+				// DisplayName: Andro Client Config
+
+				UITransparency: {
+					// Label: "{$Mods.androLib.Config.UITransparency.Label}"
+					// Tooltip: ""
+				}
+
+				PrintLocalizationLists: {
+					// Label: "{$Mods.androLib.Config.PrintLocalizationLists.Label}"
+					// Tooltip: "{$Mods.androLib.Config.PrintLocalizationLists.Tooltip}"
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,46 @@
+#
+Mods: {
+	androLib: {
+		Config: {
+			DisplaySettings: Impostazioni di visualizzazione
+			LoggingInformation: Informazioni sulla registrazione
+
+			PrintLocalizationLists: {
+				Label: Registra tutti gli elenchi di traduzione
+				Tooltip:
+					'''
+					Gli elenchi vengono stampati sul client.log quando entri in un mondo.
+					Il percorso predefinito di client.log è C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
+					'''
+			}
+
+			UITransparency.Label: Trasparenza dell'interfaccia utente
+		}
+
+		StorageText: {
+			ButtonCount: Conteggio pulsanti
+			DepositAll: Deposita tutto
+			LootAll: Saccheggia tutto
+			QuickStack: Pila veloce
+			Search: Ricerca
+			Sort: Ordinare
+			ToggleVacuum: Attiva/disattiva vuoto
+		}
+
+		Configs: {
+			AndroClientConfig: {
+				// DisplayName: Andro Client Config
+
+				UITransparency: {
+					// Label: "{$Mods.androLib.Config.UITransparency.Label}"
+					// Tooltip: ""
+				}
+
+				PrintLocalizationLists: {
+					// Label: "{$Mods.androLib.Config.PrintLocalizationLists.Label}"
+					// Tooltip: "{$Mods.androLib.Config.PrintLocalizationLists.Tooltip}"
+				}
+			}
+		}
+	}
+}

@@ -28,6 +28,8 @@ using androLib;
 namespace androLib.UI
 {
 	public static class MasterUIManager {
+		//TODO: Re-evaluate the need for any of this.  Probably taking care of everything via StorageManager and BagUI.
+
 		public static event Action UpdateUIAlpha;
 
 		public static BoolCheck IsDisplayingUI = new();
@@ -146,7 +148,7 @@ namespace androLib.UI
 		}
 		public static string DisplayedSearchBarString(int SearchBarID) {
 			if (!UsingSearchBar(SearchBarID))
-				return CommonUITextID.Search.ToString().Lang(L_ID1.EnchantmentStorageText);//TODO: Need to set up localization for this and Localization Manager
+				return StorageTextID.Search.ToString().Lang(AndroMod.ModName, L_ID1.StorageText);
 
 			return $"{(SearchBarString.Length > 15 ? SearchBarString.Substring(SearchBarString.Length - 15) : SearchBarString)}{Main.chatText}{(ShouldShowSearchBarHeartbeat ? "|" : SearchBarString != "" ? "" : " ")}";
 		}
@@ -418,7 +420,13 @@ namespace androLib.UI
 		public static void SwapMouseItem(ref Item item1) {
 			Item stored = item1.Clone();
 			item1 = Main.mouseItem.Clone();
+			if (!item1.NullOrAir() && item1.stack <= 0)
+				item1.TurnToAir();
+
 			Main.mouseItem = stored;
+			if (!Main.mouseItem.NullOrAir() && Main.mouseItem.stack <= 0)
+				Main.mouseItem.TurnToAir();
+
 			SoundEngine.PlaySound(SoundID.Grab);
 		}
 		public static void SortItems(ref Item[] inv, bool updateOrder = true) {

@@ -1,4 +1,5 @@
 ﻿using androLib.Common.Utility;
+using androLib.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 using Terraria.UI;
 
 namespace androLib
@@ -15,36 +17,32 @@ namespace androLib
 		public static StoragePlayer LocalStoragePlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 		public bool disableLeftShiftTrashCan = ItemSlot.Options.DisableLeftShiftTrashCan;
 
-		public class TryReturnItemToPlayerFunc {
-			private event Func<Item, Player, bool> eventHandler;
+		public override void SaveData(TagCompound tag) {
+			StorageManager.SaveData(tag);
+		}
+		public override void LoadData(TagCompound tag) {
+			StorageManager.LoadData(tag);
+		}
 
-			public void Add(Func<Item, Player, bool> func) {
-				eventHandler += func;
-			}
-
-			public bool Invoke(ref Item item, Player player, bool allowQuickSpawn = false) {
-				if (eventHandler == null)
-					return false;
-
-				foreach (Func<Item, Player, bool> func in eventHandler.GetInvocationList()) {
-					if (func.Invoke(item, player))
-						return true;
+		public override bool ShiftClickSlot(Item[] inventory, int context, int slot) {
+			ref Item item = ref inventory[slot];
+			if (MasterUIManager.NoUIBeingHovered) {
+				bool openAndCouldStore = false;
+				foreach (BagUI bagUI in StorageManager.BagUIs) {
+					if (bagUI.DisplayBagUI && bagUI.CanBeStored(item)) {
+						openAndCouldStore = true;
+						if (bagUI.TryVacuumItem(ref item, Main.LocalPlayer))
+							return true;
+					}
 				}
 
-				item = player.GetItem(player.whoAmI, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
-				if (item.IsAir)
+				if (openAndCouldStore) {
+					MasterUIManager.SwapMouseItem(ref item);
 					return true;
-
-				if (!allowQuickSpawn)
-					return false;
-
-				player.QuickSpawnItem(player.GetSource_Misc("PlayerDropItemCheck"), item, item.stack);
-
-				return true;
+				}
 			}
+
+			return false;
 		}
-		public TryReturnItemToPlayerFunc TryReturnItemToPlayer = new();
-
-
 	}
 }

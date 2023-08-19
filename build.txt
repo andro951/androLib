@@ -1,3 +1,4 @@
 displayName = androLib
 author = andro951
 version = 1.0
+weakReferences = MagicStorage@0.5.6.2

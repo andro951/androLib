@@ -13,7 +13,7 @@ using androLib.Common.Utility;
 
 namespace androLib.Common.Utility
 {
-    public static class UtilityMethods {
+    public static class AndroUtilityMethods {
 
 		#region ModSpecific
 
@@ -122,110 +122,110 @@ namespace androLib.Common.Utility
         }
         public static float Percent(this float value) => value * 100f;
         public static string PercentString(this float value) => $"{(value * 100).S()}%";
-        public static string Lang(this string s, string m) => s.Lang(out string result, m) ? result : "";
-        public static bool Lang(this string s, out string result, string m) {
-            string key = $"Mods.WeaponEnchantments.{m}.{s}";
-            result = Language.GetTextValue(key);
+		public static string Lang(this string s, string modName, string m) => s.Lang(modName, out string result, m) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, string m) {
+			string key = $"Mods.{modName}.{m}.{s}";
+			result = Language.GetTextValue(key);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string Lang(this string s, L_ID1 id = L_ID1.Tooltip) => s.Lang(out string result, id) ? result : "";
-        public static bool Lang(this string s, out string result, L_ID1 id = L_ID1.Tooltip) {
-            string key = $"Mods.WeaponEnchantments.{id}.{s}";
-            result = Language.GetTextValue(key);
+			return true;
+		}
+		public static string Lang(this string s, string modName, L_ID1 id = L_ID1.Tooltip) => s.Lang(modName, out string result, id) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, L_ID1 id = L_ID1.Tooltip) {
+			string key = $"Mods.{modName}.{id}.{s}";
+			result = Language.GetTextValue(key);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string Lang(this string s, L_ID1 id, string m) => s.Lang(out string result, id, m) ? result : "";
-        public static bool Lang(this string s, out string result, L_ID1 id, string m) {
-            string key = $"Mods.WeaponEnchantments.{id}.{m}.{s}";
-            result = Language.GetTextValue(key);
+			return true;
+		}
+		public static string Lang(this string s, string modName, L_ID1 id, string m) => s.Lang(modName, out string result, id, m) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, L_ID1 id, string m) {
+			string key = $"Mods.{modName}.{id}.{m}.{s}";
+			result = Language.GetTextValue(key);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string Lang(this string s, L_ID1 id, L_ID2 id2) => s.Lang(out string result, id, id2) ? result : "";
-        public static bool Lang(this string s, out string result, L_ID1 id, L_ID2 id2) {
-            string key = $"Mods.WeaponEnchantments.{id}.{id2}.{s}";
-            result = Language.GetTextValue(key);
+			return true;
+		}
+		public static string Lang(this string s, string modName, L_ID1 id, L_ID2 id2) => s.Lang(modName, out string result, id, id2) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, L_ID1 id, L_ID2 id2) {
+			string key = $"Mods.{modName}.{id}.{id2}.{s}";
+			result = Language.GetTextValue(key);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string Lang(this string s, L_ID1 id, L_ID2 id2, string m) => s.Lang(out string result, id, id2, m) ? result : "";
-        public static bool Lang(this string s, out string result, L_ID1 id, L_ID2 id2, string m) {
-            string key = $"Mods.WeaponEnchantments.{id}.{id2}.{m}.{s}";
-            result = Language.GetTextValue(key);
+			return true;
+		}
+		public static string Lang(this string s, string modName, L_ID1 id, L_ID2 id2, string m) => s.Lang(modName, out string result, id, id2, m) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, L_ID1 id, L_ID2 id2, string m) {
+			string key = $"Mods.{modName}.{id}.{id2}.{m}.{s}";
+			result = Language.GetTextValue(key);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string Lang(this int i, L_ID_V id) {
-            switch (id) {
-                case L_ID_V.Item:
-                    return Terraria.Lang.GetItemNameValue(i);
-                case L_ID_V.NPC:
-                    return Terraria.Lang.GetNPCNameValue(i);
-                case L_ID_V.Buff:
-                    return Terraria.Lang.GetBuffName(i);
-                case L_ID_V.BuffDescription:
-                    return Terraria.Lang.GetBuffDescription(i);
-            }
+			return true;
+		}
+		public static string Lang(this int i, L_ID_V id) {
+			switch (id) {
+				case L_ID_V.Item:
+					return Terraria.Lang.GetItemNameValue(i);
+				case L_ID_V.NPC:
+					return Terraria.Lang.GetNPCNameValue(i);
+				case L_ID_V.Buff:
+					return Terraria.Lang.GetBuffName(i);
+				case L_ID_V.BuffDescription:
+					return Terraria.Lang.GetBuffDescription(i);
+			}
 
-            return null;
-        }
+			return null;
+		}
 
-        public static string Lang(this string s, string m, IEnumerable<string> args) => s.Lang(out string result, m, args) ? result : "";
-        public static bool Lang(this string s, out string result, string m, IEnumerable<string> args) {
-            string key = $"Mods.WeaponEnchantments.{m}.{s}";
-            result = Language.GetTextValue(key, args);
+		public static string Lang(this string s, string modName, string m, IEnumerable<string> args) => s.Lang(modName, out string result, m, args) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, string m, IEnumerable<string> args) {
+			string key = $"Mods.{modName}.{m}.{s}";
+			result = Language.GetTextValue(key, args);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string Lang(this string s, L_ID1 id, L_ID2 id2, IEnumerable<object> args) => s.Lang(out string result, id, id2, args) ? result : "";
-        public static bool Lang(this string s, out string result, L_ID1 id, L_ID2 id2, IEnumerable<object> args) {
-            string key = $"Mods.WeaponEnchantments.{id}.{id2}.{s}";
-            result = args != null ? Language.GetTextValue(key, args.ToArray()) : Language.GetTextValue(key);
+			return true;
+		}
+		public static string Lang(this string s, string modName, L_ID1 id, L_ID2 id2, IEnumerable<object> args) => s.Lang(modName, out string result, id, id2, args) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, L_ID1 id, L_ID2 id2, IEnumerable<object> args) {
+			string key = $"Mods.{modName}.{id}.{id2}.{s}";
+			result = args != null ? Language.GetTextValue(key, args.ToArray()) : Language.GetTextValue(key);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string Lang(this string s, L_ID1 id, IEnumerable<object> args) => s.Lang(out string result, id, args) ? result : "";
-        public static bool Lang(this string s, out string result, L_ID1 id, IEnumerable<object> args) {
-            string key = $"Mods.WeaponEnchantments.{id}.{s}";
-            result = args != null ? Language.GetTextValue(key, args.ToArray()) : Language.GetTextValue(key);
+			return true;
+		}
+		public static string Lang(this string s, string modName, L_ID1 id, IEnumerable<object> args) => s.Lang(modName, out string result, id, args) ? result : "";
+		public static bool Lang(this string s, string modName, out string result, L_ID1 id, IEnumerable<object> args) {
+			string key = $"Mods.{modName}.{id}.{s}";
+			result = args != null ? Language.GetTextValue(key, args.ToArray()) : Language.GetTextValue(key);
 
-            if (result == key) {
-                return false;
-            }
+			if (result == key) {
+				return false;
+			}
 
-            return true;
-        }
-        public static string GetTextValue(this string key, IEnumerable<object> args) {
+			return true;
+		}
+		public static string GetTextValue(this string key, IEnumerable<object> args) {
             return Language.GetTextValue(key, args);
         }
 
