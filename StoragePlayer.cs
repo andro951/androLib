@@ -45,4 +45,43 @@ namespace androLib
 			return false;
 		}
 	}
+	public static class StoragePlayerFunctions {
+		public static Item[] GetChestItems(this Player player, int chest = int.MinValue) {
+			if (chest == int.MinValue)
+				chest = player.chest;
+
+			switch (chest) {
+				case > -1:
+					return Main.chest[chest].item;
+				case -2:
+					return player.bank.item;
+				case -3:
+					return player.bank2.item;
+				case -4:
+					return player.bank3.item;
+				case -5:
+					return player.bank4.item;
+				default:
+					return new Item[0];
+			}
+		}
+		public static bool ItemWillBeTrashedFromShiftClick(this Player player, Item item) {
+			int stack = item.stack;
+			for (int i = 49; i >= 0; i--) {
+				//Any open invenotry space or a stack of the same item in the inventory can hold the 
+				Item inventoryItem = player.inventory[i];
+				if (inventoryItem.IsAir) {
+					return false;
+				}
+				else if (inventoryItem.type == item.type) {
+					int availableStack = Math.Max(inventoryItem.maxStack - inventoryItem.stack, 0);
+					stack -= availableStack;
+					if (stack < 1)
+						return false;
+				}
+			}
+
+			return true;
+		}
+	}
 }

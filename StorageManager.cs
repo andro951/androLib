@@ -194,7 +194,7 @@ namespace androLib
 			vacuumStorageIndexes.Add(storage.GetModFullName(), BagUIs.Count - 1);
 			CanVacuumItemHandler.Add(bagUI.CanVacuumItem);
 			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
-			//TryReturnItemToPlayerHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
+			TryQuickStackItemHandler.Add((Item item) => bagUI.QuickStack(ref item));
 			CloseAllStorageUIEvent += () => {
 				if (bagUI.DisplayBagUI)
 					bagUI.CloseBag();
@@ -203,22 +203,6 @@ namespace androLib
 			MasterUIManager.IsDisplayingUI.Add(() => bagUI.DisplayBagUI);
 			MasterUIManager.DrawAllInterfaces += bagUI.PostDrawInterface;
 			MasterUIManager.ShouldPreventRecipeScrolling.Add(() => bagUI.Hovering);
-			
-
-			/*
-				MasterUIManager.IsDisplayingUI.Add(() => WEPlayer.LocalWEPlayer.displayOreBagUI);//OreBag-Delete
-			MasterUIManager.ShouldPreventTrashingItem.Add(() => OreBagUI.CanBeStored(Main.HoverItem));//OreBag-Delete
-				MasterUIManager.DrawAllInterfaces += OreBagUI.PostDrawInterface;//OreBag-Delete
-				MasterUIManager.ShouldPreventRecipeScrolling.Add(() => MasterUIManager.HoveringMyUIType(WE_UI_ID.OreBag_UITypeID));//OreBag-Delete
-			StorageManager.AllowedToStoreInStorage.Add(OreBagUI.CanBeStored);//OreBag-Delete
-				StorageManager.TryVacuumItemHandler.Add((Item item, Player player) => OreBagUI.TryVacuumItem(ref item, player));//OreBag-Delete
-				StorageManager.CanVacuumItemHandler.Add(OreBagUI.CanVacuumItem);
-			StorageManager.TryReturnItemToPlayerHandler.Add((Item item, Player player) => OreBagUI.TryVacuumItem(ref item, player));
-				StorageManager.CloseAllStorageUIEvent += () => {
-					if (WEPlayer.LocalWEPlayer.displayOreBagUI)
-						OreBagUI.CloseOreBag();
-				};
-			*/
 
 			return BagUIs.Count - 1;
 		}
@@ -366,6 +350,25 @@ namespace androLib
 		}
 		public static TryVacuumItemFunc TryVacuumItemHandler = new();
 		public static bool TryVacuumItem(ref Item item, Player player) => TryVacuumItemHandler.Invoke(ref item, player);
+		public class TryQuickStackItemFunc {
+			private event Func<Item, bool> eventHandler;
+			public void Add(Func<Item, bool> func) {
+				eventHandler += func;
+			}
+			public bool Invoke(ref Item item) {
+				if (eventHandler == null)
+					return false;
+
+				foreach (Func<Item, bool> func in eventHandler.GetInvocationList()) {
+					if (func.Invoke(item) && item.NullOrAir() || item.stack <= 0)
+						return true;
+				}
+
+				return false;
+			}
+		}
+		public static TryQuickStackItemFunc TryQuickStackItemHandler = new();
+		public static bool TryQuickStack(ref Item item) => TryQuickStackItemHandler.Invoke(ref item);
 		public static void TryUpdateMouseOverrideForDeposit(Item item) {
 			if (item.IsAir)
 				return;

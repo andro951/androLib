@@ -3,6 +3,8 @@ using Terraria;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework;
 using androLib.Common.Configs;
+using Terraria.ID;
+using Terraria.UI;
 
 namespace androLib
 {
@@ -168,9 +170,53 @@ namespace androLib
 					return -1;
 			}
 		}
-		public override void PostSetupContent() {
-			if (StorageManager.StorageItemTypes.ContainsKey(1))
-				return;
+		public override void Load() {
+			On_ChestUI.LootAll += OnChestUI_LootAll;
+			On_ChestUI.Restock += On_ChestUI_Restock;
+			On_Player.QuickStackAllChests += On_Player_QuickStackAllChests;
 		}
+
+		private void On_Player_QuickStackAllChests(On_Player.orig_QuickStackAllChests orig, Player self) {
+			for (int i = 0; i < self.inventory.Length; i++) {
+				ref Item item = ref self.inventory[i];
+				StorageManager.TryVacuumItem(ref item, self);
+			}
+		}
+
+		private void On_ChestUI_Restock(On_ChestUI.orig_Restock orig) {
+			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
+			int chest = storagePlayer.Player.chest;
+			if (chest != -1) {
+				Item[] chestItmes = storagePlayer.Player.GetChestItems();
+				bool synchChest = chest > -1 && Main.netMode == NetmodeID.MultiplayerClient;
+				for (int i = 0; i < chestItmes.Length; i++) {
+					ref Item item = ref chestItmes[i];
+					if (StorageManager.TryQuickStack(ref item)) {
+						if (synchChest)
+							NetMessage.SendData(MessageID.SyncChestItem, -1, -1, null, chest, i);
+					}
+				}
+			}
+		}
+
+		private void OnChestUI_LootAll(On_ChestUI.orig_LootAll orig) {//TODO: Make this work with essence
+			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
+			int chest = storagePlayer.Player.chest;
+			if (chest != -1) {
+				Item[] chestItmes = storagePlayer.Player.GetChestItems();
+				bool synchChest = chest > -1 && Main.netMode == NetmodeID.MultiplayerClient;
+				for (int i = 0; i < chestItmes.Length; i++) {
+					ref Item item = ref chestItmes[i];
+					if (StorageManager.TryVacuumItem(ref item, Main.LocalPlayer)) {
+						if (synchChest)
+							NetMessage.SendData(MessageID.SyncChestItem, -1, -1, null, chest, i);
+					}
+				}
+			}
+
+			orig();
+		}
+
+		
 	}
 }
