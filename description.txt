@@ -10,7 +10,7 @@ It is possible to create the bags without a hard dependency on this mod with the
 I'm planning to create a text tutorial and potentially create a wiki for this mod.
 If you would like to create a bag for your mod before then, look at the Vacuum Ore Bag mod for an example.  It only requires the 1 simple ModItem file and a Mod.Load() call.
 
-Feel free to reach out if you would like help creating a bag for your mod ore if you find any issues with this mod.
+Feel free to reach out if you would like help creating a bag for your mod or if you find any issues with this mod.
 
 This mod is also set up to allow non-bag storage vacuum integration if desired.  That would require a more setup on the other creator's part, 
 but I do it with Weapon Enchantment, so let me know if you would like to do something like that.
