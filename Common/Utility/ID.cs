@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static Terraria.Localization.GameCulture;
 using Terraria.GameContent.Personalities;
+using Terraria.ID;
 
 namespace androLib.Common.Utility
 {
@@ -272,5 +273,19 @@ namespace androLib.Common.Utility
 					return 1f;
 			}
 		}
+	}
+
+	public static class GemSets {
+		public static SortedSet<int> CommonGems = new() {
+			ItemID.Topaz,
+			ItemID.Sapphire,
+			ItemID.Ruby,
+			ItemID.Emerald,
+			ItemID.Amethyst
+		};
+		public static SortedSet<int> RareGems = new() {
+			ItemID.Amber,
+			ItemID.Diamond
+		};
 	}
 }

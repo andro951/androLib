@@ -120,10 +120,10 @@ namespace androLib
 						localizationNameKey,
 						StorageSize, 
 						ShouldVacuum, 
-						StorageItemTypeGetter, 
 						GetColor,
 						GetScrollBarColor,
 						GetButtonHoverColor,
+						StorageItemTypeGetter,
 						UI_DefaultLeftLocationOnScreen, 
 						UI_DefaultTopLocationOnScreen
 					);

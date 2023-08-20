@@ -55,10 +55,10 @@ namespace androLib
 				string nameLocalizationKey,
 				int storageSize, 
 				bool isVacuumBag, 
-				Func<int> storageItemTypeGetter, 
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
 				Func<Color> getButtonHoverColor,
+				Func<int> storageItemTypeGetter,
 				int uiLeftDefault, 
 				int uiTopDefault
 			) {
@@ -68,10 +68,10 @@ namespace androLib
 			NameLocalizationKey = nameLocalizationKey;
 			StorageSize = storageSize;
 			IsVacuumBag = isVacuumBag;
-			StorageItemTypeGetter = storageItemTypeGetter;
 			GetUIColor = getUIColor;
 			GetScrollBarColor = getScrollBarColor;
 			GetButtonHoverColor = getButtonHoverColor;
+			StorageItemTypeGetter = storageItemTypeGetter;
 			UILeftDefault = uiLeftDefault;
 			UITopDefault = uiTopDefault;
 			UILeft = UILeftDefault;
@@ -115,10 +115,10 @@ namespace androLib
 				NameLocalizationKey,
 				StorageSize,
 				IsVacuumBag,
-				StorageItemTypeGetter,
 				GetUIColor,
 				GetScrollBarColor,
 				GetButtonHoverColor,
+				StorageItemTypeGetter,
 				UILeftDefault,
 				UITopDefault
 			);
@@ -213,10 +213,10 @@ namespace androLib
 				string nameLocalizationKey, 
 				int storageSize, 
 				bool isVacuumBag,
-				Func<int> storageItemTypeGetter, 
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
 				Func<Color> getButtonHoverColor,
+				Func<int> storageItemTypeGetter,
 				int uiLeft, 
 				int uiTop
 			) {
@@ -231,10 +231,10 @@ namespace androLib
 				nameLocalizationKey,
 				storageSize, 
 				isVacuumBag, 
-				storageItemTypeGetter, 
 				getUIColor,
 				getScrollBarColor,
 				getButtonHoverColor,
+				storageItemTypeGetter,
 				uiLeft, 
 				uiTop
 			);
