@@ -141,9 +141,10 @@ namespace androLib.UI
 
 				DrawAllInterfaces?.Invoke(spriteBatch);
 				if (UpdateInterfaces != null) {
-					Action[] invocationList = (Action[])UpdateInterfaces.GetInvocationList();
+					Delegate[] invocationList = UpdateInterfaces.GetInvocationList();
 					for (int i = invocationList.Length - 1; i >= 0; i--) {
-						invocationList[i]?.Invoke();
+						UpdateInterface updateInterface = (UpdateInterface)invocationList[i];
+						updateInterface?.Invoke();
 					}
 				}
 
@@ -513,6 +514,11 @@ namespace androLib.UI
 		public bool MouseHovering() => MasterUIManager.MouseHovering(this);
 		public void TryStartDraggingUI() => MasterUIManager.TryStartDraggingUI(this);
 		public bool ShouldDragUI() => MasterUIManager.ShouldDragUI(this);
+		public void SetCenterY(int centerY) {
+			int height = Height;
+			TopLeft.Y = centerY;
+			BottomRight.Y = centerY + height;
+		} 
 	}
 	public struct UITextData {
 		public int ID;

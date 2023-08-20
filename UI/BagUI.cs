@@ -22,6 +22,7 @@ using Terraria.WorldBuilding;
 using androLib.Common.Utility;
 using androLib.Common.Globals;
 using androLib.ModIntegration;
+using static androLib.UI.BagUI;
 
 namespace androLib.UI
 {
@@ -84,9 +85,28 @@ namespace androLib.UI
 			StorageID = storageID;
 			RegisteredUI_ID = registeredUI_ID;
 		}
+		private DrawnUIData drawnUIData;
+		public class DrawnUIData {
+			public UIButtonData searchBarData;
+			public List<UITextData> textButtons;
+			public UIPanelData panel;
+			public UIPanelData scrollBarData;
+			public UIItemSlotData[] slotData;
+			public UIPanelData scrollPanelData;
 
-		private class DrawnUIData {
-
+			public int inventoryIndexStart;
+			public int itemSlotsLeft;
+			public int itemSlotsTop;
+			public int slotsToDisplay;
+			public bool usingSearchBar;
+			public int itemSlotColumns;
+			public int itemSlotSpaceWidth;
+			public int itemSlotSpaceHeight;
+			public int scrollPanelMinY;
+			public int scrollPanelMaxY;
+			public int possiblePanelPositions;
+			public int scrollPanelSize;
+			public bool draggingScrollPanel;
 		}
 		public void PostDrawInterface(SpriteBatch spriteBatch) {
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
@@ -98,18 +118,11 @@ namespace androLib.UI
 			if (storagePlayer.Player.chest != -1)
 				return;
 
-			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
-				if (!Main.mouseItem.IsAir || !RoomInStorage(Main.HoverItem)) {
-					Main.cursorOverride = -1;
-				}
-				else {
-					Main.cursorOverride = CursorOverrideID.InventoryToChest;
-				}
-			}
-
 			#endregion
 
 			#region Data
+
+			drawnUIData = new DrawnUIData();
 
 			Color mouseColor = MasterUIManager.MouseColor;
 			if (glowTime > 0) {
@@ -124,19 +137,24 @@ namespace androLib.UI
 
 			int itemSlotColumns = 10;
 			int itemSlotRowsDisplayed = 3;
-			int itemSlotTotalRows = inventory.Length.CeilingDivide(itemSlotColumns);
+			int itemSlotTotalRows = inventory.Length.CeilingDivide( itemSlotColumns);
 			int itemSlotSpaceWidth = MasterUIManager.ItemSlotSize + Spacing;
 			int itemSlotSpaceHeight = MasterUIManager.ItemSlotSize + Spacing;
-			int itemSlotsWidth = (itemSlotColumns - 1) * itemSlotSpaceWidth + MasterUIManager.ItemSlotSize;
-			int itemSlotsHeight = (itemSlotRowsDisplayed - 1) * itemSlotSpaceHeight + MasterUIManager.ItemSlotSize;
+			int itemSlotsWidth = ( itemSlotColumns - 1) *  itemSlotSpaceWidth + MasterUIManager.ItemSlotSize;
+			int itemSlotsHeight = (itemSlotRowsDisplayed - 1) *  itemSlotSpaceHeight + MasterUIManager.ItemSlotSize;
 			int itemSlotsLeft = BagUILeft + PanelBorder;
 
+			drawnUIData.itemSlotColumns = itemSlotColumns;
+			drawnUIData.itemSlotSpaceWidth = itemSlotsWidth;
+			drawnUIData.itemSlotSpaceHeight = itemSlotsHeight;
+			drawnUIData.itemSlotsLeft = itemSlotsLeft;
+
 			//Name Data
-			int nameLeft = itemSlotsLeft;//itemSlotsLeft + (itemSlotsWidth - nameWidth) / 2;
+			int nameLeft =  itemSlotsLeft;//itemSlotsLeft + (itemSlotsWidth - nameWidth) / 2;
 			int nameTop = BagUITop + PanelBorder;
 			//string name = EnchantmentStorageTextID.OreBag.ToString().Lang(L_ID1.EnchantmentStorageText);
 			string name = Storage.GetLocalizedName();
-			UITextData nameData = new(UI_ID.None, nameLeft, nameTop, name, 1f, mouseColor);
+			UITextData nameData = new(UI_ID.None, nameLeft, nameTop, name, 1f,  mouseColor);
 
 			//Panel Data 1/2
 			int panelBorderTop = nameData.Height + Spacing + 2;
@@ -145,19 +163,22 @@ namespace androLib.UI
 			int searchBarMinWidth = 100;
 			TextData searchBarTextData = new(MasterUIManager.DisplayedSearchBarString(SearchID));
 			Color temp = Storage.GetButtonHoverColor();//TODO: DELETE ME!!!
-			UIButtonData searchBarData = new(SearchID, nameData.BottomRight.X + Spacing * 10, nameTop - 6, searchBarTextData, mouseColor, Math.Max(6, (searchBarMinWidth - searchBarTextData.Width) / 2), 0, PanelColor, Storage.GetButtonHoverColor());
+			drawnUIData.searchBarData = new(SearchID, nameData.BottomRight.X + Spacing * 10, nameTop - 6, searchBarTextData,  mouseColor, Math.Max(6, (searchBarMinWidth - searchBarTextData.Width) / 2), 0, PanelColor, Storage.GetButtonHoverColor());
+			UIButtonData searchBarData = drawnUIData.searchBarData;
 
 			//ItemSlots Data 2/2
 			int itemSlotsTop = BagUITop + panelBorderTop;
+			drawnUIData.itemSlotsTop = itemSlotsTop;
 
-			//Scroll Bar Data 1/2
-			int scrollBarLeft = itemSlotsLeft + itemSlotsWidth + Spacing;
+			 //Scroll Bar Data 1/2
+			int scrollBarLeft =  itemSlotsLeft + itemSlotsWidth + Spacing;
 			int scrollBarWidth = 30;
 
 			//Text buttons Data
-			int buttonsLeft = scrollBarLeft + scrollBarWidth + Spacing;
+			int buttonsLeft =  scrollBarLeft + scrollBarWidth + Spacing;
 			int currentButtonTop = nameTop;
-			List<UITextData> textButtons = new();
+			drawnUIData.textButtons = new();
+			List<UITextData> textButtons = drawnUIData.textButtons;
 			int longestButtonNameWidth = 0;
 			for (int buttonIndex = 0; buttonIndex < BagButtonID.Count; buttonIndex++) {
 				if (buttonIndex == BagButtonID.ToggleVacuum && Storage.IsVacuumBag == false)
@@ -170,11 +191,11 @@ namespace androLib.UI
 					color = VacuumPurple;
 				}
 				else {
-					color = mouseColor;
+					color =  mouseColor;
 				}
 
 				UITextData thisButton = new(GetUI_ID(Bag_UI_ID.BagLootAll) + buttonIndex, buttonsLeft, currentButtonTop, text, scale, color, ancorBotomLeft: true);
-				textButtons.Add(thisButton);
+				 textButtons.Add(thisButton);
 				longestButtonNameWidth = Math.Max(longestButtonNameWidth, thisButton.Width);
 				currentButtonTop += (int)(thisButton.BaseHeight * 0.95f);
 			}
@@ -183,46 +204,154 @@ namespace androLib.UI
 			int panelBorderRightOffset = Spacing + longestButtonNameWidth + PanelBorder;
 			int panelWidth = itemSlotsWidth + Spacing + scrollBarWidth + PanelBorder + panelBorderRightOffset;
 			int panelHeight = itemSlotsHeight + PanelBorder + panelBorderTop;
-			UIPanelData panel = new(ID, BagUILeft, BagUITop, panelWidth, panelHeight, PanelColor);
-			
+			drawnUIData.panel = new(ID, BagUILeft, BagUITop, panelWidth, panelHeight, PanelColor);
+			UIPanelData panel = drawnUIData.panel;
+
 			//Scroll Bar Data 2/2
 			int scrollBarTop = BagUITop + PanelBorder;
-			UIPanelData scrollBarData = new(GetUI_ID(Bag_UI_ID.BagScrollBar), scrollBarLeft, scrollBarTop, scrollBarWidth, panelHeight - PanelBorder * 2, ScrollBarColor);
+			drawnUIData.scrollBarData = new(GetUI_ID(Bag_UI_ID.BagScrollBar),  scrollBarLeft, scrollBarTop, scrollBarWidth, panelHeight - PanelBorder * 2, ScrollBarColor);
+			UIPanelData scrollBarData = drawnUIData.scrollBarData;
 
 			//Scroll Panel Data 1/2
 			int scrollPanelXOffset = 1;
-			int scrollPanelSize = scrollBarWidth - scrollPanelXOffset * 2;
-			int scrollPanelMinY = scrollBarData.TopLeft.Y + scrollPanelXOffset;
-			int scrollPanelMaxY = scrollBarData.BottomRight.Y - scrollPanelSize - scrollPanelXOffset;
+			int scrollPanelSize = scrollBarWidth -  scrollPanelXOffset * 2;
+			int scrollPanelMinY =  scrollBarData.TopLeft.Y +  scrollPanelXOffset;
+			int scrollPanelMaxY =  scrollBarData.BottomRight.Y -  scrollPanelSize -  scrollPanelXOffset;
 			int possiblePanelPositions = itemSlotTotalRows - itemSlotRowsDisplayed;
 			if (possiblePanelPositions < 1)
 				possiblePanelPositions = 1;
 
-			scrollPanelPosition.Clamp(0, possiblePanelPositions);
+			drawnUIData.scrollPanelSize = scrollPanelSize;
+			drawnUIData.scrollPanelMinY = scrollPanelMinY;
+			drawnUIData.scrollPanelMaxY = scrollPanelMaxY;
+			drawnUIData.possiblePanelPositions = possiblePanelPositions;
 
 			#endregion
 
-			//Panel Draw
-			panel.Draw(spriteBatch);
+			 //Panel Draw
+			 panel.Draw(spriteBatch);
 
 			//Scroll Bar Draw
-			scrollBarData.Draw(spriteBatch);
+			 scrollBarData.Draw(spriteBatch);
+
+			//If pannel is being dragged, force scrollPanelY to be in it's correct position by calculating with scrollPanelPosition.
+			bool draggingScrollPanel = MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel);
+			drawnUIData.draggingScrollPanel = draggingScrollPanel;
+			if (draggingScrollPanel) {
+				int scrollPanelRange =  scrollPanelMaxY -  scrollPanelMinY;
+				scrollPanelPosition = ((scrollPanelY -  scrollPanelMinY) *  possiblePanelPositions).RoundDivide(scrollPanelRange);
+			}
+
+			scrollPanelPosition.Clamp(0,  possiblePanelPositions);
 
 			//ItemSlots Draw
+			drawnUIData.slotData = new UIItemSlotData[inventory.Length];
+			UIItemSlotData[] slotData = drawnUIData.slotData;
 			int startRow = scrollPanelPosition;
-			bool UsingSearchBar = MasterUIManager.UsingSearchBar(SearchID);
-			int inventoryIndexStart = startRow * itemSlotColumns;
-			int slotsToDisplay = itemSlotRowsDisplayed * itemSlotColumns;
+			bool usingSearchBar = MasterUIManager.UsingSearchBar(SearchID);
+			int inventoryIndexStart = startRow *  itemSlotColumns;
+			int slotsToDisplay = itemSlotRowsDisplayed *  itemSlotColumns;
 			int slotNum = 0;
-			int itemSlotX = itemSlotsLeft;
-			int itemSlotY = itemSlotsTop;
-			for (int inventoryIndex = inventoryIndexStart; inventoryIndex < inventory.Length && slotNum < slotsToDisplay; inventoryIndex++) {
+			int itemSlotX =  itemSlotsLeft;
+			int itemSlotY =  itemSlotsTop;
+			drawnUIData.usingSearchBar = usingSearchBar;
+			drawnUIData.inventoryIndexStart = inventoryIndexStart;
+			drawnUIData.slotsToDisplay = slotsToDisplay;
+			for (int inventoryIndex =  inventoryIndexStart; inventoryIndex < inventory.Length && slotNum <  slotsToDisplay; inventoryIndex++) {
 				if (inventoryIndex >= inventory.Length)
 					break;
 
 				ref Item item = ref inventory[inventoryIndex];
-				if (!UsingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
-					UIItemSlotData slotData = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
+				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
+					 slotData[inventoryIndex] = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
+					 slotData[inventoryIndex].Draw(spriteBatch, item, ItemSlotContextID.Normal, glowHue, glowTime);
+
+					slotNum++;
+					if (slotNum %  itemSlotColumns == 0) {
+						itemSlotX =  itemSlotsLeft;
+						itemSlotY +=  itemSlotSpaceHeight;
+					}
+					else {
+						itemSlotX +=  itemSlotSpaceWidth;
+					}
+				}
+			}
+
+			//Name Draw
+			nameData.Draw(spriteBatch);
+
+			//Search Bar Draw
+			 searchBarData.Draw(spriteBatch);
+
+			//Text Buttons Draw
+			for (int buttonIndex = 0; buttonIndex <  textButtons.Count; buttonIndex++) {
+				UITextData textButton =  textButtons[buttonIndex];
+				textButton.Draw(spriteBatch);
+			}
+
+			//Scroll Panel Data 2 / 2
+			if (MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel)) {
+				scrollPanelY.Clamp( scrollPanelMinY,  scrollPanelMaxY);
+			}
+			else {
+				int scrollPanelRange =  scrollPanelMaxY -  scrollPanelMinY;
+				int offset = scrollPanelPosition * scrollPanelRange /  possiblePanelPositions;
+				scrollPanelY = offset +  scrollPanelMinY;
+			}
+
+			drawnUIData.scrollPanelData = new(GetUI_ID(Bag_UI_ID.BagScrollPanel),  scrollBarLeft +  scrollPanelXOffset, scrollPanelY,  scrollPanelSize,  scrollPanelSize,  mouseColor);
+
+			drawnUIData.scrollPanelData.Draw(spriteBatch);
+		}
+		public void UpdateInterface() {
+			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
+			if (!DisplayBagUI || !Main.playerInventory)
+				return;
+
+			if (storagePlayer.Player.chest != -1)
+				return;
+
+			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
+				if (!Main.mouseItem.IsAir || !RoomInStorage(Main.HoverItem)) {
+					Main.cursorOverride = -1;
+				}
+				else {
+					Main.cursorOverride = CursorOverrideID.InventoryToChest;
+				}
+			}
+
+			UIButtonData searchBarData = drawnUIData.searchBarData;
+			List<UITextData> textButtons = drawnUIData.textButtons;
+			UIPanelData panel = drawnUIData.panel;
+			UIPanelData scrollBarData = drawnUIData.scrollBarData;
+			UIItemSlotData[] slotDatas = drawnUIData.slotData;
+			UIPanelData scrollPanelData = drawnUIData.scrollPanelData;
+			int inventoryIndexStart = drawnUIData.inventoryIndexStart;
+			int itemSlotsLeft = drawnUIData.itemSlotsLeft;
+			int itemSlotsTop = drawnUIData.itemSlotsTop;
+			int slotsToDisplay = drawnUIData.slotsToDisplay;
+			bool usingSearchBar = drawnUIData.usingSearchBar;
+			int itemSlotColumns = drawnUIData.itemSlotColumns;
+			int itemSlotSpaceWidth = drawnUIData.itemSlotSpaceWidth;
+			int itemSlotSpaceHeight = drawnUIData.itemSlotSpaceHeight;
+			int scrollPanelMinY = drawnUIData.scrollPanelMinY;
+			int scrollPanelMaxY = drawnUIData.scrollPanelMaxY;
+			int possiblePanelPositions = drawnUIData.possiblePanelPositions;
+			int scrollPanelSize = drawnUIData.scrollPanelSize;
+			bool draggingScrollPanel = drawnUIData.draggingScrollPanel;
+
+			Item[] inventory = Inventory;
+			int itemSlotX =  itemSlotsLeft;
+			int itemSlotY =  itemSlotsTop;
+			int slotNum = 0;
+			for (int inventoryIndex =  inventoryIndexStart; inventoryIndex < inventory.Length && slotNum <  slotsToDisplay; inventoryIndex++) {
+				if (inventoryIndex >= inventory.Length)
+					break;
+
+				ref Item item = ref inventory[inventoryIndex];
+				if (! usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
+					// slotData[inventoryIndex] = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
+					UIItemSlotData slotData =  slotDatas[inventoryIndex];
 					if (slotData.MouseHovering()) {
 						if (AndroModSystem.FavoriteKeyDown) {
 							Main.cursorOverride = CursorOverrideID.FavoriteStar;
@@ -242,26 +371,20 @@ namespace androLib.UI
 					if (!item.IsAir && !item.favorited && item.TryGetGlobalItem(out VacuumToStorageItem vacummItem) && vacummItem.favorited)
 						item.favorited = true;
 
-					slotData.Draw(spriteBatch, item, ItemSlotContextID.Normal, glowHue, glowTime);
+					//slotData.Draw(spriteBatch, item, ItemSlotContextID.Normal, glowHue, glowTime);
 
 					slotNum++;
-					if (slotNum % itemSlotColumns == 0) {
-						itemSlotX = itemSlotsLeft;
-						itemSlotY += itemSlotSpaceHeight;
+					if (slotNum %  itemSlotColumns == 0) {
+						itemSlotX =  itemSlotsLeft;
+						itemSlotY +=  itemSlotSpaceHeight;
 					}
 					else {
-						itemSlotX += itemSlotSpaceWidth;
+						itemSlotX +=  itemSlotSpaceWidth;
 					}
 				}
 			}
 
-			//Name Draw
-			nameData.Draw(spriteBatch);
-
-			//Search Bar Draw
-			searchBarData.Draw(spriteBatch);
-
-			bool mouseHoveringSearchBar = searchBarData.MouseHovering();
+			bool mouseHoveringSearchBar =  searchBarData.MouseHovering();
 			if (mouseHoveringSearchBar) {
 				if (MasterUIManager.LeftMouseClicked)
 					MasterUIManager.ClickSearchBar(SearchID);
@@ -279,9 +402,9 @@ namespace androLib.UI
 			}
 
 			//Text Buttons Draw
-			for (int buttonIndex = 0; buttonIndex < textButtons.Count; buttonIndex++) {
-				UITextData textButton = textButtons[buttonIndex];
-				textButton.Draw(spriteBatch);
+			for (int buttonIndex = 0; buttonIndex <  textButtons.Count; buttonIndex++) {
+				UITextData textButton =  textButtons[buttonIndex];
+				//textButton.Draw(spriteBatch);
 				if (MasterUIManager.MouseHovering(textButton, true)) {
 					ButtonScale[buttonIndex] += 0.05f;
 
@@ -322,75 +445,56 @@ namespace androLib.UI
 			}
 
 			//Scroll Panel Data 2/2
-			bool draggingScrollPanel = MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel);
-			if (MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel)) {
-				scrollPanelY.Clamp(scrollPanelMinY, scrollPanelMaxY);
+			//bool draggingScrollPanel = MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel);
+			/*if (MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel)) {
+				scrollPanelY.Clamp( scrollPanelMinY,  scrollPanelMaxY);
 			}
 			else {
-				int scrollPanelRange = scrollPanelMaxY - scrollPanelMinY;
-				int offset = scrollPanelPosition * scrollPanelRange / possiblePanelPositions;
-				scrollPanelY = offset + scrollPanelMinY;
-			}
+				int scrollPanelRange =  scrollPanelMaxY -  scrollPanelMinY;
+				int offset = scrollPanelPosition * scrollPanelRange /  possiblePanelPositions;
+				scrollPanelY = offset +  scrollPanelMinY;
+			}*/
 
 			//Scroll Bar Hover
-			if (scrollBarData.MouseHovering()) {
+			if ( scrollBarData.MouseHovering()) {
 				if (MasterUIManager.LeftMouseClicked) {
-					MasterUIManager.UIBeingHovered = UI_ID.None;
-					scrollPanelY = Main.mouseY - scrollPanelSize / 2;
-					scrollPanelY.Clamp(scrollPanelMinY, scrollPanelMaxY);
+					MasterUIManager.UIBeingHovered = Bag_UI_ID.BagScrollPanel;
+					scrollPanelY = Main.mouseY -  scrollPanelSize / 2;
+					scrollPanelY.Clamp( scrollPanelMinY,  scrollPanelMaxY);
+					 scrollPanelData.SetCenterY(scrollPanelY);
+
+					 scrollPanelData.TryStartDraggingUI();
 				}
 			}
 
 			//Scroll Panel Hover and Drag
-			UIPanelData scrollPanelData = new(GetUI_ID(Bag_UI_ID.BagScrollPanel), scrollBarLeft + scrollPanelXOffset, scrollPanelY, scrollPanelSize, scrollPanelSize, mouseColor);
-			if (scrollPanelData.MouseHovering()) {
-				scrollPanelData.TryStartDraggingUI();
-			}
+			//UIPanelData scrollPanelData = new(GetUI_ID(Bag_UI_ID.BagScrollPanel),  scrollBarLeft +  scrollPanelXOffset, scrollPanelY,  scrollPanelSize,  scrollPanelSize,  mouseColor);
+			
+			
 
-			if (scrollPanelData.ShouldDragUI()) {
+			if ( scrollPanelData.ShouldDragUI()) {
 				MasterUIManager.DragUI(out _, out scrollPanelY);
 			}
-			else if (draggingScrollPanel) {
-				int scrollPanelRange = scrollPanelMaxY - scrollPanelMinY;
-				scrollPanelPosition = ((scrollPanelY - scrollPanelMinY) * possiblePanelPositions).RoundDivide(scrollPanelRange);
+			else if ( draggingScrollPanel) {
+				int scrollPanelRange =  scrollPanelMaxY -  scrollPanelMinY;
+				scrollPanelPosition = ((scrollPanelY -  scrollPanelMinY) *  possiblePanelPositions).RoundDivide(scrollPanelRange);
 			}
-
-			scrollPanelData.Draw(spriteBatch);
 
 			//Panel Hover and Drag
-			if (panel.MouseHovering()) {
-				panel.TryStartDraggingUI();
+			if ( panel.MouseHovering()) {
+				 panel.TryStartDraggingUI();
 			}
 
-			if (panel.ShouldDragUI())
+			if ( panel.ShouldDragUI())
 				MasterUIManager.DragUI(out Storage.UILeft, out Storage.UITop);
 
 			int scrollWheelTicks = MasterUIManager.ScrollWheelTicks;
 			if (scrollWheelTicks != 0 && Hovering && MasterUIManager.NoPanelBeingDragged) {
-				if (scrollPanelPosition > 0 && scrollWheelTicks < 0 || scrollPanelPosition < possiblePanelPositions && scrollWheelTicks > 0) {
+				if (scrollPanelPosition > 0 && scrollWheelTicks < 0 || scrollPanelPosition <  possiblePanelPositions && scrollWheelTicks > 0) {
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					scrollPanelPosition += scrollWheelTicks;
 				}
 			}
-		}
-		public void UpdateInterface() {
-			//StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
-			//if (!DisplayBagUI || !Main.playerInventory)
-			//	return;
-
-			//if (storagePlayer.Player.chest != -1)
-			//	return;
-
-			//if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
-			//	if (!Main.mouseItem.IsAir || !RoomInStorage(Main.HoverItem)) {
-			//		Main.cursorOverride = -1;
-			//	}
-			//	else {
-			//		Main.cursorOverride = CursorOverrideID.InventoryToChest;
-			//	}
-			//}
-
-
 		}
 
 
