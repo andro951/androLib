@@ -23,11 +23,11 @@ namespace androLib
 		public Func<Item, bool> ItemAllowedToBeStored { get; set; }
 		public string NameLocalizationKey { get; set; }
 		public int StorageSize { get; set; }
-		public bool IsVacuumBag { get; }
+		public bool? IsVacuumBag { get; }
 		public bool ShouldVacuum {
 			get => shouldVacuum;
 			set {
-				if (!IsVacuumBag) {
+				if (IsVacuumBag == false) {
 					shouldVacuum = false;
 					return;
 				}
@@ -54,7 +54,7 @@ namespace androLib
 				Func<Item, bool> itemAllowedToBeStored, 
 				string nameLocalizationKey,
 				int storageSize, 
-				bool isVacuumBag, 
+				bool? isVacuumBag, 
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
 				Func<Color> getButtonHoverColor,
@@ -77,7 +77,7 @@ namespace androLib
 			UILeft = UILeftDefault;
 			UITop = UITopDefault;
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
-			ShouldVacuum = IsVacuumBag;
+			ShouldVacuum = IsVacuumBag != false;
 		}
 
 		public string GetModFullName() => $"{Mod.Name}_{VacuumStorageType.Name}";
@@ -127,7 +127,7 @@ namespace androLib
 			clone.UITop = UITop;
 			clone.Items = new Item[StorageSize];
 			Array.Copy(Items, clone.Items, StorageSize);
-			ShouldVacuum = IsVacuumBag;
+			ShouldVacuum = IsVacuumBag != false;
 
 			return clone;
 		}
@@ -212,7 +212,7 @@ namespace androLib
 				Func<Item, bool> itemAllowedToBeStored,
 				string nameLocalizationKey, 
 				int storageSize, 
-				bool isVacuumBag,
+				bool? isVacuumBag,
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
 				Func<Color> getButtonHoverColor,
@@ -253,6 +253,7 @@ namespace androLib
 
 			MasterUIManager.IsDisplayingUI.Add(() => bagUI.DisplayBagUI);
 			MasterUIManager.DrawAllInterfaces += bagUI.PostDrawInterface;
+			MasterUIManager.UpdateInterfaces += bagUI.UpdateInterface;
 			MasterUIManager.ShouldPreventRecipeScrolling.Add(() => bagUI.Hovering);
 
 			BagUIs.Add(bagUI);

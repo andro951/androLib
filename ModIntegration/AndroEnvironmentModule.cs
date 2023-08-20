@@ -14,7 +14,7 @@ namespace androLib.ModIntegration
 {
     [ExtendsFromMod(AndroMod.magicStorageName)]
     public class AndroEnvironmentModule : EnvironmentModule {
-        public override string Name => "Andro's Storage";
+        public override string Name => "Andros Storage";
 		private IStorageManagerWrapper _storageManager;
 		public AndroEnvironmentModule() {
 			_storageManager = new MagicStorageWrapper();

@@ -18,7 +18,7 @@ Mods: {
 		}
 
 		StorageText: {
-			ButtonCount: Nombre de boutons
+			// CloseBag: Close Bag
 			DepositAll: Tout déposer
 			LootAll: Tout piller
 			QuickStack: Pile rapide

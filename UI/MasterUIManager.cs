@@ -24,6 +24,7 @@ using androLib.Common.Globals;
 using androLib.Common.Utility;
 //using androLib.Content.NPCs;
 using androLib;
+using static androLib.UI.MasterUIManager;
 
 namespace androLib.UI
 {
@@ -39,6 +40,9 @@ namespace androLib.UI
 		public delegate void DrawInterface(SpriteBatch spriteBatch);
 		public static event DrawInterface DrawAllInterfaces;
 
+		public delegate void UpdateInterface();
+		public static event UpdateInterface UpdateInterfaces;
+
 		private static int UI_ID_Counter = 0;
 		public static int RegisterUI_ID() {
 			int ui_id = UI_ID_Counter;
@@ -50,6 +54,7 @@ namespace androLib.UI
 
 		public static int GetUI_ID(int ui_id, int UITypeID) => ui_id + UITypeID * 1000;
 		public static bool HoveringMyUIType(int uiTypeID) => UI_IDToTypeID(UIBeingHovered) == uiTypeID;
+		public static bool HovingUIByID(int ui_id) => UIBeingHovered == ui_id;
 		public static int UI_IDToTypeID(int ui_id) => ui_id / 1000;
 
 		public static bool DisplayingAnyUI => IsDisplayingUI.Invoke();
@@ -135,6 +140,12 @@ namespace androLib.UI
 				}
 
 				DrawAllInterfaces?.Invoke(spriteBatch);
+				if (UpdateInterfaces != null) {
+					Action[] invocationList = (Action[])UpdateInterfaces.GetInvocationList();
+					for (int i = invocationList.Length - 1; i >= 0; i--) {
+						invocationList[i]?.Invoke();
+					}
+				}
 
 				Main.inventoryScale = savedInventoryScale;
 			}

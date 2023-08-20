@@ -18,7 +18,7 @@ Mods: {
 		}
 
 		StorageText: {
-			ButtonCount: 按钮数量
+			// CloseBag: Close Bag
 			DepositAll: 全部存入
 			LootAll: 掠夺全部
 			QuickStack: 快速堆叠

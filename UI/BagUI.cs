@@ -57,7 +57,8 @@ namespace androLib.UI
 			public const int QuickStack = 2;
 			public const int Sort = 3;
 			public const int ToggleVacuum = 4;
-			public const int Count = 5;
+			public const int CloseBag = 5;
+			public const int Count = 6;
 		}
 		public int ID => GetUI_ID(Bag_UI_ID.Bag);
 		public int SearchID => GetUI_ID(Bag_UI_ID.BagSearch);
@@ -84,6 +85,9 @@ namespace androLib.UI
 			RegisteredUI_ID = registeredUI_ID;
 		}
 
+		private class DrawnUIData {
+
+		}
 		public void PostDrawInterface(SpriteBatch spriteBatch) {
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
 			if (!DisplayBagUI || !Main.playerInventory)
@@ -94,7 +98,7 @@ namespace androLib.UI
 			if (storagePlayer.Player.chest != -1)
 				return;
 
-			if (ItemSlot.ShiftInUse && MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem)) {
+			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
 				if (!Main.mouseItem.IsAir || !RoomInStorage(Main.HoverItem)) {
 					Main.cursorOverride = -1;
 				}
@@ -156,7 +160,7 @@ namespace androLib.UI
 			List<UITextData> textButtons = new();
 			int longestButtonNameWidth = 0;
 			for (int buttonIndex = 0; buttonIndex < BagButtonID.Count; buttonIndex++) {
-				if (buttonIndex == BagButtonID.ToggleVacuum && !Storage.IsVacuumBag)
+				if (buttonIndex == BagButtonID.ToggleVacuum && Storage.IsVacuumBag == false)
 					continue;
 
 				string text = ((StorageTextID)buttonIndex).ToString().Lang(AndroMod.ModName, L_ID1.StorageText);
@@ -301,6 +305,9 @@ namespace androLib.UI
 							case BagButtonID.ToggleVacuum:
 								ToggleVacuum();
 								break;
+							case BagButtonID.CloseBag:
+								CloseBag();
+								break;
 						}
 
 						SoundEngine.PlaySound(SoundID.MenuTick);
@@ -366,7 +373,27 @@ namespace androLib.UI
 				}
 			}
 		}
-		
+		public void UpdateInterface() {
+			//StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
+			//if (!DisplayBagUI || !Main.playerInventory)
+			//	return;
+
+			//if (storagePlayer.Player.chest != -1)
+			//	return;
+
+			//if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
+			//	if (!Main.mouseItem.IsAir || !RoomInStorage(Main.HoverItem)) {
+			//		Main.cursorOverride = -1;
+			//	}
+			//	else {
+			//		Main.cursorOverride = CursorOverrideID.InventoryToChest;
+			//	}
+			//}
+
+
+		}
+
+
 		public void OpenBag() {
 			scrollPanelY = int.MinValue;
 			Main.playerInventory = true;
@@ -384,7 +411,7 @@ namespace androLib.UI
 					SoundEngine.PlaySound(SoundID.Grab);
 			}
 		}
-		public bool CanBeStored(Item item) => Storage.ItemAllowedToBeStored(item);
+		public bool CanBeStored(Item item) => !item.NullOrAir() && Storage.ItemAllowedToBeStored(item);
 		public bool RoomInStorage(Item item, Player player = null) {
 			if (Main.netMode == NetmodeID.Server)
 				return false;
@@ -436,6 +463,10 @@ namespace androLib.UI
 			if (!RoomInStorage(item))
 				return false;
 
+			//If bag is a "Quick Stack" only style bag, check if item is already in inventory
+			if (!VacuumAllowed(item))
+				return false;
+
 			return true;
 		}
 		public bool TryVacuumItem(ref Item item, Player player) {
@@ -450,10 +481,13 @@ namespace androLib.UI
 			int storageIndex = 0;
 			Item[] oreBagInventory = Inventory;
 			for (int i = 0; i < inv.Length; i++) {
-				if (i == 58)//Skip Mouse Item
+				if (i == 58 && Main.mouseItem.type == inv[i].type)//Skip Mouse Item
 					continue;
 
 				ref Item item = ref inv[i];
+				if (!VacuumAllowed(item))
+					continue;
+
 				if (!item.favorited && CanBeStored(item)) {
 					while (storageIndex < oreBagInventory.Length && oreBagInventory[storageIndex].type > ItemID.None) {
 						storageIndex++;
@@ -476,6 +510,16 @@ namespace androLib.UI
 			}
 
 			return transferedAnyItem;
+		}
+		public bool VacuumAllowed(Item item) => Storage.IsVacuumBag == true || Storage.IsVacuumBag == null && (ContainsItem(item) || ItemSlot.ShiftInUse && MasterUIManager.LeftMouseClicked);
+		public bool ContainsItem(Item item) {
+			Item[] inv = Inventory;
+			for (int i = 0; i < inv.Length; i++) {
+				if (inv[i].type == item.type)
+					return true;
+			}
+
+			return false;
 		}
 		public bool QuickStack(ref Item item) => QuickStack(new Item[] { item });
 		public bool QuickStack(Item[] inv, bool playSound = true) {

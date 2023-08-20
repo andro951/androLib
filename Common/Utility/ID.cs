@@ -79,7 +79,7 @@ namespace androLib.Common.Utility
 		QuickStack,
 		Sort,
 		ToggleVacuum,
-		ButtonCount,
+		CloseBag,
 		//ToggleMarkTrash,
 		//UncraftAllTrash,
 		//RevertAllToBasic,

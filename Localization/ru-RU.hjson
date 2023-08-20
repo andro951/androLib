@@ -18,7 +18,7 @@ Mods: {
 		}
 
 		StorageText: {
-			ButtonCount: Количество кнопок
+			// CloseBag: Close Bag
 			DepositAll: Депозит Все
 			LootAll: Лут все
 			QuickStack: Быстрый стек

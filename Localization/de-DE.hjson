@@ -18,7 +18,7 @@ Mods: {
 		}
 
 		StorageText: {
-			ButtonCount: Tastenanzahl
+			// CloseBag: Close Bag
 			DepositAll: Alles einzahlen
 			LootAll: Plündere alles
 			QuickStack: Schneller Stapel
