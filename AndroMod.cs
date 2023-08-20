@@ -181,6 +181,8 @@ namespace androLib
 				ref Item item = ref self.inventory[i];
 				StorageManager.TryVacuumItem(ref item, self);
 			}
+
+			orig(self);
 		}
 
 		private void On_ChestUI_Restock(On_ChestUI.orig_Restock orig) {
@@ -197,6 +199,8 @@ namespace androLib
 					}
 				}
 			}
+
+			orig();
 		}
 
 		private void OnChestUI_LootAll(On_ChestUI.orig_LootAll orig) {//TODO: Make this work with essence
@@ -216,7 +220,5 @@ namespace androLib
 
 			orig();
 		}
-
-		
 	}
 }
