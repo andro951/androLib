@@ -14,7 +14,7 @@ namespace androLib.Common.Globals
 	public class VacuumBag : GlobalItem
 	{
 		private bool AppliesTo(Item item) => StorageManager.StorageItemTypes.ContainsKey(item.type);
-		public override bool CanRightClick(Item item) => AppliesTo(item) && !ItemSlot.ShiftInUse;
+		public override bool CanRightClick(Item item) => AppliesTo(item);
 		public override void RightClick(Item item, Player player) {
 			if (!AppliesTo(item))
 				return;
