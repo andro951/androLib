@@ -5,6 +5,9 @@ using Microsoft.Xna.Framework;
 using androLib.Common.Configs;
 using Terraria.ID;
 using Terraria.UI;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using MonoMod.RuntimeDetour;
+using System.Collections.Generic;
 
 namespace androLib
 {
@@ -170,12 +173,17 @@ namespace androLib
 					return -1;
 			}
 		}
+		List<Hook> hooks = new();
 		public override void Load() {
 			On_ChestUI.LootAll += OnChestUI_LootAll;
 			On_ChestUI.Restock += On_ChestUI_Restock;
 			On_Player.QuickStackAllChests += On_Player_QuickStackAllChests;
+			//hooks.Add();
+			//foreach (Hook hook in hooks) {
+			//	hook.Apply();
+			//}
 		}
-
+		//private static readonly 
 		private void On_Player_QuickStackAllChests(On_Player.orig_QuickStackAllChests orig, Player self) {
 			for (int i = 0; i < self.inventory.Length; i++) {
 				ref Item item = ref self.inventory[i];

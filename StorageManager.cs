@@ -351,31 +351,6 @@ namespace androLib
 		public static MagicStorageItemsGatherer MagicStorageItemsHandler = new();
 		public static IEnumerable<Item> GetMagicStorageItems => MagicStorageItemsHandler.Invoke();
 
-		public class AllowedToStoreInStorageConditions
-		{
-			private event Func<Item, bool> eventHandler;
-
-			public void Add(Func<Item, bool> func) {
-				eventHandler += func;
-			}
-
-			public bool Invoke(Item item) {
-				if (eventHandler == null)
-					return false;
-
-				foreach (Func<Item, bool> func in eventHandler.GetInvocationList()) {
-					if (func.Invoke(item))
-						return true;
-				}
-
-				return false;
-			}
-		}
-		public static AllowedToStoreInStorageConditions AllowedToStoreInStorage = new();
-		public static bool AllowedToBeStored(Item item) {
-			return AllowedToStoreInStorage.Invoke(item);
-		}
-
 		public class CanVacuumItemConditions
 		{
 			private event Func<Item, Player, bool> eventHandler;

@@ -150,6 +150,9 @@ namespace androLib.UI
 
 				Main.inventoryScale = savedInventoryScale;
 			}
+			else {
+				UIBeingHovered = UI_ID.None;
+			}
 
 			lastMouseLeft = Main.mouseLeft;
 			lastMouseRight = Main.mouseRight;
