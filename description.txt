@@ -21,8 +21,8 @@ androLib is required by these mods:
 		Wiki: https://weapon-enchantments-mod-tmodloader.fandom.com/wiki/Weapon_Enchantments_Mod_(tModLoader)_Wiki
 	-Vacuum Ore Bag
 		Steam: https://steamcommunity.com/sharedfiles/filedetails/?id=3022671410
-	-Vacuum Bags (In progress)
-		Steam:
+	-Vacuum Bags
+		Steam: https://steamcommunity.com/sharedfiles/filedetails/?id=3023408924&tscn=1692773450
 
 Please give us your feedback!!!!!!
 https://discord.gg/mPywEhyV9b
