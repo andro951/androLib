@@ -22,21 +22,13 @@ namespace androLib.Common.Globals
 			item.stack++;
 			UseBag(item, player);
 		}
-		public override bool? UseItem(Item item, Player player) {
-			if (!AppliesTo(item))
-				return null;
+		private static void UseBag(Item item, Player player) => UseBag(StorageManager.StorageItemTypes[item.type]);
 
-			if (Main.myPlayer == player.whoAmI && Main.netMode != NetmodeID.Server)
-				UseBag(item, player);
-
-			return null;
-		}
-		private void UseBag(Item item, Player player) {
-			int bagStroageID = StorageManager.StorageItemTypes[item.type];
-			if (!StorageManager.TryGetBagUI(bagStroageID, out BagUI bagUI))
+		public static void UseBag(int bagStorageID) {
+			if (!StorageManager.TryGetBagUI(bagStorageID, out BagUI bagUI))
 				return;
 
-			if (StorageManager.BagUIs[bagStroageID].DisplayBagUI && Main.LocalPlayer.chest == -1) {
+			if (StorageManager.BagUIs[bagStorageID].DisplayBagUI && Main.LocalPlayer.chest == -1) {
 				bagUI.CloseBag(true);
 			}
 			else {

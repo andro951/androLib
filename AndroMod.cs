@@ -8,6 +8,7 @@ using Terraria.UI;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MonoMod.RuntimeDetour;
 using System.Collections.Generic;
+using androLib.Common.Globals;
 
 namespace androLib
 {
@@ -185,9 +186,14 @@ namespace androLib
 		}
 		//private static readonly 
 		private void On_Player_QuickStackAllChests(On_Player.orig_QuickStackAllChests orig, Player self) {
+			//TODO: Need to look for nearby bag tiles too
 			for (int i = 0; i < self.inventory.Length; i++) {
 				ref Item item = ref self.inventory[i];
-				StorageManager.TryVacuumItem(ref item, self);
+				if (item.favorited)
+					continue;
+
+				if (!StorageManager.TryVacuumItem(ref item, self))
+					VacuumBagTile.QuickStackToBags(ref item, self);
 			}
 
 			orig(self);
@@ -201,6 +207,9 @@ namespace androLib
 				bool synchChest = chest > -1 && Main.netMode == NetmodeID.MultiplayerClient;
 				for (int i = 0; i < chestItmes.Length; i++) {
 					ref Item item = ref chestItmes[i];
+					if (item.favorited)
+						continue;
+
 					if (StorageManager.TryQuickStack(ref item)) {
 						if (synchChest)
 							NetMessage.SendData(MessageID.SyncChestItem, -1, -1, null, chest, i);

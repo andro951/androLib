@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using MonoMod.Cil;
+using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -33,5 +35,29 @@ namespace androLib.Common.Utility
             }
         }
         private static string AddCharToFront(this string s, char c = '|') => new string(c, charNum) + s;
+
+
+        public static void LogRest(this ILCursor c, int goBack = 0) {
+			int index = c.Index;
+            c.Index = index - goBack;
+			while (c.Next != null) {
+				bool catchingExceptions = true;
+				$"c.Index: {c.Index}, Instruction: {c.Next}{(c.Index == index ? $" (Cursor Location)" : "")}".LogSimple();
+				while (catchingExceptions) {
+					c.Index++;
+					try {
+						if (c.Next != null) {
+							string tempString = c.Next.ToString();
+						}
+						catchingExceptions = false;
+					}
+					catch (Exception e) {
+						$"c.Index: {c.Index}, Instruction: {e.ToString().Substring(0, 20)}".LogSimple();
+					}
+				}
+			}
+
+			c.Index = index;
+		}
     }
 }

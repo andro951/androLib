@@ -551,7 +551,7 @@ namespace androLib.UI
 				}
 			}
 		}
-		public bool CanVacuumItem(Item item, Player player) {
+		public bool CanVacuumItem(Item item, Player player, bool ignoreTile = false) {
 			if (item.NullOrAir())
 				return false;
 
@@ -561,7 +561,7 @@ namespace androLib.UI
 			if (!CanBeStored(item))
 				return false;
 
-			if (!Storage.HasRequiredItemToUseStorage(player))
+			if (!ignoreTile && !Storage.HasRequiredItemToUseStorage(player))
 				return false;
 
 			if (!RoomInStorage(item))
@@ -573,8 +573,8 @@ namespace androLib.UI
 
 			return true;
 		}
-		public bool TryVacuumItem(ref Item item, Player player) {
-			if (CanVacuumItem(item, player))
+		public bool TryVacuumItem(ref Item item, Player player, bool ignoreTile = false) {
+			if (CanVacuumItem(item, player, ignoreTile))
 				return DepositAll(ref item);
 
 			return false;

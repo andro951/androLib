@@ -187,20 +187,50 @@ namespace androLib
 			}
 		}
 
+		/// <summary>
+		/// <int itemType, int bagID>
+		/// </summary>
 		public static SortedDictionary<int, int> StorageItemTypes {
 			get {
 				if (storageItemTypes == null) {
-					storageItemTypes = new();
-					for (int i = 0; i < BagUIs.Count; i++) {
-						if (BagUIs[i].Storage.ValidItemTypeGetter(out int itemType) == true)
-							storageItemTypes.Add(itemType, i);
-					}
+					SetUpStorageItemAndTileTypes();
 				}
 
 				return storageItemTypes;
 			}
 		}
 		private static SortedDictionary<int, int> storageItemTypes = null;
+		private static List<(Func<int>, int)> otherStorageItemTypeOnly = new();
+		public static SortedDictionary<int, int> StorageTileTypes {
+			get {
+				if (storageTileTypes == null) {
+					SetUpStorageItemAndTileTypes();
+				}
+
+				return storageTileTypes;
+			}
+		}
+		private static SortedDictionary<int, int> storageTileTypes = null;
+		private static void SetUpStorageItemAndTileTypes() {
+			storageItemTypes = new();
+			for (int i = 0; i < BagUIs.Count; i++) {
+				if (BagUIs[i].Storage.ValidItemTypeGetter(out int itemType) == true)
+					storageItemTypes.Add(itemType, i);
+			}
+
+			foreach ((Func<int> itemTypeGetter, int storageID) in otherStorageItemTypeOnly) {
+				storageItemTypes.Add(itemTypeGetter(), storageID);
+			}
+
+			otherStorageItemTypeOnly.Clear();
+
+			storageTileTypes = new();
+			foreach (int itemType in storageItemTypes.Keys) {
+				int createTile = ContentSamples.ItemsByType[itemType].createTile;
+				if (createTile > ItemID.None)
+					storageTileTypes.Add(createTile, storageItemTypes[itemType]);
+			}
+		}
 
 		#endregion
 
@@ -243,7 +273,7 @@ namespace androLib
 			vacuumStorageIndexes.Add(storage.GetModFullName(), storageID);
 			BagUI bagUI = new(storageID, registeredUI_ID);
 
-			CanVacuumItemHandler.Add(bagUI.CanVacuumItem);
+			CanVacuumItemHandler.Add((Item item, Player player) => bagUI.CanVacuumItem(item, player));
 			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
 			TryQuickStackItemHandler.Add((Item item) => bagUI.QuickStack(ref item));
 			CloseAllStorageUIEvent += () => {
@@ -260,11 +290,26 @@ namespace androLib
 
 			return storageID;
 		}
+		public static void RegisterVacuumStorageClassItemTypeOnly(Func<int> itemTypeGetter, int storageID) {
+			otherStorageItemTypeOnly.Add((itemTypeGetter, storageID));
+		}
 		public static Item[] GetItems(int modID) {
 			if (!ValidModID(modID))
 				return null;
 
 			return BagUIs[modID].Storage.Items;
+		}
+		public static void CloseBag(int modID) {
+			if (!ValidModID(modID))
+				return;
+
+			BagUIs[modID].CloseBag();
+		}
+		public static bool TryVacuumItemToTile(ref Item item, Player player, int storageID) {
+			if (!ValidModID(storageID))
+				return false;
+
+			return BagUIs[storageID].TryVacuumItem(ref item, player, true);
 		}
 
 		#region Sets
