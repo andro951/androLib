@@ -299,6 +299,12 @@ namespace androLib
 
 			return BagUIs[modID].Storage.Items;
 		}
+		public static int GetStorageID(string modName, string bagName) {
+			if (vacuumStorageIndexes.TryGetValue($"{modName}_{bagName}", out int storageID))
+				return storageID;
+
+			return -1;
+		}
 		public static void CloseBag(int modID) {
 			if (!ValidModID(modID))
 				return;

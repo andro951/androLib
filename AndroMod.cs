@@ -32,10 +32,18 @@ namespace androLib
 
 
 
-			//The rest of the calls just need the id you got from Register.  Or you can use mod and type of the class
-			//GetItems: Item[] items = Call("GetItems", int id);
-			//Example: Item[] items = Call("GetItems", id); where id is the id you got from Register
+			//The rest of the calls just need the id you got from Register.
+			//GetItems: Item[] items = Call("GetItems", int storageID);
+			//Example: Item[] items = Call("GetItems", storageID); where storageID is the id you got from Register Or GetStorageID.
+			//Default value is null. DON'T FORGET TO CHECK FOR NULL!
 			GetItems = 1,
+
+			//Used to get the StorageId for an existing bag by internal name such as "PaintBucket"
+			//Should be used after Mod.Load() such as in Mod.PostSetupContent()
+			//GetStorageID: int storageID = Call("GetStorageID", string modInternalName, string bagInternalName);
+			//Example: int storageID = Call("GetStorageID", "VacuumBags", "PaintBucket");
+			//Default value is -1.  I check for -1, so no need to check on your end.
+			GetStorageID = 2,
 
 
 			SetUIPosition = 100,
@@ -133,13 +141,25 @@ namespace androLib
 					);
 
 				case CallID.GetItems:
-					if (args.Length < 2)
+					if (args.Length < 2 || args.Length > 2)
 						return null;
 
 					if (args[1] is not int modID)
 						return null;
 
 					return StorageManager.GetItems(modID);
+
+				case CallID.GetStorageID:
+					if (args.Length < 3 || args.Length > 3)
+						return -1;
+
+					if (args[1] is not string modName)
+						return -1;
+
+					if (args[2] is not string bagName)
+						return -1;
+
+					return StorageManager.GetStorageID(modName, bagName);
 
 				case CallID.SetUIPosition:
 					if (args.Length < 4)
