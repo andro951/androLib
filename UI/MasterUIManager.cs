@@ -229,9 +229,11 @@ namespace androLib.UI
 
 			return false;
 		}
-		public static bool MouseHovering(UIButtonData button, bool playSound = false) {
+		public static bool MouseHovering(UIButtonData button, bool playSound = false, bool shouldSet = true) {
 			if (NoUIBeingHovered && button.IsMouseHovering) {
-				SetMouseHovering(button.ID, playSound);
+				if (shouldSet)
+					SetMouseHovering(button.ID, playSound);
+
 				return true;
 			}
 
@@ -646,7 +648,7 @@ namespace androLib.UI
 		private bool? isMouseHovering = null;
 		public bool MouseHovering() => MasterUIManager.MouseHovering(this, true);
 		public void Draw(SpriteBatch spriteBatch) {
-			MasterUIManager.DrawUIPanel(spriteBatch, TopLeft, BottomRight, IsMouseHovering ? HoverColor : PanelColor);
+			MasterUIManager.DrawUIPanel(spriteBatch, TopLeft, BottomRight, MasterUIManager.MouseHovering(this, false, false) ? HoverColor : PanelColor);
 			ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.MouseText.Value, Text, TopLeft + Borders, Color, 0f, Position, new Vector2(Scale), -1f, 1.5f);
 		}
 	}
@@ -674,6 +676,10 @@ namespace androLib.UI
 	}
 	public static class UI_ID {
 		public const int None = -1000;
+		public static int MagicStorageDepositAll_UITypeID;//Set by MasterUIManager
+		public const int MagicStorageButtonsUI = 0;
+		public const int MagicStorageDepositAllButton = 1;
+
 	}
 	public static class ItemSlotContextID
 	{

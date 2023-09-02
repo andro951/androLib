@@ -36,7 +36,7 @@ namespace androLib
 			}
 		}
 		private bool shouldVacuum = true;
-		private Func<int> StorageItemTypeGetter { get; set; }
+		private List<Func<int>> StorageItemTypeGetters { get; set; } = new();
 		public Func<Color> GetUIColor { get; set; }
 		public Func<Color> GetScrollBarColor { get; set; }
 		public Func<Color> GetButtonHoverColor { get; set; }
@@ -58,7 +58,7 @@ namespace androLib
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
 				Func<Color> getButtonHoverColor,
-				Func<int> storageItemTypeGetter,
+				List<Func<int>> storageItemTypeGetters,
 				int uiLeftDefault, 
 				int uiTopDefault
 			) {
@@ -71,7 +71,7 @@ namespace androLib
 			GetUIColor = getUIColor;
 			GetScrollBarColor = getScrollBarColor;
 			GetButtonHoverColor = getButtonHoverColor;
-			StorageItemTypeGetter = storageItemTypeGetter;
+			StorageItemTypeGetters = storageItemTypeGetters;
 			UILeftDefault = uiLeftDefault;
 			UITopDefault = uiTopDefault;
 			UILeft = UILeftDefault;
@@ -118,7 +118,7 @@ namespace androLib
 				GetUIColor,
 				GetScrollBarColor,
 				GetButtonHoverColor,
-				StorageItemTypeGetter,
+				StorageItemTypeGetters,
 				UILeftDefault,
 				UITopDefault
 			);
@@ -149,24 +149,44 @@ namespace androLib
 
 			return VacuumStorageType.Name.AddSpaces();
 		}
-		public bool? ValidItemTypeGetter(out int itemType) {
-			itemType = StorageItemTypeGetter();
-			if (itemType == -1)
-				return null;
+		public bool? ValidItemTypeGetters(out SortedSet<int> itemTypes) {
+			itemTypes = new();
+			bool? found = null;//null means no associated item, so it does not need to check for an associated item in the player's inventory.
+			foreach (Func<int> storageItemTypeGetter in StorageItemTypeGetters) {
+				int itemType = storageItemTypeGetter();
+				if (itemType == -1)
+					continue;
 
-			return itemType >= 0 && itemType < ItemLoader.ItemCount;
-		}
-		public bool HasRequiredItemToUseStorage(Player player) {
-			bool? validItemType = ValidItemTypeGetter(out int bagItemType);
-			if (validItemType != null) {//-1 = null, No associated item
-				if (validItemType != true)//false, Not in valid range and not default -1.
-					return false;
+				if (itemType < 0 || itemType >= ItemLoader.ItemCount) {
+					if (found == null)
+						found = false;//If item type is out of range, don't add it and set found to false.
 
-				if (!player.HasItem(bagItemType))
-					return false;
+					continue;
+				}
+
+				found = true;
+				itemTypes.Add(itemType);
 			}
 
-			return true;
+			return found;
+		}
+		public bool HasRequiredItemToUseStorage(Player player) {
+			bool? validItemType = ValidItemTypeGetters(out SortedSet<int> bagItemTypes);
+			if (validItemType != true)
+				return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
+
+			foreach (int bagItemType in bagItemTypes) {
+				if (player.HasItem(bagItemType))
+					return true;
+			}
+
+			return false;
+		}
+		public void RegisterItemTypeGetter(Func<int> itemTypeGetter) {
+			if (itemTypeGetter == null)
+				return;
+
+			StorageItemTypeGetters.Add(itemTypeGetter);
 		}
 	}
 	public static class StorageManager {
@@ -200,7 +220,6 @@ namespace androLib
 			}
 		}
 		private static SortedDictionary<int, int> storageItemTypes = null;
-		private static List<(Func<int>, int)> otherStorageItemTypeOnly = new();
 		public static SortedDictionary<int, int> StorageTileTypes {
 			get {
 				if (storageTileTypes == null) {
@@ -214,22 +233,26 @@ namespace androLib
 		private static void SetUpStorageItemAndTileTypes() {
 			storageItemTypes = new();
 			for (int i = 0; i < BagUIs.Count; i++) {
-				if (BagUIs[i].Storage.ValidItemTypeGetter(out int itemType) == true)
-					storageItemTypes.Add(itemType, i);
+				if (BagUIs[i].Storage.ValidItemTypeGetters(out SortedSet<int> itemTypes) == true) {
+					foreach (int itemType in itemTypes) {
+						storageItemTypes.Add(itemType, i);
+					}
+				}
 			}
-
-			foreach ((Func<int> itemTypeGetter, int storageID) in otherStorageItemTypeOnly) {
-				storageItemTypes.Add(itemTypeGetter(), storageID);
-			}
-
-			otherStorageItemTypeOnly.Clear();
 
 			storageTileTypes = new();
 			foreach (int itemType in storageItemTypes.Keys) {
 				int createTile = ContentSamples.ItemsByType[itemType].createTile;
-				if (createTile > ItemID.None)
+				if (createTile > 0)
 					storageTileTypes.Add(createTile, storageItemTypes[itemType]);
 			}
+		}
+
+		public static bool TryVacuumItemToTile(ref Item item, Player player, int storageID) {
+			if (!ValidModID(storageID))
+				return false;
+
+			return BagUIs[storageID].TryVacuumItem(ref item, player, true, false);
 		}
 
 		#endregion
@@ -264,7 +287,7 @@ namespace androLib
 				getUIColor,
 				getScrollBarColor,
 				getButtonHoverColor,
-				storageItemTypeGetter,
+				new() { storageItemTypeGetter },
 				uiLeft, 
 				uiTop
 			);
@@ -291,7 +314,7 @@ namespace androLib
 			return storageID;
 		}
 		public static void RegisterVacuumStorageClassItemTypeOnly(Func<int> itemTypeGetter, int storageID) {
-			otherStorageItemTypeOnly.Add((itemTypeGetter, storageID));
+			RegisteredStorages[storageID].RegisterItemTypeGetter(itemTypeGetter);
 		}
 		public static Item[] GetItems(int modID) {
 			if (!ValidModID(modID))
@@ -310,12 +333,6 @@ namespace androLib
 				return;
 
 			BagUIs[modID].CloseBag();
-		}
-		public static bool TryVacuumItemToTile(ref Item item, Player player, int storageID) {
-			if (!ValidModID(storageID))
-				return false;
-
-			return BagUIs[storageID].TryVacuumItem(ref item, player, true);
 		}
 
 		#region Sets

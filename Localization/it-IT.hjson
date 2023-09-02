@@ -17,9 +17,15 @@ Mods: {
 			UITransparency.Label: Trasparenza dell'interfaccia utente
 		}
 
+		Items: {
+		}
+
+		MagicStorageButtonsText.DepositAllFromVacuumBags: Deposit All From Vacuum Bags
+
 		StorageText: {
-			// CloseBag: Close Bag
+			CloseBag: Close Bag
 			DepositAll: Deposita tutto
+			DepositAllMagicStorage: Deposit All Magic Storage
 			LootAll: Saccheggia tutto
 			QuickStack: Pila veloce
 			Search: Ricerca

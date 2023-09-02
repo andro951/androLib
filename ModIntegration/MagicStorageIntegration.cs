@@ -42,8 +42,48 @@ namespace androLib.ModIntegration
             if (MagicStorageIsOpen())
                 CloseMagicStorage();
         }
+        public static bool DepositToMagicStorage(IEnumerable<Item> items) {
+            if (!Enabled)
+                return false;
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
+            return TryDepositToMagicStorage(items);
+        }
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		private static bool TryDepositToMagicStorage(IEnumerable<Item> items) {
+			IEnumerable<TEStorageCenter> centers = MagicStorage.Utility.GetNearbyCenters(Main.LocalPlayer);
+			if (!centers.Any())
+				return false;
+
+            bool anyStored = false;
+            foreach (TEStorageCenter center in centers) {
+				TEStorageHeart storageHeart = center.GetHeart();
+                if (storageHeart == null)
+					continue;
+
+                foreach (Item item in items) {
+                    if (item.NullOrAir() || item.favorited)
+                        continue;
+
+					int oldType = item.type;
+					int oldStack = item.stack;
+					storageHeart.DepositItem(item);
+
+					if (oldType != item.type || oldStack != item.stack) {
+						Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, center.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
+                        anyStored = true;
+					}
+
+					if (item.stack <= 0)
+						item.TurnToAir();
+				}
+			}
+
+			return anyStored;
+        }
+
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
         private static void CloseMagicStorage() {
             MagicStorage.StoragePlayer.LocalPlayer.CloseStorage();
         }

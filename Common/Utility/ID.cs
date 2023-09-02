@@ -40,7 +40,8 @@ namespace androLib.Common.Utility
 		EnchantmentStorageText,
 		Config,
 		UIText,
-		StorageText
+		StorageText,
+		MagicStorageButtonsText
 	}
 	public enum L_ID2
 	{
@@ -79,6 +80,7 @@ namespace androLib.Common.Utility
 		QuickStack,
 		Sort,
 		ToggleVacuum,
+		DepositAllMagicStorage,
 		CloseBag,
 		//ToggleMarkTrash,
 		//UncraftAllTrash,
@@ -102,6 +104,9 @@ namespace androLib.Common.Utility
 		//NotEnoughEnchantments,
 		//Add,
 		//Loadout
+	}
+	public enum MagicStorageButtonsTextID {
+		DepositAllFromVacuumBags
 	}
 
 	public enum WikiTypeID

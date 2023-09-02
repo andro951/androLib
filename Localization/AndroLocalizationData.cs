@@ -14,17 +14,10 @@ using androLib.Common.Configs;
 
 namespace androLib.Localization
 {
-	public class AndroLocalizationData
-	{
-		public static SortedDictionary<string, SData> All {
-			get {
-				if (all == null)
-					all = AllData;
-
-				return all;
-			}
+	public class AndroLocalizationData {
+		public static void RegisterSDataPackage() {
+			AndroLogModSystem.RegisterModLocalizationSDataPackage(new(ModContent.GetInstance<AndroMod>, () => AllData));
 		}
-		private static SortedDictionary<string, SData> all;
 
 		public static Dictionary<CultureName, string> LocalizationComments = new() {
 			{ CultureName.German, "Contributors: @Shiro ᵘʷᵘ#6942, @Fischstäbchen#2603  (All others Google Translated.  Needs review)" },
@@ -52,6 +45,13 @@ namespace androLib.Localization
 							},
 							dict: new() {
 								
+						}) },
+						{ L_ID1.MagicStorageButtonsText.ToString(), new(
+							values: new() {
+								//Filled Automatically
+							},
+							dict: new() {
+
 						}) },
 						{ L_ID1.Config.ToString(), new(children: new() {
 							{ nameof(AndroClientConfig.UITransparency), new(dict: new() {
@@ -93,6 +93,12 @@ namespace androLib.Localization
 					foreach (string stroageText in Enum.GetNames(typeof(StorageTextID))) {
 						if (!allData[StorageTextKey].Dict.ContainsKey(stroageText))
 							allData[StorageTextKey].Values.Add(stroageText);
+					}
+
+					string MagicStorageButtonsTextKey = L_ID1.MagicStorageButtonsText.ToString();
+					foreach (string magicStorageButtonsText in Enum.GetNames(typeof(MagicStorageButtonsTextID))) {
+						if (!allData[MagicStorageButtonsTextKey].Dict.ContainsKey(magicStorageButtonsText))
+							allData[MagicStorageButtonsTextKey].Values.Add(magicStorageButtonsText);
 					}
 				}
 
@@ -192,12 +198,15 @@ namespace androLib.Localization
 	}
 	public static class LocalizationDataStaticMethods
 	{
-		public static void AddLocalizationTooltip(this ModItem modItem, string tooltip) {
+		/// <summary>
+		/// Should only be used for items directly in androLib, not items derived from AndroModItem, or the localization will end up in androLib localization.
+		/// </summary>
+		public static void AddLocalizationTooltip(this ModItem modItem, string tooltip, string name = null) {
 			SortedDictionary<string, SData> all = AndroLocalizationData.AllData;
 			if (AndroLogModSystem.printLocalization || AndroLogModSystem.printLocalizationKeysAndValues) {
 				AndroLocalizationData.AllData[L_ID1.Items.ToString()].Children.Add(modItem.Name, new(dict: new()));
 				AndroLocalizationData.AllData[L_ID1.Items.ToString()].Children[modItem.Name].Dict.Add(L_ID1.Tooltip.ToString(), tooltip);
-				AndroLocalizationData.AllData[L_ID1.Items.ToString()].Children[modItem.Name].Dict.Add(L_ID2.DisplayName.ToString(), modItem.Name.AddSpaces());
+				AndroLocalizationData.AllData[L_ID1.Items.ToString()].Children[modItem.Name].Dict.Add(L_ID2.DisplayName.ToString(), name ?? modItem.Name.AddSpaces());
 			}
 		}
 	}

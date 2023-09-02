@@ -17,6 +17,9 @@ namespace androLib
 		public override void PostDrawInterface(SpriteBatch spriteBatch) {
 			MasterUIManager.PostDrawInterface(spriteBatch);
 		}
+		public override void PostUpdateEverything() {
+			SoundManager.Update();
+		}
 		public override void AddRecipeGroups() {
 			RecipeGroup group = new RecipeGroup(() => "Any Common Gem", GemSets.CommonGems.ToArray());
 			RecipeGroup.RegisterGroup("androLib:CommonGems", group);

@@ -1,5 +1,7 @@
-﻿using androLib.UI;
+﻿using androLib.Common.Utility;
+using androLib.UI;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,6 +82,16 @@ namespace androLib.Common.Globals
 					break;
 				}
 			}
+		}
+
+		public static void AskForBagToEatItem(Vector2 worldPosition, int duration) {
+			Point point = worldPosition.ToTileCoordinates();
+			Tile tile = Main.tile[point.X, point.Y];
+			int tileType = tile.TileType;
+			if (!StorageManager.StorageTileTypes.ContainsKey(tileType))
+				return;
+
+			SoundManager.QueDelyedSound(SoundID.Grab, worldPosition, duration - 9);
 		}
 	}
 }

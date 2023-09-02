@@ -53,7 +53,19 @@ namespace androLib.Common.Utility
         private static SortedDictionary<int, SortedDictionary<string, string>> translations;
         private static int culture;
         private static JDataManager jDataManager;
-        public override void OnWorldLoad() {
+        private static SortedDictionary<string, ModLocalizationSDataPackage> modLocalizationSDataPackages = new();
+        private static ModLocalizationSDataPackage ActivePackage;
+		public static void RegisterModLocalizationSDataPackage(ModLocalizationSDataPackage package) {
+            string name = package.ModName;
+            if (modLocalizationSDataPackages.ContainsKey(name)) {
+                modLocalizationSDataPackages[name] = package;
+			}
+            else {
+                modLocalizationSDataPackages.Add(name, package);
+            }
+		}
+
+		public override void OnWorldLoad() {
             PrintContributorsList();
 
             PrintAllLocalization();
@@ -79,33 +91,49 @@ namespace androLib.Common.Utility
             if (sharedName != null)
                 namesAddedToContributorDictionary.Add(sharedName);
         }
+        public struct ModLocalizationSDataPackage {
+            public ModLocalizationSDataPackage(Func<Mod> mod, Func<SortedDictionary<string, SData>> allData) {
+				this.mod = mod;
+				this.allData = allData;
+			}
+
+            private Func<Mod> mod;
+            public Mod Mod => mod();
+            public string ModName => Mod.Name;
+            private Func<SortedDictionary<string, SData>> allData;
+            public SortedDictionary<string, SData> AllData => allData();
+
+		}
         private static void PrintAllLocalization() {
             if (!printLocalization && !printLocalizationKeysAndValues)
                 return;
 
-            jDataManager = new();
-            AndroLocalizationData.ChangedData = new();
-			AndroLocalizationData.RenamedFullKeys = new();
-            Mod mod = ModContent.GetInstance<AndroMod>();
-            TmodFile file = (TmodFile)typeof(Mod).GetProperty("File", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(mod);
-            translations = new();
-            IEnumerable<int> cultures = Enum.GetValues(typeof(CultureName)).Cast<CultureName>().Where(n => n != CultureName.Unknown).Select(n => (int)n);
-            MethodInfo loadTranslationsInfo = typeof(LocalizationLoader).GetMethod("LoadTranslations", BindingFlags.NonPublic | BindingFlags.Static);
-            foreach (int i in cultures) {
-                SortedDictionary<string, string> cultureTranslations = new();
-                GameCulture gameCulture = FromLegacyId(i);
-                List<(string, string)> loadedTranslationsList = (List<(string, string)>)loadTranslationsInfo.Invoke(null, new object[] { mod, gameCulture });
-                foreach ((string key, string value) t in loadedTranslationsList)
-                {
-                    cultureTranslations.Add(t.key, t.value);
-                }
+            foreach (ModLocalizationSDataPackage package in modLocalizationSDataPackages.Values) {
+                ActivePackage = package;
+				jDataManager = new();
+				AndroLocalizationData.ChangedData = new();
+				AndroLocalizationData.RenamedFullKeys = new();
+                //Mod mod = ModContent.GetInstance<AndroMod>();
+                Mod mod = ActivePackage.Mod;
+				TmodFile file = (TmodFile)typeof(Mod).GetProperty("File", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(mod);
+				translations = new();
+				IEnumerable<int> cultures = Enum.GetValues(typeof(CultureName)).Cast<CultureName>().Where(n => n != CultureName.Unknown).Select(n => (int)n);
+				MethodInfo loadTranslationsInfo = typeof(LocalizationLoader).GetMethod("LoadTranslations", BindingFlags.NonPublic | BindingFlags.Static);
+				foreach (int i in cultures) {
+					SortedDictionary<string, string> cultureTranslations = new();
+					GameCulture gameCulture = FromLegacyId(i);
+					List<(string, string)> loadedTranslationsList = (List<(string, string)>)loadTranslationsInfo.Invoke(null, new object[] { mod, gameCulture });
+					foreach ((string key, string value) t in loadedTranslationsList) {
+						cultureTranslations.Add(t.key, t.value);
+					}
 
-                translations.Add(i, cultureTranslations);
-            }
+					translations.Add(i, cultureTranslations);
+				}
 
-            foreach (int i in cultures) {
-                PrintLocalization(i);
-            }
+				foreach (int i in cultures) {
+					PrintLocalization(i);
+				}
+			}
         }
         private class JDataManager {
             private JData master = new();
@@ -117,7 +145,7 @@ namespace androLib.Common.Utility
                 cultureName = CultureName;
                 culture = (int)cultureName;
                 AddKey("Mods");
-                AddKey("androLib");
+                AddKey(ActivePackage.ModName);
             }
             public void AddKey(string key) {
                 active.Children.Add(key, new(parent: active));
@@ -290,11 +318,11 @@ namespace androLib.Common.Utility
                 if (printLocalizationKeysAndValues) {
                     string cultureName = ((CultureName)culture).ToLanguageName();
                     localizationKeys = localizationKeys.ReplaceLineEndings();
-                    string keyFilePath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger\androLib\Keys\{cultureName}.txt";
+                    string keyFilePath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger\{ActivePackage.ModName}\Keys\{cultureName}.txt";
                     File.WriteAllText(keyFilePath, localizationKeys);
                     localizationKeys = "";
 
-                    string valueFilePath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger\androLib\In\{cultureName}.txt";
+                    string valueFilePath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger\{ActivePackage.ModName}\In\{cultureName}.txt";
                     File.WriteAllText(valueFilePath, localizationValues);
                     localizationValues = "";
                 }
@@ -329,7 +357,7 @@ namespace androLib.Common.Utility
 
             jDataManager.End();
         }
-        private static void FromLocalizationData() => GetFromSDataDict(AndroLocalizationData.All);
+        private static void FromLocalizationData() => GetFromSDataDict(ActivePackage.AllData);
         private static void GetFromSDataDict(SortedDictionary<string, SData> dict) {
             foreach (KeyValuePair<string, SData> pair in dict) {
                 jDataManager.AddKey(pair.Key);

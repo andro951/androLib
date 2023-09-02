@@ -9,6 +9,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using MonoMod.RuntimeDetour;
 using System.Collections.Generic;
 using androLib.Common.Globals;
+using androLib.UI;
+using androLib.Common.Utility;
+using androLib.Localization;
 
 namespace androLib
 {
@@ -199,14 +202,25 @@ namespace androLib
 			On_ChestUI.LootAll += OnChestUI_LootAll;
 			On_ChestUI.Restock += On_ChestUI_Restock;
 			On_Player.QuickStackAllChests += On_Player_QuickStackAllChests;
+			On_Chest.AskForChestToEatItem += On_Chest_AskForChestToEatItem;
 			//hooks.Add();
 			//foreach (Hook hook in hooks) {
 			//	hook.Apply();
 			//}
+
+			MagicStorageButtonsUI.RegisterWithMasterUIManager();
+			AndroLocalizationData.RegisterSDataPackage();
 		}
-		//private static readonly 
+
+		private void On_Chest_AskForChestToEatItem(On_Chest.orig_AskForChestToEatItem orig, Vector2 worldPosition, int duration) {
+			orig(worldPosition, duration);
+
+			VacuumBagTile.AskForBagToEatItem(worldPosition, duration);
+		}
+
 		private void On_Player_QuickStackAllChests(On_Player.orig_QuickStackAllChests orig, Player self) {
-			//TODO: Need to look for nearby bag tiles too
+			orig(self);
+
 			for (int i = 0; i < self.inventory.Length; i++) {
 				ref Item item = ref self.inventory[i];
 				if (item.favorited)
@@ -215,8 +229,6 @@ namespace androLib
 				if (!StorageManager.TryVacuumItem(ref item, self))
 					VacuumBagTile.QuickStackToBags(ref item, self);
 			}
-
-			orig(self);
 		}
 
 		private void On_ChestUI_Restock(On_ChestUI.orig_Restock orig) {

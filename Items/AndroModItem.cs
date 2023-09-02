@@ -18,10 +18,12 @@ namespace androLib.Items
 		public abstract string Designer { get; }
 		public virtual string WikiDescription => null;
 		public virtual string LocalizationTooltip { protected set; get; }
+		public virtual string LocalizationDisplayName => null;
 		protected string localizationTooltip;
+		protected abstract Action<ModItem, string, string> AddLocalizationTooltipFunc { get; }
 		public override void SetStaticDefaults() {
 			if (Tooltip != LocalizedText.Empty)
-				this.AddLocalizationTooltip(LocalizationTooltip);
+				AddLocalizationTooltipFunc(this, LocalizationTooltip, LocalizationDisplayName);
 		}
 	}
 }

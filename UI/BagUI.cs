@@ -14,11 +14,6 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.WorldBuilding;
-//using WeaponEnchantments.Common;
-//using WeaponEnchantments.Common.Globals;
-//using WeaponEnchantments.Common.Utility;
-//using WeaponEnchantments.Items;
-//using WeaponEnchantments.ModIntegration;
 using androLib.Common.Utility;
 using androLib.Common.Globals;
 using androLib.ModIntegration;
@@ -27,11 +22,9 @@ using static androLib.UI.BagUI;
 namespace androLib.UI
 {
 
-	public class BagUI//Time to move this and related stuff to AndroMod.
+	public class BagUI
 	{
 		public static class Bag_UI_ID {
-			//public static int Bag_UITypeID;//Set by MasterUIManager//Needs to use BagStorageID instead since this is for all bags.
-
 			public const int Bag = 0;
 			public const int BagScrollBar = 1;
 			public const int BagScrollPanel = 2;
@@ -41,12 +34,11 @@ namespace androLib.UI
 			public const int BagQuickStack = 102;
 			public const int BagSort = 103;
 			public const int BagToggleVacuum = 104;
+			public const int BagDepostAllMagicStorage = 105;
+			public const int BagCloseBag = 106;
 			public const int BagItemSlot = 200;
 		}
 
-		//private int BagStorageID = -1;
-		//public static Item[] Inventory => (Item[])WEMod.AndroLib.Call("GetItems", BagStorageID);
-		//public Storage Storage { get; }
 		public Item[] Inventory => Storage.Items;
 		public Storage Storage => StoragePlayer.LocalStoragePlayer.Storages[StorageID];
 		public int RegisteredUI_ID { get; }
@@ -58,8 +50,9 @@ namespace androLib.UI
 			public const int QuickStack = 2;
 			public const int Sort = 3;
 			public const int ToggleVacuum = 4;
-			public const int CloseBag = 5;
-			public const int Count = 6;
+			public const int DepositAllMagicStorage = 5;
+			public const int CloseBag = 6;
+			public const int Count = 7;
 		}
 		public int ID => GetUI_ID(Bag_UI_ID.Bag);
 		public int SearchID => GetUI_ID(Bag_UI_ID.BagSearch);
@@ -162,7 +155,6 @@ namespace androLib.UI
 			//Search Bar Data
 			int searchBarMinWidth = 100;
 			TextData searchBarTextData = new(MasterUIManager.DisplayedSearchBarString(SearchID));
-			Color temp = Storage.GetButtonHoverColor();//TODO: DELETE ME!!!
 			drawnUIData.searchBarData = new(SearchID, nameData.BottomRight.X + Spacing * 10, nameTop - 6, searchBarTextData,  mouseColor, Math.Max(6, (searchBarMinWidth - searchBarTextData.Width) / 2), 0, PanelColor, Storage.GetButtonHoverColor());
 			UIButtonData searchBarData = drawnUIData.searchBarData;
 
@@ -184,6 +176,9 @@ namespace androLib.UI
 				if (buttonIndex == BagButtonID.ToggleVacuum && Storage.IsVacuumBag == false)
 					continue;
 
+				if (buttonIndex == BagButtonID.DepositAllMagicStorage && !AndroMod.magicStorageEnabled)
+					continue;
+
 				string text = ((StorageTextID)buttonIndex).ToString().Lang(AndroMod.ModName, L_ID1.StorageText);
 				float scale = ButtonScale[buttonIndex];
 				Color color;
@@ -197,7 +192,7 @@ namespace androLib.UI
 				UITextData thisButton = new(GetUI_ID(Bag_UI_ID.BagLootAll) + buttonIndex, buttonsLeft, currentButtonTop, text, scale, color, ancorBotomLeft: true);
 				 textButtons.Add(thisButton);
 				longestButtonNameWidth = Math.Max(longestButtonNameWidth, thisButton.Width);
-				currentButtonTop += (int)(thisButton.BaseHeight * 0.95f);
+				currentButtonTop += (int)(thisButton.BaseHeight * 0.9f);
 			}
 
 			//Panel Data 2/2
@@ -428,6 +423,9 @@ namespace androLib.UI
 							case BagButtonID.ToggleVacuum:
 								ToggleVacuum();
 								break;
+							case BagButtonID.DepositAllMagicStorage:
+								MagicStorageIntegration.DepositToMagicStorage(Inventory.ToList());
+								break;
 							case BagButtonID.CloseBag:
 								CloseBag();
 								break;
@@ -573,14 +571,14 @@ namespace androLib.UI
 
 			return true;
 		}
-		public bool TryVacuumItem(ref Item item, Player player, bool ignoreTile = false) {
+		public bool TryVacuumItem(ref Item item, Player player, bool ignoreTile = false, bool playSound = true) {
 			if (CanVacuumItem(item, player, ignoreTile))
-				return DepositAll(ref item);
+				return DepositAll(ref item, playSound);
 
 			return false;
 		}
-		public bool DepositAll(ref Item item) => DepositAll(new Item[] { item });
-		public bool DepositAll(Item[] inv) {
+		public bool DepositAll(ref Item item, bool playSound = true) => DepositAll(new Item[] { item }, playSound);
+		public bool DepositAll(Item[] inv, bool playSound = true) {
 			bool transferedAnyItem = QuickStack(inv, false);
 			int storageIndex = 0;
 			Item[] oreBagInventory = Inventory;
@@ -609,7 +607,9 @@ namespace androLib.UI
 			}
 
 			if (transferedAnyItem) {
-				SoundEngine.PlaySound(SoundID.Grab);
+				if (playSound)
+					SoundEngine.PlaySound(SoundID.Grab);
+
 				Recipe.FindRecipes(true);
 			}
 
