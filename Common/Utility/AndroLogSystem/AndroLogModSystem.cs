@@ -92,9 +92,13 @@ namespace androLib.Common.Utility
                 namesAddedToContributorDictionary.Add(sharedName);
         }
         public struct ModLocalizationSDataPackage {
-            public ModLocalizationSDataPackage(Func<Mod> mod, Func<SortedDictionary<string, SData>> allData) {
+            public ModLocalizationSDataPackage(Func<Mod> mod, Func<SortedDictionary<string, SData>> allData, Func<List<string>> changedData, Func<Dictionary<string, string>> renamedKeys, Func<Dictionary<string, string>> renamedFullKeys, Func<Dictionary<CultureName, List<string>>> sameAsEnglish) {
 				this.mod = mod;
 				this.allData = allData;
+                this.changedData = changedData;
+                this.renamedKeys = renamedKeys;
+                this.renamedFullKeys = renamedFullKeys;
+                this.sameAsEnglish = sameAsEnglish;
 			}
 
             private Func<Mod> mod;
@@ -102,7 +106,14 @@ namespace androLib.Common.Utility
             public string ModName => Mod.Name;
             private Func<SortedDictionary<string, SData>> allData;
             public SortedDictionary<string, SData> AllData => allData();
-
+            private Func<List<string>> changedData;
+            public List<string> ChangedData => changedData();
+            private Func<Dictionary<string, string>> renamedKeys;
+            public Dictionary<string, string> RenamedKeys => renamedKeys();
+            private Func<Dictionary<string, string>> renamedFullKeys;
+            public Dictionary<string, string> RenamedFullKeys => renamedFullKeys();
+            private Func<Dictionary<CultureName, List<string>>> sameAsEnglish;
+            public Dictionary<CultureName, List<string>> SameAsEnglish => sameAsEnglish();
 		}
         private static void PrintAllLocalization() {
             if (!printLocalization && !printLocalizationKeysAndValues)
@@ -111,9 +122,6 @@ namespace androLib.Common.Utility
             foreach (ModLocalizationSDataPackage package in modLocalizationSDataPackages.Values) {
                 ActivePackage = package;
 				jDataManager = new();
-				AndroLocalizationData.ChangedData = new();
-				AndroLocalizationData.RenamedFullKeys = new();
-                //Mod mod = ModContent.GetInstance<AndroMod>();
                 Mod mod = ActivePackage.Mod;
 				TmodFile file = (TmodFile)typeof(Mod).GetProperty("File", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(mod);
 				translations = new();
@@ -208,25 +216,25 @@ namespace androLib.Common.Utility
                         s = translations[culture][key];
                         if (culture == (int)CultureName.English) {
                             if (s != p.Value)
-                                AndroLocalizationData.ChangedData.Add(key);
+								ActivePackage.ChangedData.Add(key);
                         }
 
-                        if (AndroLocalizationData.ChangedData.Contains(key))
+                        if (ActivePackage.ChangedData.Contains(key))
                             s = p.Value;
                     }
                     else {
                         if (culture == (int)CultureName.English) {
-                            if (AndroLocalizationData.RenamedKeys.ContainsKey(p.Key)) {
-                                string renamedKey = AndroLocalizationData.RenamedKeys[p.Key];
+                            if (ActivePackage.RenamedKeys.ContainsKey(p.Key)) {
+                                string renamedKey = ActivePackage.RenamedKeys[p.Key];
                                 string newKey = $"{allLabels}.{renamedKey}";
                                 string newS = translations[culture][newKey];
                                 if (newS != renamedKey.AddSpaces())
-                                    AndroLocalizationData.RenamedFullKeys.Add(key, newKey);
+									ActivePackage.RenamedFullKeys.Add(key, newKey);
                             }
                         }
 
-                        if (AndroLocalizationData.RenamedFullKeys.ContainsKey(key)) {
-                            string newKey = AndroLocalizationData.RenamedFullKeys[key];
+                        if (ActivePackage.RenamedFullKeys.ContainsKey(key)) {
+                            string newKey = ActivePackage.RenamedFullKeys[key];
                             string newS = translations[culture][newKey];
                             if (newS != newKey) {
                                 key = newKey;
@@ -249,7 +257,7 @@ namespace androLib.Common.Utility
                     if (s == key)
                         s = p.Value;
 
-                    bool noLocalizationFound = s == p.Value && (culture == (int)CultureName.English || !AndroLocalizationData.SameAsEnglish[(CultureName)culture].Contains(s));
+                    bool noLocalizationFound = s == p.Value && (culture == (int)CultureName.English || !ActivePackage.SameAsEnglish[(CultureName)culture].Contains(s));
 
                     s = s.Replace("\"", "\\\"");
                     if ((s.Contains("{") || s.Contains("\"")) && s[0] != '"' && s[0] != '“' && s[0] != '”' && !s.Contains('\n'))

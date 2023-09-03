@@ -20,12 +20,12 @@ Mods: {
 		Items: {
 		}
 
-		MagicStorageButtonsText.DepositAllFromVacuumBags: Deposit All From Vacuum Bags
+		MagicStorageButtonsText.DepositAllFromVacuumBags: 全部存放在真空袋中
 
 		StorageText: {
-			CloseBag: Close Bag
+			CloseBag: 关闭袋子
 			DepositAll: 全部存入
-			DepositAllMagicStorage: Deposit All Magic Storage
+			DepositAllMagicStorage: 存入所有魔法储存
 			LootAll: 掠夺全部
 			QuickStack: 快速堆叠
 			Search: 搜索

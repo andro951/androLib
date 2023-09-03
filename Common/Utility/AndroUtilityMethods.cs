@@ -50,6 +50,17 @@ namespace androLib.Common.Utility
                     player.QuickSpawnItem(player.GetSource_GiftOrReward(), ItemID.CopperCoin + i, coins);
             }
         }
+		public static bool AnyFavoritedItem(this IEnumerable<Item> items) {
+			foreach (Item item in items) {
+				if (item.NullOrAir())
+					continue;
+
+				if (item?.favorited == true)
+					return true;
+			}
+
+			return false;
+		}
 
         /// <summary>
 		/// Randomly selects an item from the list if the chance is higher than the randomly generated float.<br/>

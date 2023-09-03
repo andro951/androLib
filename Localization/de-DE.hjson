@@ -20,12 +20,12 @@ Mods: {
 		Items: {
 		}
 
-		MagicStorageButtonsText.DepositAllFromVacuumBags: Deposit All From Vacuum Bags
+		MagicStorageButtonsText.DepositAllFromVacuumBags: Bewahren Sie alles aus Vakuumbeuteln auf
 
 		StorageText: {
-			CloseBag: Close Bag
+			CloseBag: Beutel schließen
 			DepositAll: Alles einzahlen
-			DepositAllMagicStorage: Deposit All Magic Storage
+			DepositAllMagicStorage: Deponieren Sie den gesamten magischen Speicher
 			LootAll: Plündere alles
 			QuickStack: Schneller Stapel
 			Search: Suchen

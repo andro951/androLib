@@ -1,5 +1,6 @@
 ﻿using androLib.Common.Utility;
 using androLib.UI;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,5 +99,16 @@ namespace androLib
 
 			return true;
 		}
+		//public static bool MouseOutOfTilePlaceRange(this Item item) {//Copied from Vanilla Player.PlaceThing_Tiles()
+		//	Vector2 position = Main.LocalPlayer.position;
+		//	int tileRangeX = Player.tileRangeX;
+		//	int tileRangeY = Player.tileRangeY;
+		//	int blockRange = Main.LocalPlayer.blockRange;
+		//	int tileTargetX = Player.tileTargetX;
+		//	int tileTargetY = Player.tileTargetY;
+		//	int width = Main.LocalPlayer.width;
+		//	int height = Main.LocalPlayer.height;
+		//	return !(position.X / 16f - (float)tileRangeX - (float)item.tileBoost - (float)blockRange <= (float)tileTargetX) || !((position.X + (float)width) / 16f + (float)tileRangeX + (float)item.tileBoost - 1f + (float)blockRange >= (float)tileTargetX) || !(position.Y / 16f - (float)tileRangeY - (float)item.tileBoost - (float)blockRange <= (float)tileTargetY) || !((position.Y + (float)height) / 16f + (float)tileRangeY + (float)item.tileBoost - 2f + (float)blockRange >= (float)tileTargetY);
+		//}
 	}
 }

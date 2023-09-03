@@ -16,7 +16,7 @@ namespace androLib.Localization
 {
 	public class AndroLocalizationData {
 		public static void RegisterSDataPackage() {
-			AndroLogModSystem.RegisterModLocalizationSDataPackage(new(ModContent.GetInstance<AndroMod>, () => AllData));
+			AndroLogModSystem.RegisterModLocalizationSDataPackage(new(ModContent.GetInstance<AndroMod>, () => AllData, () => ChangedData, () => RenamedKeys, () => RenamedFullKeys, () => SameAsEnglish));
 		}
 
 		public static Dictionary<CultureName, string> LocalizationComments = new() {
