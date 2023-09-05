@@ -12,6 +12,7 @@ using androLib.Common.Globals;
 using androLib.UI;
 using androLib.Common.Utility;
 using androLib.Localization;
+using androLib.ModIntegration;
 
 namespace androLib
 {
@@ -210,6 +211,9 @@ namespace androLib
 
 			MagicStorageButtonsUI.RegisterWithMasterUIManager();
 			AndroLocalizationData.RegisterSDataPackage();
+		}
+		public override void Unload() {
+			BossChecklistIntegration.UnloadBossChecklistIntegration();
 		}
 
 		private void On_Chest_AskForChestToEatItem(On_Chest.orig_AskForChestToEatItem orig, Vector2 worldPosition, int duration) {

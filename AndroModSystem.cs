@@ -12,8 +12,12 @@ using Terraria.ModLoader;
 
 namespace androLib
 {
-	internal class AndroModSystem : ModSystem {
+	public class AndroModSystem : ModSystem {
 		public static bool FavoriteKeyDown => Main.keyState.IsKeyDown(Main.FavoriteKey);
+		public static bool StartedPostAddRecipes { get; private set; } = false;
+		public override void PostAddRecipes() {
+			StartedPostAddRecipes = true;
+		}
 		public override void PostDrawInterface(SpriteBatch spriteBatch) {
 			MasterUIManager.PostDrawInterface(spriteBatch);
 		}
