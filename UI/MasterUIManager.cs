@@ -77,7 +77,7 @@ namespace androLib.UI
 		}
 		public static readonly Asset<Texture2D>[] uiTextures = { Main.Assets.Request<Texture2D>("Images/UI/PanelBackground"), Main.Assets.Request<Texture2D>("Images/UI/PanelBorder") };
 		public static readonly int ItemSlotSize = 44;
-		public const int ItemSlotInteractContext = ItemSlot.Context.BankItem;
+		public static int ItemSlotInteractContext => Main.mouseRight && !ItemSlot.ShiftInUse ? ItemSlot.Context.InventoryItem : ItemSlot.Context.BankItem;
 		public static int PanelBeingDragged { get; private set; } = UI_ID.None;
 		public static int UIBeingHovered = UI_ID.None;
 		public static int LastUIBeingHovered { get; private set; } = UI_ID.None;
@@ -433,7 +433,10 @@ namespace androLib.UI
 
 			return false;
 		}
-		public static void ItemSlotClickInteractions(ref Item item, int context = ItemSlotInteractContext) {
+		public static void ItemSlotClickInteractions(ref Item item, int context = -1) {
+			if (context == -1)
+				context = ItemSlotInteractContext;
+
 			ItemSlot.Handle(ref item, context);
 		}
 		public static void SwapMouseItem(ref Item item1) {
@@ -672,7 +675,12 @@ namespace androLib.UI
 			MasterUIManager.DrawItemSlot(spriteBatch, item, this, context, hue, glowTime, stack);
 		}
 		public bool MouseHovering() => MasterUIManager.MouseHoveringItemSlot(TopLeft.X, TopLeft.Y, ID);
-		public void ClickInteractions(ref Item item, int context = MasterUIManager.ItemSlotInteractContext) => MasterUIManager.ItemSlotClickInteractions(ref item, context);
+		public void ClickInteractions(ref Item item, int context = -1) {
+			if (context == -1)
+				context = ItemSlotInteractContext;
+
+			ItemSlotClickInteractions(ref item, context);
+		}
 	}
 	public static class UI_ID {
 		public const int None = -1000;

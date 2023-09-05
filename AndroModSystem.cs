@@ -1,8 +1,10 @@
-﻿using androLib.Common.Utility;
+﻿using androLib.Common.Globals;
+using androLib.Common.Utility;
 using androLib.UI;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +24,19 @@ namespace androLib
 			MasterUIManager.PostDrawInterface(spriteBatch);
 		}
 		public override void PostUpdateEverything() {
+			if (Debugger.IsAttached && !Main.LocalPlayer.HeldItem.NullOrAir()) {//temp
+				Item item = Main.LocalPlayer.HeldItem;
+				string temp = item.ModFullName();
+				int createTile = item.createTile;
+				int useStyle = item.useStyle;
+				bool useTurn = item.useTurn;
+				bool autoReuse = item.autoReuse;
+				bool consumable = item.consumable;
+				if (item.DamageType != DamageClass.Default) {
+					string temp2 = item.DamageType.Name;
+				}
+			}
+
 			SoundManager.Update();
 		}
 		public override void AddRecipeGroups() {

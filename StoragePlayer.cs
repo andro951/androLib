@@ -60,6 +60,9 @@ namespace androLib
 
 			return false;
 		}
+		public override void OnEnterWorld() {
+			StorageManager.CanVacuumItem(new(1), Player);//Sets up all allowed Lists
+		}
 	}
 	public static class StoragePlayerFunctions {
 		public static Item[] GetChestItems(this Player player, int chest = int.MinValue) {
