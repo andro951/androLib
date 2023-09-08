@@ -27,7 +27,9 @@ namespace androLib.ModIntegration
 				return false;
 
 			bossInfos = null;
-			Mod BossChecklist = ModLoader.GetMod("BossChecklist");
+			if (!ModLoader.TryGetMod("BossChecklist", out Mod BossChecklist))
+				return false;
+
 			if (BossChecklist != null && BossChecklist.Version >= BossChecklistAPIVersion) {
 				object currentBossInfoResponse = BossChecklist.Call("GetBossInfoDictionary", mod, BossChecklistAPIVersion.ToString());
 				if (currentBossInfoResponse is Dictionary<string, Dictionary<string, object>> bossInfoList) {
