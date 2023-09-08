@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Default;
 
 namespace androLib
 {
@@ -23,6 +24,7 @@ namespace androLib
 		public override void PostDrawInterface(SpriteBatch spriteBatch) {
 			MasterUIManager.PostDrawInterface(spriteBatch);
 		}
+		private static bool printModItemName => false;
 		public override void PostUpdateEverything() {
 			if (Debugger.IsAttached && !Main.LocalPlayer.HeldItem.NullOrAir()) {//temp
 				Item item = Main.LocalPlayer.HeldItem;
@@ -35,6 +37,20 @@ namespace androLib
 				if (item.DamageType != DamageClass.Default) {
 					string temp2 = item.DamageType.Name;
 				}
+
+				if (item.ModItem != null) {
+					ModItem modItem = item.ModItem;
+					string modItemName = modItem.Name;
+					if (modItem is UnloadedItem unloadedItem) {
+						string unloadedItemName = unloadedItem.Name;
+						string unloadedItemFullName = unloadedItem.FullName;
+						string unloadedItemItemName = unloadedItem.ItemName;
+						string unloadedItemModName = unloadedItem.ModName;
+					}
+				}
+
+				if (printModItemName && !Main.mouseItem.NullOrAir() && Main.mouseItem.ModItem != null)
+					Main.NewText(Main.mouseItem.ModItem.Name);
 			}
 
 			SoundManager.Update();

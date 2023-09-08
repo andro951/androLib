@@ -18,7 +18,7 @@ namespace androLib.Common.Globals
 		public static bool IsWorm(this NPC npc) {
 			return npc.aiStyle == NPCAIStyleID.Worm || npc.aiStyle == NPCAIStyleID.TheDestroyer;
 		}
-		//public static bool IsDummy(this NPC npc) => npc.netID < NPCID.Count ? npc.netID == NPCID.TargetDummy : npc.ModFullName() is string modFullName && (WEMod.calamityEnabled && modFullName == "CalamityMod/SuperDummyNPC" || WEMod.fargosEnabled && modFullName == "Fargowiltas/SuperDummy");
+		//public static bool IsDummy(this NPC npc) => npc.netID < NPCID.Count ? npc.netID == NPCID.TargetDummy : npc.ModFullName() is string modFullName && (AndroMod.calamityEnabled && modFullName == "CalamityMod/SuperDummyNPC" || AndroMod.fargosEnabled && modFullName == "Fargowiltas/SuperDummy");
 		//public static bool IsBoss(this NPC npc) => npc.boss || WEGlobalNPC.multipleSegmentBossTypes.ContainsKey(npc.netID) || WEGlobalNPC.normalNpcsThatDropsBags.Contains(npc.netID);
 		public static int RealNetID(this NPC npc) => npc.realLife == -1 ? npc.netID : Main.npc[npc.realLife].netID;
 		public static NPC RealNPC(this NPC npc) => npc.realLife == -1 ? npc : Main.npc[npc.realLife];

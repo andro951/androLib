@@ -22,6 +22,20 @@ namespace androLib
 		public static string ModName = ModContent.GetInstance<AndroMod>().Name;
 		public const string magicStorageName = "MagicStorage";
 		public static bool magicStorageEnabled = false;
+		public static string calamityModName = "CalamityMod";
+		public static Mod calamityMod;
+		public static bool calamityEnabled = ModLoader.TryGetMod(calamityModName, out calamityMod);
+		public static string thoriumModName = "ThoriumMod";
+		public static Mod thoriumMod;
+		public static bool thoriumEnabled = ModLoader.TryGetMod(thoriumModName, out thoriumMod);
+		public static string starsAboveModName = "StarsAbove";
+		public static Mod starsAboveMod;
+		public static bool starsAboveEnabled = ModLoader.TryGetMod(starsAboveModName, out starsAboveMod);
+		public static string fargosModName = "Fargowiltas";
+		public static Mod fargosMod;
+		public static bool fargosEnabled = ModLoader.TryGetMod(fargosModName, out fargosMod);
+		public static string fargosSoulsModName = "FargowiltasSouls";
+		public static bool fargosSoulsEnabled = ModLoader.TryGetMod(fargosSoulsModName, out Mod _);
 		private enum CallID {
 			None = -1,
 
