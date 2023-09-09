@@ -440,6 +440,9 @@ namespace androLib.UI
 			ItemSlot.Handle(ref item, context);
 		}
 		public static void SwapMouseItem(ref Item item1) {
+			if (item1.NullOrAir() && Main.mouseItem.NullOrAir())
+				return;
+
 			Item stored = item1.Clone();
 			item1 = Main.mouseItem.Clone();
 			if (!item1.NullOrAir() && item1.stack <= 0)

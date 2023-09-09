@@ -68,6 +68,6 @@ namespace androLib.Common.Globals
 	}
 
 	public static class ItemStaticMethods {
-		public static string ModFullName(this Item item) => item.ModItem?.FullName ?? item.Name;
+		public static string ModFullName(this Item item) => item.ModItem?.FullName ?? item.GetItemInternalName();
 	} 
 }

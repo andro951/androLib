@@ -615,7 +615,7 @@ namespace androLib.UI
 
 			return transferedAnyItem;
 		}
-		public bool VacuumAllowed(Item item) => Storage.IsVacuumBag == true || Storage.IsVacuumBag == null && (ContainsItem(item) || ItemSlot.ShiftInUse && MasterUIManager.LeftMouseClicked);
+		public bool VacuumAllowed(Item item) => Storage.IsVacuumBag == true || Storage.IsVacuumBag == null && (ContainsItem(item) || ItemSlot.ShiftInUse && MasterUIManager.LeftMouseClicked && DisplayBagUI);
 		public bool ContainsItem(Item item) {
 			Item[] inv = Inventory;
 			for (int i = 0; i < inv.Length; i++) {

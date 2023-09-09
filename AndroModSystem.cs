@@ -53,6 +53,12 @@ namespace androLib
 					Main.NewText(Main.mouseItem.ModItem.Name);
 			}
 
+			if (Debugger.IsAttached && !Main.HoverItem.NullOrAir()) {
+				string hoverItemName = Main.HoverItem.ModFullName();
+				if (printModItemName)
+					Main.NewText(hoverItemName);
+			}
+
 			SoundManager.Update();
 		}
 		public override void AddRecipeGroups() {

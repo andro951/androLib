@@ -81,14 +81,17 @@ namespace androLib.Common.Utility
             string s = f.ToString($"F{decimals + 1}");
 
             int dot = s.IndexOf('.');
-            if (dot == -1)
-                return s;
+            if (dot == -1) {
+                dot = s.IndexOf(',');
+                if (dot == -1)
+					return s;
+			}
 
             int length = s.Length;
             int end = length - 1;
             for (; end > dot; end--) {
                 char c = s[end - 1];
-				if (c != '0' && c != '.') {
+				if (c != '0' && c != '.' && c != ',') {
                     break;
                 }
             }
@@ -99,7 +102,7 @@ namespace androLib.Common.Utility
                 int i = end + 1;
 				for (; i > dot + 2; i--) {
                     char c = s[i - 2];
-                    if (c != last && c != lastM1 && c != '.') {
+                    if (c != last && c != lastM1 && c != '.' && c != ',') {
                         break;
                     }
                 }
@@ -145,6 +148,8 @@ namespace androLib.Common.Utility
 		public static string GetNPCNameString(this int netId) => ContentSamples.NpcsByNetId[netId].ModFullName().Quotes();
 		//public static string ModFullName(this NPC npc) => npc.ModNPC?.FullName ?? npc.type.GetNPCIDOrName();
 		public static string GetItemIDOrName(this int itemType) => itemType < ItemID.Count ? itemType.GetItemIDName() : itemType.GetItemNameString();
+        public static string GetItemInternalName(this int itemType) => GetItemInternalName(ContentSamples.ItemsByType[itemType]);
+		public static string GetItemInternalName(this Item item) => item.type < ItemID.Count ? ItemID.Search.TryGetName(item.type, out string name) ? name : $"FailedToFindItemName{item.S()}" : item.ModFullName();
         public static string GetNPCIDOrName(this int netId) => netId < NPCID.Count ? netId.GetNPCIDName() : netId.GetNPCNameString();
         public static string GetTilIDName(this int tileType) => TileID.Search.TryGetName(tileType, out string name) ? $"TileID.{name}" : $"FailedToFindTileNae{tileType}";
         public static string GetTileNameString(this int tileType) => TileLoader.GetTile(tileType) is ModTile modTile && modTile != null ? modTile.FullName : $"NullModTile{tileType}";
