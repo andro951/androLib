@@ -223,53 +223,5 @@ namespace androLib.Common.Utility
 
 			return false;
 		}
-
-		/*
-		Example:
-						|										  .
-						|									  .
-						|								  .
-						|							  .
-						|						  .
-						|					  .
-						|				  .
-						| (3000, 1000) .
-						|			 *
-						|         .   .
-						|	   .	   .
-						|	.		    .
-		(2166.67, 3500)	|________________* (4000, 3500)
-		*/
-		private static readonly Vector2 EXAMPLE_TARGET_POSITION = new Vector2(3000f, 1000f);
-		private static readonly Vector2 EXAMPLE_TARGET_VELOCITY = new Vector2(100f, -300f);
-		private static readonly Vector2 EXAMPLE_PROJECTILE_POSITION = new Vector2(4000f, 3500f);
-		private static readonly Vector2 EXAMPLE_PROJECTILE_VELOCITY = new Vector2(300f, -300f);
-		public static void PrintExampleTragectoryCalculation() {
-			float targetVelocityLength = EXAMPLE_TARGET_VELOCITY.Length();
-			float projectileVelocityLength = EXAMPLE_PROJECTILE_VELOCITY.Length();
-			Vector2 targetVelocityNormal = EXAMPLE_TARGET_VELOCITY.SafeNormalize(Vector2.Zero);
-			float velcityRatio = projectileVelocityLength / targetVelocityLength;
-			if (velcityRatio > 1f) {
-				//Home
-				if (TryGetPerpendicularLineIntercept(EXAMPLE_TARGET_VELOCITY, EXAMPLE_TARGET_POSITION, EXAMPLE_PROJECTILE_POSITION, out Vector2 perpendicualarIntercept)) {
-					float relativeB1 = EXAMPLE_TARGET_POSITION.Distance(perpendicualarIntercept);
-					float relativeA = EXAMPLE_PROJECTILE_POSITION.Distance(perpendicualarIntercept);
-					Vector2 homingTargetVector = targetVelocityNormal * (EXAMPLE_TARGET_VELOCITY.Length() + relativeB1);
-					Vector2 homingTarget = homingTargetVector + EXAMPLE_TARGET_POSITION;
-					Vector2 projectileDirection = (homingTarget - EXAMPLE_PROJECTILE_POSITION).SafeNormalize(Vector2.Zero);
-					Vector2 projectileVelocity = projectileDirection * projectileVelocityLength;
-					Main.NewText($"I: {perpendicualarIntercept}, B1: {relativeB1}, A: {relativeA}, VT: {homingTargetVector}, HT: {homingTarget}, PV: {projectileVelocity}");
-				}
-				else {
-					Main.NewText($"Div by zero!!  perpendicualarIntercept: {perpendicualarIntercept}");
-				}
-			}
-			else {
-				//Parallel
-				Vector2 projectileVelocity = targetVelocityNormal * projectileVelocityLength;
-
-				Main.NewText($"To slow to home, projectileVelocity: {projectileVelocity}");
-			}
-		}
 	}
 }
