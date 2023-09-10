@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -16,7 +17,7 @@ namespace androLib
 {
 	public class StoragePlayer : ModPlayer {
 		public static StoragePlayer LocalStoragePlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
-		public bool disableLeftShiftTrashCan = ItemSlot.Options.DisableLeftShiftTrashCan;
+		public bool disableLeftShiftTrashCan = false;
 		public List<Storage> Storages {
 			get {
 				if (storages == null)
@@ -42,6 +43,12 @@ namespace androLib
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot) {
 			ref Item item = ref inventory[slot];
+			if (context == 29) {
+				item = item.Clone();
+				item.stack = item.maxStack;
+				item.OnCreated(new JourneyDuplicationItemCreationContext());
+			}
+
 			if (MasterUIManager.NoUIBeingHovered) {
 				bool openAndCouldStore = false;
 				foreach (BagUI bagUI in StorageManager.BagUIs) {
