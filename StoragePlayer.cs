@@ -16,6 +16,7 @@ using Terraria.UI;
 namespace androLib
 {
 	public class StoragePlayer : ModPlayer {
+		public Vector2 CenterBeforeMoveUpdate = Vector2.Zero;
 		public static StoragePlayer LocalStoragePlayer => Main.LocalPlayer.GetModPlayer<StoragePlayer>();
 		public bool disableLeftShiftTrashCan = false;
 		public List<Storage> Storages {
@@ -69,6 +70,9 @@ namespace androLib
 		}
 		public override void OnEnterWorld() {
 			StorageManager.CanVacuumItem(new(1), Player);//Sets up all allowed Lists
+		}
+		public override void PreUpdateMovement() {
+			CenterBeforeMoveUpdate = Player.Center;
 		}
 	}
 	public static class StoragePlayerFunctions {
