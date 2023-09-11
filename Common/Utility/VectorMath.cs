@@ -19,7 +19,7 @@ namespace androLib.Common.Utility
 	public static class VectorMath
 	{
 		public static readonly Vector2 PlayerNotMoving = new(0f, 0.4f);
-		public static readonly float PsudoZero = 0.00001f;//100000
+		public static readonly float PsudoZero = 0.00001f;
 		public static float LinearEvaluate(Vector2 p1, Vector2 p2, float x) => (p2.Y - p1.Y) / (p2.X - p1.X) * (x - p1.X) + p1.Y;
 		public static bool QuadraticEvaluate(float len, float height1, float height2HypotenuseRatio, out float height2) {
 			float a = 1f - height2HypotenuseRatio * height2HypotenuseRatio;
@@ -144,7 +144,6 @@ namespace androLib.Common.Utility
 			float c1 = relativeOrigin.Y;
 			float m2 = velocity.InvertedSlope();
 			float c2 = projectilePosition.Y - m2 * (projectilePosition.X - relativeOrigin.X);
-			//Main.NewText($"m1: {m1}, c1: {c1}, m2: {m2}, c2: {c2}");
 			bool lineResult = TryLineIntercept(m1, c1, m2, c2, out intercept);
 			intercept.X += relativeOrigin.X;
 			

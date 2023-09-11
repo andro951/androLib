@@ -41,7 +41,8 @@ namespace androLib.Common.Utility
 		Config,
 		UIText,
 		StorageText,
-		MagicStorageButtonsText
+		MagicStorageButtonsText,
+		GameMessages
 	}
 	public enum L_ID2
 	{
