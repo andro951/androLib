@@ -114,7 +114,6 @@ namespace androLib
 
 		private void TryShiftDownAndReduceToMaxSize(ref Item[] items, int itemCount) {
 			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
-			//bool temp = nonAirItems.Select(i => i.type).Contains(ItemID.ViciousMushroom);
 			int nonAirItemCount = nonAirItems.Count();
 			if (nonAirItemCount >= itemCount) {
 				items = nonAirItems.ToArray();
