@@ -36,6 +36,9 @@ namespace androLib
 		public static bool fargosEnabled = ModLoader.TryGetMod(fargosModName, out fargosMod);
 		public static string fargosSoulsModName = "FargowiltasSouls";
 		public static bool fargosSoulsEnabled = ModLoader.TryGetMod(fargosSoulsModName, out Mod _);
+		public static string vacuumBagsName = "VacuumBags";
+		public static Mod vacuumBagsMod;
+		public static bool vacuumBagsEnabled = ModLoader.TryGetMod(vacuumBagsName, out vacuumBagsMod);
 		private enum CallID {
 			None = -1,
 
@@ -53,7 +56,7 @@ namespace androLib
 			//The rest of the calls just need the id you got from Register.
 			//GetItems: Item[] items = Call("GetItems", int storageID);
 			//Example: Item[] items = Call("GetItems", storageID); where storageID is the id you got from Register Or GetStorageID.
-			//Default value is null. DON'T FORGET TO CHECK FOR NULL!
+			//Default value is an empty array if it fails.
 			GetItems = 1,
 
 			//Used to get the StorageId for an existing bag by internal name such as "PaintBucket"

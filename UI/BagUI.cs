@@ -72,7 +72,7 @@ namespace androLib.UI
 		private float glowHue = 0f;
 		private int scrollPanelY = int.MinValue;
 		private int scrollPanelPosition = 0;
-		public bool DisplayBagUI => Storage.DisplayBagUI;
+		public bool DisplayBagUI => Storage.DisplayBagUI && Main.LocalPlayer.chest == -1;
 
 		public BagUI(int storageID, int registeredUI_ID) {
 			StorageID = storageID;
@@ -108,8 +108,7 @@ namespace androLib.UI
 
 			#region Pre UI
 
-			if (storagePlayer.Player.chest != -1)
-				return;
+
 
 			#endregion
 
@@ -303,11 +302,8 @@ namespace androLib.UI
 			if (!DisplayBagUI || !Main.playerInventory)
 				return;
 
-			if (storagePlayer.Player.chest != -1)
-				return;
-
 			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
-				if (!Main.mouseItem.IsAir || !RoomInStorage(Main.HoverItem)) {
+				if (!Main.mouseItem.IsAir || !CanVacuumItem(Main.HoverItem, storagePlayer.Player, forShiftClickFromInventory: true)) {
 					Main.cursorOverride = -1;
 				}
 				else {
@@ -549,7 +545,7 @@ namespace androLib.UI
 				}
 			}
 		}
-		public bool CanVacuumItem(Item item, Player player, bool ignoreTile = false) {
+		public bool CanVacuumItem(Item item, Player player, bool ignoreNeedBagInInventory = false, bool forShiftClickFromInventory = false) {
 			if (item.NullOrAir())
 				return false;
 
@@ -559,14 +555,14 @@ namespace androLib.UI
 			if (!CanBeStored(item))
 				return false;
 
-			if (!ignoreTile && !Storage.HasRequiredItemToUseStorage(player))
+			if (!ignoreNeedBagInInventory && !Storage.HasRequiredItemToUseStorage(player))
 				return false;
 
 			if (!RoomInStorage(item))
 				return false;
 
 			//If bag is a "Quick Stack" only style bag, check if item is already in inventory
-			if (!VacuumAllowed(item))
+			if (!forShiftClickFromInventory && !VacuumAllowed(item))
 				return false;
 
 			return true;

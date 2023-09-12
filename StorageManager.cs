@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework;
 using Terraria.Localization;
 using androLib.Common.Utility;
 using System.Runtime.CompilerServices;
+using System.Data.SqlTypes;
 
 namespace androLib
 {
@@ -97,6 +98,9 @@ namespace androLib
 			if (items.Length < itemCount)
 				items = items.Concat(Enumerable.Repeat(new Item(), itemCount - items.Length)).ToArray();
 
+			if (items.Length > itemCount)
+				TryShiftDownAndReduceToMaxSize(ref items, itemCount);
+
 			Items = items;
 			
 			int uiLeft = tag.Get<int>($"{modFullName}_UILeft");
@@ -107,6 +111,49 @@ namespace androLib
 
 			ShouldVacuum = tag.Get<bool>($"{modFullName}_ShouldVacuumItems");
 		}
+
+		private void TryShiftDownAndReduceToMaxSize(ref Item[] items, int itemCount) {
+			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
+			//bool temp = nonAirItems.Select(i => i.type).Contains(ItemID.ViciousMushroom);
+			int nonAirItemCount = nonAirItems.Count();
+			if (nonAirItemCount >= itemCount) {
+				items = nonAirItems.ToArray();
+				return;
+			}
+			else if (nonAirItemCount < 1) {
+				items = Enumerable.Repeat(new Item(), itemCount).ToArray();
+				return;
+			}
+
+			int allowedOpenSlots = itemCount - nonAirItemCount;
+			int index = 0;
+			int airCount = 0;
+			while (airCount <= allowedOpenSlots && index <= itemCount) {
+				if (items[index].NullOrAir())
+					airCount++;
+
+				index++;
+			}
+
+			items = items.Take(index - 1).Concat(nonAirItems.Reverse().Take(itemCount -(index - 1)).Reverse()).ToArray();
+		}
+		private bool TryGetNextOpenSlot(Item[] items, ref int nextOpenSlot, bool fromEnd = false) {
+			if (!fromEnd) {
+				while (nextOpenSlot < items.Length && !items[nextOpenSlot].NullOrAir()) {
+					nextOpenSlot++;
+				}
+
+				return nextOpenSlot < items.Length;
+			}
+			else {
+				while (nextOpenSlot >= 0 && !items[nextOpenSlot].NullOrAir()) {
+					nextOpenSlot--;
+				}
+
+				return nextOpenSlot >= 0;
+			}
+		}
+
 		public Storage Clone() {
 			Storage clone = new Storage(
 				Mod,
@@ -318,7 +365,7 @@ namespace androLib
 		}
 		public static Item[] GetItems(int modID) {
 			if (!ValidModID(modID))
-				return null;
+				return new Item[0];
 
 			return BagUIs[modID].Storage.Items;
 		}

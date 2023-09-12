@@ -29,14 +29,11 @@ namespace androLib
 		}
 		private List<Storage> storages = null;
 		public override void SaveData(TagCompound tag) {
-			string name = Player.name;
 			for (int i = 0; i < Storages.Count; i++) {
 				Storages[i].SaveData(tag);
 			}
 		}
 		public override void LoadData(TagCompound tag) {
-			string name = Player.name;//, PlayerStorageManager);
-
 			for (int i = 0; i < Storages.Count; i++) {
 				Storages[i].LoadData(tag);
 			}
@@ -60,7 +57,7 @@ namespace androLib
 					}
 				}
 
-				if (openAndCouldStore) {
+				if (openAndCouldStore || !Main.mouseItem.NullOrAir()) {
 					MasterUIManager.SwapMouseItem(ref item);
 					return true;
 				}
