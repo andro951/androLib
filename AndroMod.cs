@@ -13,6 +13,8 @@ using androLib.UI;
 using androLib.Common.Utility;
 using androLib.Localization;
 using androLib.ModIntegration;
+using System.Reflection;
+using System.Linq;
 
 namespace androLib
 {
@@ -36,9 +38,14 @@ namespace androLib
 		public static bool fargosEnabled = ModLoader.TryGetMod(fargosModName, out fargosMod);
 		public static string fargosSoulsModName = "FargowiltasSouls";
 		public static bool fargosSoulsEnabled = ModLoader.TryGetMod(fargosSoulsModName, out Mod _);
+		public static string amuletOfManyMinionsName = "AmuletOfManyMinions";
+		public static bool amuletOfManyMinionsEnabled = ModLoader.TryGetMod(amuletOfManyMinionsName, out Mod _);
 		public static string vacuumBagsName = "VacuumBags";
 		public static Mod vacuumBagsMod;
 		public static bool vacuumBagsEnabled = ModLoader.TryGetMod(vacuumBagsName, out vacuumBagsMod);
+		public static string weaponEnchantmentsName = "WeaponEnchantments";
+		public static Mod weaponEnchantmentsMod;
+		public static bool weaponEnchantmentsLoaded = ModLoader.TryGetMod(weaponEnchantmentsName, out weaponEnchantmentsMod);
 		private enum CallID {
 			None = -1,
 
@@ -217,14 +224,15 @@ namespace androLib
 		}
 		List<Hook> hooks = new();
 		public override void Load() {
+			hooks.Add(new(ModLoaderModifyItemLootMethodInfo, ModifyItemLootDetour));
+			foreach (Hook hook in hooks) {
+				hook.Apply();
+			}
+
 			On_ChestUI.LootAll += OnChestUI_LootAll;
 			On_ChestUI.Restock += On_ChestUI_Restock;
 			On_Player.QuickStackAllChests += On_Player_QuickStackAllChests;
 			On_Chest.AskForChestToEatItem += On_Chest_AskForChestToEatItem;
-			//hooks.Add();
-			//foreach (Hook hook in hooks) {
-			//	hook.Apply();
-			//}
 
 			MagicStorageButtonsUI.RegisterWithMasterUIManager();
 			AndroLocalizationData.RegisterSDataPackage();
@@ -232,13 +240,11 @@ namespace androLib
 		public override void Unload() {
 			BossChecklistIntegration.UnloadBossChecklistIntegration();
 		}
-
 		private void On_Chest_AskForChestToEatItem(On_Chest.orig_AskForChestToEatItem orig, Vector2 worldPosition, int duration) {
 			orig(worldPosition, duration);
 
-			VacuumBagTile.AskForBagToEatItem(worldPosition, duration);
+			GlobalVacuumBagTile.AskForBagToEatItem(worldPosition, duration);
 		}
-
 		private void On_Player_QuickStackAllChests(On_Player.orig_QuickStackAllChests orig, Player self) {
 			orig(self);
 
@@ -248,10 +254,9 @@ namespace androLib
 					continue;
 
 				if (!StorageManager.TryVacuumItem(ref item, self))
-					VacuumBagTile.QuickStackToBags(ref item, self);
+					GlobalVacuumBagTile.QuickStackToBags(ref item, self);
 			}
 		}
-
 		private void On_ChestUI_Restock(On_ChestUI.orig_Restock orig) {
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
 			int chest = storagePlayer.Player.chest;
@@ -272,7 +277,6 @@ namespace androLib
 
 			orig();
 		}
-
 		private void OnChestUI_LootAll(On_ChestUI.orig_LootAll orig) {//TODO: Make this work with essence
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
 			int chest = storagePlayer.Player.chest;
@@ -289,6 +293,15 @@ namespace androLib
 			}
 
 			orig();
+		}
+		private delegate void orig_ModifyItemLoot(Item item, ItemLoot itemLoot);
+		private delegate void hook_ModifyItemLoot(orig_ModifyItemLoot orig, Item item, ItemLoot itemLoot);
+		private static readonly MethodInfo ModLoaderModifyItemLootMethodInfo = typeof(ItemLoader).GetMethod("ModifyItemLoot");
+		private void ModifyItemLootDetour(orig_ModifyItemLoot orig, Item item, ItemLoot itemLoot) {
+			if (StorageManager.AllBagTypesSorted.Contains(item.type))
+				return;
+
+			orig(item, itemLoot);
 		}
 	}
 }

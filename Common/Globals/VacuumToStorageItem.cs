@@ -43,7 +43,7 @@ namespace androLib.Common.Globals
 			}
 		}
 		public override bool OnPickup(Item item, Player player) {
-			if (player.whoAmI != Main.myPlayer)
+			if (Main.netMode == NetmodeID.Server || player.whoAmI != Main.myPlayer)
 				return true;
 
 			if (item.NullOrAir())

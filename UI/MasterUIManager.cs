@@ -25,6 +25,7 @@ using androLib.Common.Utility;
 //using androLib.Content.NPCs;
 using androLib;
 using static androLib.UI.MasterUIManager;
+using System.Globalization;
 
 namespace androLib.UI
 {
@@ -344,8 +345,14 @@ namespace androLib.UI
 					texture = TextureAssets.InventoryBack4.Value;//Purple
 					break;
 				case ItemSlotContextID.Purple when item.favorited:
-					texture = (Texture2D)ModContent.Request<Texture2D>("WeaponEnchantments/UI/Sprites/Inventory_Back4(Favorited)");
+					texture = (Texture2D)ModContent.Request<Texture2D>("androLib/UI/Sprites/Inventory_Back4(Favorited)");
 					break;
+				//case ItemSlotContextID.Orange when !item.favorited:
+				//	texture = (Texture2D)ModContent.Request<Texture2D>("androLib/UI/Sprites/ItemSlotBack_Orange");
+				//	break;
+				//case ItemSlotContextID.Orange when item.favorited:
+				//	texture = (Texture2D)ModContent.Request<Texture2D>("androLib/UI/Sprites/ItemSlotBack_Orange(Favorited)");
+				//	break;
 				case ItemSlotContextID.Red:
 					texture = TextureAssets.InventoryBack5.Value;
 					break;
@@ -373,8 +380,11 @@ namespace androLib.UI
 				case 13:
 					texture = TextureAssets.InventoryBack13.Value;
 					break;
-				case 14:
+				case ItemSlotContextID.YellowSelected when !item.favorited:
 					texture = TextureAssets.InventoryBack14.Value;
+					break;
+				case ItemSlotContextID.YellowSelected when item.favorited:
+					texture = TextureAssets.InventoryBack17.Value;
 					break;
 				case 15:
 					texture = TextureAssets.InventoryBack15.Value;
@@ -382,7 +392,7 @@ namespace androLib.UI
 				case 16:
 					texture = TextureAssets.InventoryBack16.Value;
 					break;
-				case ItemSlotContextID.Gold:
+				case ItemSlotContextID.GoldFavorited:
 					texture = TextureAssets.InventoryBack17.Value;
 					break;
 				case 18:
@@ -694,11 +704,13 @@ namespace androLib.UI
 	}
 	public static class ItemSlotContextID
 	{
+		//public const int Orange = -2;
 		public const int MarkedTrash = -1;
 		public const int Normal = 0;
 		public const int Purple = 4;
 		public const int Red = 5;
 		public const int Favorited = 10;
-		public const int Gold = 17;
+		public const int YellowSelected = 14;
+		public const int GoldFavorited = 17;
 	}
 }

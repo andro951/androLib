@@ -38,6 +38,21 @@ namespace androLib
 				Storages[i].LoadData(tag);
 			}
 		}
+		public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
+			itemConsumedCallback = null;
+			List<Item> items = new();
+			foreach (Storage storage in StorageManager.BagUIs.Select(b => b.Storage)) {
+				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out _)) {
+					for (int i = 0; i < storage.Items.Length; i++) {
+						ref Item item = ref storage.Items[i];
+						if (!item.NullOrAir() && item.stack > 0)
+							items.Add(item);
+					}
+				}
+			}
+
+			return items.Count > 0 ? items : null;
+		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot) {
 			ref Item item = ref inventory[slot];
@@ -70,6 +85,25 @@ namespace androLib
 		}
 		public override void PreUpdateMovement() {
 			CenterBeforeMoveUpdate = Player.Center;
+		}
+		public override void ResetInfoAccessories() {
+			if (Main.LocalPlayer == null)
+				return;
+
+			if (Main.gameMenu)
+				return;
+
+			foreach (Storage storage in StorageManager.BagUIs.Select(ui => ui.Storage)) {
+				if (!storage.ShouldRefreshInfoAccs)
+					continue;
+
+				foreach (Item item in storage.Items) {
+					if (!item.favorited)
+						continue;
+
+					Player.RefreshInfoAccsFromItemType(item);
+				}
+			}
 		}
 	}
 	public static class StoragePlayerFunctions {

@@ -61,22 +61,22 @@ namespace androLib.ModIntegration
                 if (storageHeart == null)
 					continue;
 
-                foreach (Item item in items) {
-                    if (item.NullOrAir() || item.favorited)
-                        continue;
+				storageHeart.TryDeposit(items.ToList());
+				//foreach (Item item in items) {
+    //                if (item.NullOrAir() || item.favorited)
+    //                    continue;
 
-					int oldType = item.type;
-					int oldStack = item.stack;
-					storageHeart.DepositItem(item);
+				//	int oldType = item.type;
+				//	int oldStack = item.stack;
 
-					if (oldType != item.type || oldStack != item.stack) {
-						Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, center.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
-                        anyStored = true;
-					}
+				//	if (oldType != item.type || oldStack != item.stack) {
+				//		Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, center.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
+    //                    anyStored = true;
+				//	}
 
-					if (item.stack <= 0)
-						item.TurnToAir();
-				}
+				//	if (item.stack <= 0)
+				//		item.TurnToAir();
+				//}
 			}
 
 			return anyStored;

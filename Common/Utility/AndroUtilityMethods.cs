@@ -61,6 +61,7 @@ namespace androLib.Common.Utility
 
 			return false;
 		}
+        public static bool AnyFavoritedItem(this IEnumerable<KeyValuePair<int, Item>> indexItemsPairs) => indexItemsPairs.Select(p => p.Value).AnyFavoritedItem();
 
         /// <summary>
 		/// Randomly selects an item from the list if the chance is higher than the randomly generated float.<br/>
@@ -489,6 +490,6 @@ namespace androLib.Common.Utility
             return false;
         }
 
-        #endregion
-    }
+		#endregion
+	}
 }

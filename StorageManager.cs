@@ -38,6 +38,7 @@ namespace androLib
 		}
 		private bool shouldVacuum = true;
 		private List<Func<int>> StorageItemTypeGetters { get; set; } = new();
+		public IEnumerable<int> StorageItemTypes => StorageItemTypeGetters.Select(g => g());
 		public Func<Color> GetUIColor { get; set; }
 		public Func<Color> GetScrollBarColor { get; set; }
 		public Func<Color> GetButtonHoverColor { get; set; }
@@ -48,6 +49,8 @@ namespace androLib
 		public Item[] Items;
 		public int RegisteredUI_ID { get; }
 		public bool DisplayBagUI = false;
+		public Action SelectItemForUIOnly { get; }
+		public bool ShouldRefreshInfoAccs { get; }
 
 		public Storage(
 				Mod mod, 
@@ -61,7 +64,9 @@ namespace androLib
 				Func<Color> getButtonHoverColor,
 				List<Func<int>> storageItemTypeGetters,
 				int uiLeftDefault, 
-				int uiTopDefault
+				int uiTopDefault,
+				Action selectItemForUIOnly,
+				bool shouldRefreshInfoAccs
 			) {
 			Mod = mod;
 			VacuumStorageType = vacuumStorageType;
@@ -77,6 +82,8 @@ namespace androLib
 			UITopDefault = uiTopDefault;
 			UILeft = UILeftDefault;
 			UITop = UITopDefault;
+			SelectItemForUIOnly = selectItemForUIOnly;
+			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
 		}
@@ -111,7 +118,6 @@ namespace androLib
 
 			ShouldVacuum = tag.Get<bool>($"{modFullName}_ShouldVacuumItems");
 		}
-
 		private void TryShiftDownAndReduceToMaxSize(ref Item[] items, int itemCount) {
 			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
 			int nonAirItemCount = nonAirItems.Count();
@@ -166,7 +172,9 @@ namespace androLib
 				GetButtonHoverColor,
 				StorageItemTypeGetters,
 				UILeftDefault,
-				UITopDefault
+				UITopDefault,
+				SelectItemForUIOnly,
+				ShouldRefreshInfoAccs
 			);
 
 			clone.UILeft = UILeft;
@@ -216,14 +224,55 @@ namespace androLib
 
 			return found;
 		}
-		public bool HasRequiredItemToUseStorage(Player player) {
+		public static readonly int RequiredItemNotFound = -1;
+		public static readonly int ReuiredItemInABagStartingIndex = -2;
+		public Item GetItemFromHasRequiredItemToUseStorageIndex(Player player, int hasRequiredItemToUseStorageIndex) {
+			if (hasRequiredItemToUseStorageIndex > RequiredItemNotFound)
+				return player.inventory[hasRequiredItemToUseStorageIndex];
+
+			int index = ItemsIndexFromHasRequiredItemToUseStorageIndex(hasRequiredItemToUseStorageIndex);
+			return Items[index];
+		}
+		public static int ItemsIndexFromHasRequiredItemToUseStorageIndex(int hasRequiredItemToUseStorageIndex) => -(hasRequiredItemToUseStorageIndex - ReuiredItemInABagStartingIndex);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="player"></param>
+		/// <param name="index">The index in the players inventory.  If found in a bag, the index will be -index + ReuiredItemInABagStartingIndex.<\br>
+		/// Use GetItemFromHasRequiredItemToUseStorageIndex() to get the item savely.</param>
+		/// <returns></returns>
+		public bool HasRequiredItemToUseStorage(Player player, out int bagFoundInID, out int index) {
+			index = RequiredItemNotFound;
+			bagFoundInID = -1;
 			bool? validItemType = ValidItemTypeGetters(out SortedSet<int> bagItemTypes);
 			if (validItemType != true)
 				return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
 
 			foreach (int bagItemType in bagItemTypes) {
-				if (player.HasItem(bagItemType))
+				int createTile = ContentSamples.ItemsByType[bagItemType].createTile;
+				if (createTile > -1 && player.adjTile[createTile])
 					return true;
+			}
+
+			for (int i = 0; i < player.inventory.Length; i++) {
+				if (bagItemTypes.Contains(player.inventory[i].type)) {
+					index = i;
+					return true;
+				}
+			}
+
+			for (int j = 0; j < StorageManager.BagUIs.Count; j++) {
+				BagUI bagUI = StorageManager.BagUIs[j];
+				if (!bagUI.DisplayBagUI)
+					continue;
+
+				for (int i = 0; i < bagUI.Storage.Items.Length; i++) {
+					if (bagItemTypes.Contains(bagUI.Storage.Items[i].type)) {
+						index = -i + ReuiredItemInABagStartingIndex;
+						bagFoundInID = j;
+						return true;
+					}
+				}
 			}
 
 			return false;
@@ -234,6 +283,11 @@ namespace androLib
 
 			StorageItemTypeGetters.Add(itemTypeGetter);
 		}
+		public void SelectItemSlotFunc() {
+			if (SelectItemForUIOnly != null)
+				SelectItemForUIOnly();
+		}
+		public bool HasSelectItemForUIOnlyFunc() => SelectItemForUIOnly != null;
 	}
 	public static class StorageManager {
 		public static int DefaultLeftLocationOnScreen => 80;
@@ -243,6 +297,15 @@ namespace androLib
 		#region Lists and Dictionaries
 
 		private static SortedDictionary<string, int> vacuumStorageIndexes = new();
+		private static SortedDictionary<int, int> VacuumStorageIndexesFromBagTypes {
+			get {
+				if (vacuumStorageIndexesFromBagTypes == null)
+					PopulateVacuumStorageIndexesFromBagTypes();
+
+				return vacuumStorageIndexesFromBagTypes;
+			}
+		}
+		private static SortedDictionary<int, int> vacuumStorageIndexesFromBagTypes = null;
 		public static List<BagUI> BagUIs = new();
 		public static List<Storage> RegisteredStorages = new();
 		public static void PopulateStorages(ref List<Storage> storages) {
@@ -252,6 +315,56 @@ namespace androLib
 				storages.Add(storage);
 			}
 		}
+		public static void PopulateVacuumStorageIndexesFromBagTypes() {
+			vacuumStorageIndexesFromBagTypes = new();
+			foreach (BagUI bagUI in BagUIs) {
+				Storage storage = bagUI.Storage;
+				if (storage.ValidItemTypeGetters(out SortedSet<int> bagTypes) != true)
+					continue;
+
+				foreach (int bagType in bagTypes) {
+					vacuumStorageIndexesFromBagTypes.Add(bagType, bagUI.StorageID);
+				}
+			}
+		}
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="bagType"></param>
+		/// <param name="storageItems">Storage items for the storage for bagType, not the bag containing the bagType item if stored in one.</param>
+		/// <param name="storageBagFoundIn">Storage items that the bag is in.  storageBagFoundIn[index] is the bag of type bagType.  Make sure to null check storageBagFoundIn before using it or check index >= 0.</param>
+		/// <param name="indexFoundAt"></param>
+		/// <returns></returns>
+		public static bool HasRequiredItemToUseStorageFromBagType(Player player, int bagType, out int bagInventoryIndex) {
+			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
+				Storage storage = BagUIs[storageID].Storage;
+				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out bagInventoryIndex))
+					return true;
+			}
+
+			bagInventoryIndex = Storage.RequiredItemNotFound;
+			return false;
+		}
+
+		public static List<int> AllBagTypes {
+			get {
+				if (allBagTypes == null)
+					allBagTypes = RegisteredStorages.Select(s => s.StorageItemTypes).SelectMany(s => s).ToList();
+
+				return allBagTypes;
+			}
+		}
+		private static List<int> allBagTypes = null;
+
+		public static SortedSet<int> AllBagTypesSorted {
+			get {
+				if (allBagTypesSorted == null)
+					allBagTypesSorted = new(AllBagTypes);
+
+				return allBagTypesSorted;
+			}
+		}
+		private static SortedSet<int> allBagTypesSorted = null;
 
 		/// <summary>
 		/// <int itemType, int bagID>
@@ -306,18 +419,20 @@ namespace androLib
 		#region Calls
 
 		public static int RegisterVacuumStorageClass(
-				Mod mod, 
-				Type vacuumStorageType, 
+				Mod mod,
+				Type vacuumStorageType,
 				Func<Item, bool> itemAllowedToBeStored,
-				string nameLocalizationKey, 
-				int storageSize, 
+				string nameLocalizationKey,
+				int storageSize,
 				bool? isVacuumBag,
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
 				Func<Color> getButtonHoverColor,
 				Func<int> storageItemTypeGetter,
-				int uiLeft, 
-				int uiTop
+				int uiLeft,
+				int uiTop,
+				Action selectItemForUIOnly = null,
+				bool shouldRefreshInfoAccs = false
 			) {
 			int storageID = BagUIs.Count;
 
@@ -335,7 +450,9 @@ namespace androLib
 				getButtonHoverColor,
 				new() { storageItemTypeGetter },
 				uiLeft, 
-				uiTop
+				uiTop,
+				selectItemForUIOnly,
+				shouldRefreshInfoAccs
 			);
 
 			RegisteredStorages.Add(storage);

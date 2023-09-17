@@ -26,7 +26,7 @@ namespace androLib
 		}
 		private static bool printModItemName => false;
 		public override void PostUpdateEverything() {
-			if (Debugger.IsAttached && !Main.LocalPlayer.HeldItem.NullOrAir()) {//temp
+			if (Debugger.IsAttached && !Main.LocalPlayer.HeldItem.NullOrAir()) {
 				Item item = Main.LocalPlayer.HeldItem;
 				string temp = item.ModFullName();
 				int createTile = item.createTile;
@@ -61,12 +61,67 @@ namespace androLib
 
 			SoundManager.Update();
 		}
+		public const string AnyCommonGem = "AnyCommonGem";
+		public const string AnyRareGem = "AnyRareGem";
+		public const string AnyAlignedSoul = "AnyAlignedSoul";
+		public const string Workbenches = "Workbenches";
 		public override void AddRecipeGroups() {
-			RecipeGroup group = new RecipeGroup(() => "Any Common Gem", GemSets.CommonGems.ToArray());
-			RecipeGroup.RegisterGroup("androLib:CommonGems", group);
+			RecipeGroup group = new RecipeGroup(() => AnyCommonGem.AddSpaces(), GemSets.CommonGems.ToArray());
+			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyCommonGem}", group);
 
-			group = new RecipeGroup(() => "Any Rare Gem", GemSets.RareGems.ToArray());
-			RecipeGroup.RegisterGroup("androLib:RareGems", group);
+			group = new RecipeGroup(() => AnyRareGem.AddSpaces(), GemSets.RareGems.ToArray());
+			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyRareGem}", group);
+
+			group = new RecipeGroup(() => Workbenches.AddSpaces(), new int[] {
+				ItemID.WorkBench,
+				ItemID.BambooWorkbench,
+				ItemID.BlueDungeonWorkBench,
+				ItemID.BoneWorkBench,
+				ItemID.BorealWoodWorkBench,
+				ItemID.CactusWorkBench,
+				ItemID.CrystalWorkbench,
+				ItemID.DynastyWorkBench,
+				ItemID.EbonwoodWorkBench,
+				ItemID.FleshWorkBench,
+				ItemID.FrozenWorkBench,
+				ItemID.GlassWorkBench,
+				ItemID.GoldenWorkbench,
+				ItemID.GothicWorkBench,
+				ItemID.GraniteWorkBench,
+				ItemID.GreenDungeonWorkBench,
+				ItemID.HoneyWorkBench,
+				ItemID.LesionWorkbench,
+				ItemID.LihzahrdWorkBench,
+				ItemID.LivingWoodWorkBench,
+				ItemID.MarbleWorkBench,
+				ItemID.MartianWorkBench,
+				ItemID.MeteoriteWorkBench,
+				ItemID.MushroomWorkBench,
+				ItemID.NebulaWorkbench,
+				ItemID.ObsidianWorkBench,
+				ItemID.PalmWoodWorkBench,
+				ItemID.PearlwoodWorkBench,
+				ItemID.PinkDungeonWorkBench,
+				ItemID.PumpkinWorkBench,
+				ItemID.RichMahoganyWorkBench,
+				ItemID.SandstoneWorkbench,
+				ItemID.ShadewoodWorkBench,
+				ItemID.SkywareWorkbench,
+				ItemID.SlimeWorkBench,
+				ItemID.SolarWorkbench,
+				ItemID.SpiderWorkbench,
+				ItemID.SpookyWorkBench,
+				ItemID.StardustWorkbench,
+				ItemID.SteampunkWorkBench,
+				ItemID.VortexWorkbench
+			});
+			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{Workbenches}", group);
+
+			group = new RecipeGroup(() => AnyAlignedSoul.AddSpaces(), new int[] {
+				ItemID.SoulofLight,
+				ItemID.SoulofNight
+			});
+			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyAlignedSoul}", group);
 		}
 	}
 }

@@ -17,7 +17,7 @@ using Terraria.UI;
 
 namespace androLib.Common.Globals
 {
-	public class VacuumBagTile : GlobalTile {
+	public class GlobalVacuumBagTile : GlobalTile {
 		private bool AppliesTo(int tileType) => StorageManager.StorageTileTypes.ContainsKey(tileType);
 		public override void RightClick(int i, int j, int type) {
 			if (!AppliesTo(type))

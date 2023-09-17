@@ -72,6 +72,10 @@ namespace androLib.UI
 		private float glowHue = 0f;
 		private int scrollPanelY = int.MinValue;
 		private int scrollPanelPosition = 0;
+		/// <summary>
+		/// For changing how items are visually displayed when selected only.
+		/// </summary>
+		private SortedDictionary<int, int> selectedItemSlots = new();
 		public bool DisplayBagUI => Storage.DisplayBagUI && Main.LocalPlayer.chest == -1;
 
 		public BagUI(int storageID, int registeredUI_ID) {
@@ -108,7 +112,7 @@ namespace androLib.UI
 
 			#region Pre UI
 
-
+			UpdateSelectedItemSlots();
 
 			#endregion
 
@@ -257,8 +261,9 @@ namespace androLib.UI
 
 				ref Item item = ref inventory[inventoryIndex];
 				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
-					 slotData[inventoryIndex] = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
-					 slotData[inventoryIndex].Draw(spriteBatch, item, ItemSlotContextID.Normal, glowHue, glowTime);
+					slotData[inventoryIndex] = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
+					int context = selectedItemSlots.TryGetValue(inventoryIndex, out int selectedContext) ? selectedContext : ItemSlotContextID.Normal;
+					slotData[inventoryIndex].Draw(spriteBatch, item, context, glowHue, glowTime);
 
 					slotNum++;
 					if (slotNum %  itemSlotColumns == 0) {
@@ -489,6 +494,10 @@ namespace androLib.UI
 					scrollPanelPosition += scrollWheelTicks;
 				}
 			}
+
+			if (Storage.HasSelectItemForUIOnlyFunc()) {
+				selectedItemSlots = new();
+			}
 		}
 
 
@@ -555,7 +564,7 @@ namespace androLib.UI
 			if (!CanBeStored(item))
 				return false;
 
-			if (!ignoreNeedBagInInventory && !Storage.HasRequiredItemToUseStorage(player))
+			if (!ignoreNeedBagInInventory && !Storage.HasRequiredItemToUseStorage(player, out _, out _))
 				return false;
 
 			if (!RoomInStorage(item))
@@ -672,11 +681,30 @@ namespace androLib.UI
 				}
 			}
 
-			glowTime = 300;
-			glowHue = 0.5f;
+			//prevent glow on bags that select items.
+			if (selectedItemSlots.Count == 0) {
+				glowTime = 300;
+				glowHue = 0.5f;
+			}
 		}
 		private void ToggleVacuum() {
 			Storage.ShouldVacuum = !Storage.ShouldVacuum;
+		}
+		public void AddSelectedItemSlots(IEnumerable<KeyValuePair<int, int>> selectedItemSlots) {
+			foreach (KeyValuePair<int, int> selectedItemSlot in selectedItemSlots) {
+				AddSelectedItemSlot(selectedItemSlot.Key, selectedItemSlot.Value);
+			}
+		}
+		public void AddSelectedItemSlot(int selectedItemSlot, int context) => selectedItemSlots.TryAdd(selectedItemSlot, context);
+		private void UpdateSelectedItemSlots() {
+			if (selectedItemSlots.Count == 0) {
+				Storage.SelectItemSlotFunc();
+			}
+			else if (selectedItemSlots.Count == 1) {
+				Item selectedItem = Inventory[selectedItemSlots.First().Key];
+				if (selectedItem.stack < 1)
+					selectedItem.favorited = false;
+			}
 		}
 	}
 }

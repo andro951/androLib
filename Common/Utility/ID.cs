@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 using static Terraria.Localization.GameCulture;
 using Terraria.GameContent.Personalities;
 using Terraria.ID;
+using Terraria;
+using androLib.Common.Globals;
+using Terraria.ModLoader;
+using System.Diagnostics;
+using static Terraria.ID.ContentSamples.CreativeHelper;
 
 namespace androLib.Common.Utility
 {
@@ -293,5 +298,257 @@ namespace androLib.Common.Utility
 			ItemID.Amber,
 			ItemID.Diamond
 		};
+	}
+
+	public static class ToolStrategyID {
+		public static readonly int None = -1;
+		public static readonly int Light = 0;
+		public static readonly int Hammer = 1;
+		public static readonly int Axe = 2;
+		public static readonly int Pickaxe = 3;
+		public static readonly int WetLight = 4;
+		public static readonly int WetLongDistanceThrow = 5;
+		public static readonly int Cannon = 6;
+		public static readonly int Extractinator = 7;
+		public static readonly int PaintScraper = 8;
+		public static readonly int Count = 9;
+
+		public static readonly SortedDictionary<int, Func<Item, bool>> ToolStrategyConditions = new() {
+			{ Light, ItemSets.IsTorch },
+			{ Hammer, (item) => item.hammer > 0 },
+			{ Axe, (item) => item.axe > 0 },
+			{ Pickaxe, (item) => item.pick > 0 },
+			{ WetLight, (item) => ItemSets.IsWaterTorch(item) || ItemSets.IsGlowstick(item) },
+			{ WetLongDistanceThrow, ItemSets.IsGlowstick },
+			{ Cannon, (item) => false },//Requires checking the hover tile
+			{ Extractinator, (item) => false },//Requires checking the hover tile
+			{ PaintScraper, (item) => ItemID.Sets.IsPaintScraper[item.type] },
+		};
+	}
+
+	public static class ItemSets {
+		public static bool IsEnchantable(this Item item) {
+			if (item.IsArmorItem() || item.IsWeaponItem() || item.IsAccessoryItem() || item.IsFishingPole() || item.IsTool()) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		public static bool IsWeaponItem(this Item item) {
+			if (item.NullOrAir())
+				return false;
+
+			if (IsArmorItem(item))
+				return false;
+
+			if (item.ModItem != null) {
+				string modName = item.ModItem.Mod.Name;
+				//Manually prevent calamity items from being weapons
+				if (AndroMod.calamityEnabled && modName == AndroMod.calamityModName) {
+					switch (item.ModFullName()) {
+						case "CalamityMod/WulfrumFusionCannon":
+							return false;
+					}
+				}
+
+				//Manually prevent magic storage items from being weapons
+				if (AndroMod.magicStorageEnabled && modName == AndroMod.magicStorageName) {
+					switch (item.ModFullName()) {
+						case "MagicStorage/BiomeGlobe":
+							return false;
+					}
+				}
+
+				if (AndroMod.thoriumEnabled && modName == AndroMod.thoriumModName) {
+					string modItemFullName = item.ModFullName();
+					switch (modItemFullName) {
+						case "ThoriumMod/HiveMind":
+						case "ThoriumMod/PiousBanner":
+						case "ThoriumMod/PrecisionBanner":
+							return false;
+						case "ThoriumMod/TechniqueBloodLotus":
+						case "ThoriumMod/TechniqueCobraBite":
+						case "ThoriumMod/TechniqueHiddenBlade":
+						case "ThoriumMod/TechniquePaperExplosive":
+						case "ThoriumMod/TechniqueShadowClone":
+						case "ThoriumMod/Gauze":
+							return true;
+						default:
+							if (modItemFullName.Contains("InspirationNote") || modItemFullName.Contains("Tester"))
+								return false;
+
+							break;
+					}
+
+					//Some Thorium non-weapon consumables were counting as weapons.
+					if (item.consumable && item.damage <= 0 && item.mana <= 0)
+						return false;
+				}
+
+				if (AndroMod.fargosEnabled && modName == AndroMod.fargosModName) {
+					switch (item.ModFullName()) {
+						case "Fargowiltas/BrittleBone":
+							return false;
+					}
+				}
+
+				if (AndroMod.amuletOfManyMinionsEnabled && modName == AndroMod.amuletOfManyMinionsName) {
+					List<string> aOMMNonItemNames = new() {
+						"AmuletOfManyMinions/AxolotlMinionItem",
+						"AmuletOfManyMinions/CinderHenMinionItem",
+						"AmuletOfManyMinions/WyvernFlyMinionItem",
+						"AmuletOfManyMinions/TruffleTurtleMinionItem",
+						"AmuletOfManyMinions/SmolederMinionItem",
+						"AmuletOfManyMinions/PlantPupMinionItem",
+						"AmuletOfManyMinions/LilGatorMinionItem",
+						"AmuletOfManyMinions/CloudiphantMinionItem"
+					};
+					string modItemFullName = item.ModFullName();
+					if (aOMMNonItemNames.Contains(modItemFullName) || modItemFullName.Contains("Replica"))
+						return false;
+				}
+			}
+
+			bool isWeapon;
+			switch (item.type) {
+				case ItemID.ExplosiveBunny:
+				case ItemID.TreeGlobe:
+				case ItemID.WorldGlobe:
+				case ItemID.MoonGlobe:
+					isWeapon = false;
+					break;
+				case ItemID.LawnMower:
+					isWeapon = true;
+					break;
+				default:
+					isWeapon = (item.DamageType != DamageClass.Default || item.damage > 0 || item.crit > 0) && (item.ammo == 0 || item.ammo == ItemID.Grenade);
+					break;
+			}
+
+			return isWeapon && !item.accessory;
+		}
+		public static bool IsArmorItem(this Item item) {
+			if (item.NullOrAir())
+				return false;
+
+			return !item.vanity && (item.headSlot > -1 || item.bodySlot > -1 || item.legSlot > -1);
+		}
+		public static bool IsAccessoryItem(this Item item) {
+			if (item.NullOrAir())
+				return false;
+
+			//Check for armor item is a fix for Reforge-able armor mod setting armor to accessories
+			return item.accessory && !IsArmorItem(item);
+		}
+		public static bool IsFishingPole(this Item item) {
+			if (item.NullOrAir())
+				return false;
+
+			return item.fishingPole > 0;
+		}
+		public static bool IsTool(this Item item) {
+			if (item.NullOrAir())
+				return false;
+
+			switch (item.type) {
+				case ItemID.Clentaminator:
+				case ItemID.BugNet:
+				case ItemID.GoldenBugNet:
+				case ItemID.FireproofBugNet:
+				case ItemID.BottomlessBucket:
+				case ItemID.BottomlessLavaBucket:
+				case ItemID.SuperAbsorbantSponge:
+				case ItemID.LavaAbsorbantSponge:
+				case ItemID.Clentaminator2:
+					return true;
+				default:
+					return item.mana > 0 && !IsWeaponItem(item);
+			}
+		}
+		public static bool IsBanner(this Item item, out int banner) => IsBannerItem(item.NullOrAir() ? item.type : ItemID.None, out banner);
+		public static bool IsBannerItem(this int itemType, out int banner) => ItemToBanner.TryGetValue(itemType, out banner);
+		public static bool IsBanner(this Item item) => !item.NullOrAir() && IsBannerItem(item.type);
+		public static bool IsBannerItem(this int itemType) => ItemToBanner.ContainsKey(itemType);
+		public static SortedDictionary<int, int> ItemToBanner {
+			get {
+				if (itemToBanner == null)
+					SetupItemToBanner();
+
+				return itemToBanner;
+			}
+		}
+		private static SortedDictionary<int, int> itemToBanner = null;
+		public static IEnumerable<int> AllBanners => ItemToBanner.Select(p => p.Key);
+		private static void SetupItemToBanner() {
+			itemToBanner = new();
+
+			for (int npcid = NPCID.NegativeIDCount + 1; npcid < NPCLoader.NPCCount; npcid++) {
+				NPC npc = ContentSamples.NpcsByNetId[npcid];
+				int bannerID = Item.NPCtoBanner(npc.BannerID());
+				int bannerItemID = Item.BannerToItem(bannerID);
+				if (bannerItemID >= 0 && bannerItemID < ItemLoader.ItemCount) {
+					if (!itemToBanner.TryAdd(bannerItemID, bannerID) && Debugger.IsAttached)
+						$"banner {bannerID} already exists.  current [{itemToBanner[bannerItemID].GetItemIDOrName()}], new [{bannerItemID.GetItemIDOrName()}, npc: {npc.S()}]".LogSimple();
+				}
+			}
+		}
+		public static bool IsBossTrophy(this Item item, string lowerName = null) {
+			if (item.NullOrAir())
+				return false;
+
+			if (lowerName == null)
+				lowerName = item.GetItemInternalName().ToLower();
+
+			int bossTrophyValue = Item.sellPrice(0, 1);
+			if (lowerName.EndsWith("mastertrophy")
+				&& item.useStyle == ItemUseStyleID.Swing
+				&& item.useTurn == true
+				&& item.autoReuse == true
+				&& item.consumable == true
+				&& item.createTile > -1
+				&& item.value == bossTrophyValue
+				&& item.rare == ItemRarityID.Master
+				) {
+				return true;
+			}
+
+			return false;
+		}
+		public static bool IsBossRelic(this Item item, string lowerName = null) {
+			if (item.NullOrAir())
+				return false;
+
+			if (lowerName == null)
+				lowerName = item.GetItemInternalName().ToLower();
+
+			if (lowerName.Contains("relic")
+					&& item.useStyle == ItemUseStyleID.Swing
+					&& item.useTurn
+					&& item.autoReuse
+					&& item.consumable
+					) {
+				return true;
+			}
+
+			return false;
+		}
+		public static bool IsBossSpawner(this Item item) {
+			if (ItemID.Sets.SortingPriorityBossSpawns[item.type] > -1
+					&& item.useStyle == ItemUseStyleID.HoldUp
+					&& item.consumable
+					&& item.useAnimation == 45
+					&& item.useTime == 45
+					) {
+				return true;
+			}
+
+			ItemGroupAndOrderInGroup group = new ItemGroupAndOrderInGroup(item);
+			return group.Group == ItemGroup.BossSpawners;
+		}
+		public static bool IsRope(this Item item) => !item.NullOrAir() && (ItemID.Sets.SortingPriorityRopes[item.type] != -1 && item.type != ItemID.Vine || item.type == ItemID.VineRope);
+		public static bool IsTorch(this Item item) => !item.NullOrAir() && ItemID.Sets.Torches[item.type];
+		public static bool IsWaterTorch(this Item item) => !item.NullOrAir() && ItemID.Sets.WaterTorches[item.type];
+		public static bool IsGlowstick(this Item item) => !item.NullOrAir() && ItemID.Sets.Glowsticks[item.type];
 	}
 }
