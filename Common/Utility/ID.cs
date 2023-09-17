@@ -301,6 +301,7 @@ namespace androLib.Common.Utility
 	}
 
 	public static class ToolStrategyID {
+		public static readonly int Light2ndPassGlowStickOnly = -2;
 		public static readonly int None = -1;
 		public static readonly int Light = 0;
 		public static readonly int Hammer = 1;
@@ -314,12 +315,13 @@ namespace androLib.Common.Utility
 		public static readonly int Count = 9;
 
 		public static readonly SortedDictionary<int, Func<Item, bool>> ToolStrategyConditions = new() {
-			{ Light, ItemSets.IsTorch },
+			{ Light2ndPassGlowStickOnly, (item) => ItemSets.IsGlowstick(item) },
+			{ Light, (item) => ItemSets.IsTorch(item) },
 			{ Hammer, (item) => item.hammer > 0 },
 			{ Axe, (item) => item.axe > 0 },
 			{ Pickaxe, (item) => item.pick > 0 },
-			{ WetLight, (item) => ItemSets.IsWaterTorch(item) || ItemSets.IsGlowstick(item) },
-			{ WetLongDistanceThrow, ItemSets.IsGlowstick },
+			{ WetLight, (item) => ItemSets.IsGlowstick(item) || ItemSets.ISFlareGun(item) || ItemSets.IsWaterTorch(item) },
+			{ WetLongDistanceThrow, (item) => ItemSets.ISFlareGun(item) || ItemSets.IsGlowstick(item) },
 			{ Cannon, (item) => false },//Requires checking the hover tile
 			{ Extractinator, (item) => false },//Requires checking the hover tile
 			{ PaintScraper, (item) => ItemID.Sets.IsPaintScraper[item.type] },
@@ -550,5 +552,6 @@ namespace androLib.Common.Utility
 		public static bool IsTorch(this Item item) => !item.NullOrAir() && ItemID.Sets.Torches[item.type];
 		public static bool IsWaterTorch(this Item item) => !item.NullOrAir() && ItemID.Sets.WaterTorches[item.type];
 		public static bool IsGlowstick(this Item item) => !item.NullOrAir() && ItemID.Sets.Glowsticks[item.type];
+		public static bool ISFlareGun(this Item item) => !item.NullOrAir() && item.useAmmo == ItemID.Flare;
 	}
 }
