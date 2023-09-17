@@ -23,7 +23,8 @@ namespace androLib
 		public static AndroClientConfig clientConfig = ModContent.GetInstance<AndroClientConfig>();
 		public static string ModName = ModContent.GetInstance<AndroMod>().Name;
 		public const string magicStorageName = "MagicStorage";
-		public static bool magicStorageEnabled = false;
+		public static Mod magicStroageMod;
+		public static bool magicStorageEnabled = ModLoader.TryGetMod(magicStorageName, out magicStroageMod);
 		public static string calamityModName = "CalamityMod";
 		public static Mod calamityMod;
 		public static bool calamityEnabled = ModLoader.TryGetMod(calamityModName, out calamityMod);

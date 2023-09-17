@@ -20,20 +20,14 @@ namespace androLib.ModIntegration
     [JITWhenModsEnabled(AndroMod.magicStorageName)]
     public class MagicStorageIntegration : ModSystem
     {
-        public static bool Enabled { get; private set; }
-		public static bool MagicStorageEnabledAndOpen => Enabled ? IsOpen() : false;
+		public static bool MagicStorageEnabledAndOpen => AndroMod.magicStorageEnabled ? IsOpen() : false;
         public static event Action HandleMagicStorageOnTickEvents;
-		public override void Load() {
-            Enabled = ModLoader.HasMod(AndroMod.magicStorageName);
-
-            AndroMod.magicStorageEnabled = Enabled;
-        }
         public override void PostDrawInterface(SpriteBatch spriteBatch) {
-			if (Enabled)
+			if (AndroMod.magicStorageEnabled)
                 HandleOnTickEvents();
         }
         public static bool MagicStorageIsOpen() {
-            if (!Enabled)
+            if (!AndroMod.magicStorageEnabled)
                 return false;
 
             return IsOpen();
@@ -43,7 +37,7 @@ namespace androLib.ModIntegration
                 CloseMagicStorage();
         }
         public static bool DepositToMagicStorage(IEnumerable<Item> items) {
-            if (!Enabled)
+            if (!AndroMod.magicStorageEnabled)
                 return false;
 
             return TryDepositToMagicStorage(items);
