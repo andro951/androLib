@@ -28,14 +28,32 @@ namespace androLib
 			}
 		}
 		private List<Storage> storages = null;
+		private List<Storage> unloadedStorages = new();
 		public override void SaveData(TagCompound tag) {
 			for (int i = 0; i < Storages.Count; i++) {
 				Storages[i].SaveData(tag);
+			}
+
+			foreach (Storage storage in unloadedStorages) {
+				storage.SaveData(tag);
 			}
 		}
 		public override void LoadData(TagCompound tag) {
 			for (int i = 0; i < Storages.Count; i++) {
 				Storages[i].LoadData(tag);
+			}
+
+			foreach (string key in tag.AsEnumerable().Where(p => p.Key.EndsWith(Storage.ItemsTag)).Select(k => k.Key.Substring(0, k.Key.Length - Storage.ItemsTag.Length))) {
+				bool found = false;
+				foreach (Storage storage in Storages) {
+					if (storage.GetModFullName() == key) {
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					unloadedStorages.Add(new Storage(key, tag));
 			}
 		}
 		public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {

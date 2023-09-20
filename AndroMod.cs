@@ -254,7 +254,7 @@ namespace androLib
 				if (item.favorited)
 					continue;
 
-				if (!StorageManager.TryVacuumItem(ref item, self))
+				if (!StorageManager.TryQuickStack(ref item, self))
 					GlobalVacuumBagTile.QuickStackToBags(ref item, self);
 			}
 		}
@@ -269,7 +269,7 @@ namespace androLib
 					if (item.favorited)
 						continue;
 
-					if (StorageManager.TryQuickStack(ref item)) {
+					if (StorageManager.TryRestock(ref item)) {
 						if (synchChest)
 							NetMessage.SendData(MessageID.SyncChestItem, -1, -1, null, chest, i);
 					}

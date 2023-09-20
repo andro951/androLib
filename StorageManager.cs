@@ -51,6 +51,7 @@ namespace androLib
 		public bool DisplayBagUI = false;
 		public Action SelectItemForUIOnly { get; }
 		public bool ShouldRefreshInfoAccs { get; }
+		private string modFullName;
 
 		public Storage(
 				Mod mod, 
@@ -86,37 +87,55 @@ namespace androLib
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
+			modFullName = DefaultModFullName();
 		}
 
-		public string GetModFullName() => $"{Mod.Name}_{VacuumStorageType.Name}";
+		/// <summary>
+		/// Only used to save/load data when it's not loaded via the normal way to prevent deleting unloaded mod data.
+		/// </summary>
+		/// <param name="key"></param>
+		/// <param name="tag"></param>
+		public Storage(string key, TagCompound tag) {
+			modFullName = key;
+			LoadData(tag);
+		}
+
+		public string GetModFullName() => modFullName;
+		private string DefaultModFullName() => $"{Mod.Name}_{VacuumStorageType.Name}";
+		public const string ItemsTag = "_Items";
+		public const string UILeftTag = "_UILeft";
+		public const string UITopTag = "_UITop";
+		public const string ShouldVacuumItemsTag = "_ShouldVacuumItems";
 		public void SaveData(TagCompound tag) {
 			string modFullName = GetModFullName();
-			tag[$"{modFullName}_Items"] = Items;
-			tag[$"{modFullName}_UILeft"] = UILeft;
-			tag[$"{modFullName}_UITop"] = UITop;
-			tag[$"{modFullName}_ShouldVacuumItems"] = ShouldVacuum;
+			tag[$"{modFullName}{ItemsTag}"] = Items;
+			tag[$"{modFullName}{UILeftTag}"] = UILeft;
+			tag[$"{modFullName}{UITopTag}"] = UITop;
+			tag[$"{modFullName}{ShouldVacuumItemsTag}"] = ShouldVacuum; 
 		}
 		public void LoadData(TagCompound tag) {
 			int itemCount = StorageSize;
 			string modFullName = GetModFullName();
-			if (!tag.TryGet($"{modFullName}_Items", out Item[] items))
+			if (!tag.TryGet($"{modFullName}{ItemsTag}", out Item[] items))
 				items = Enumerable.Repeat(new Item(), itemCount).ToArray();
 
 			if (items.Length < itemCount)
 				items = items.Concat(Enumerable.Repeat(new Item(), itemCount - items.Length)).ToArray();
 
-			if (items.Length > itemCount)
+			//Mod != null is checking if the bag is loaded the correct way instead of unloaded.
+			if (Mod != null && items.Length > itemCount)
 				TryShiftDownAndReduceToMaxSize(ref items, itemCount);
 
+			bool temp = !items.Where(i => !i.NullOrAir()).Any();
 			Items = items;
 			
-			int uiLeft = tag.Get<int>($"{modFullName}_UILeft");
-			int uiTop = tag.Get<int>($"{modFullName}_UITop");
+			int uiLeft = tag.Get<int>($"{modFullName}{UILeftTag}");
+			int uiTop = tag.Get<int>($"{modFullName}{UITopTag}");
 			MasterUIManager.CheckOutOfBoundsRestoreDefaultPosition(ref uiLeft, ref uiTop, UILeftDefault, UITopDefault);
 			UILeft = uiLeft;
 			UITop = uiTop;
 
-			ShouldVacuum = tag.Get<bool>($"{modFullName}_ShouldVacuumItems");
+			ShouldVacuum = tag.Get<bool>($"{modFullName}{ShouldVacuumItemsTag}");
 		}
 		private void TryShiftDownAndReduceToMaxSize(ref Item[] items, int itemCount) {
 			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
@@ -248,12 +267,7 @@ namespace androLib
 			if (validItemType != true)
 				return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
 
-			foreach (int bagItemType in bagItemTypes) {
-				int createTile = ContentSamples.ItemsByType[bagItemType].createTile;
-				if (createTile > -1 && player.adjTile[createTile])
-					return true;
-			}
-
+			//Check player inventory for this bag.
 			for (int i = 0; i < player.inventory.Length; i++) {
 				if (bagItemTypes.Contains(player.inventory[i].type)) {
 					index = i;
@@ -261,6 +275,7 @@ namespace androLib
 				}
 			}
 
+			//Check all other bags for this bag.
 			for (int j = 0; j < StorageManager.BagUIs.Count; j++) {
 				BagUI bagUI = StorageManager.BagUIs[j];
 				if (!bagUI.DisplayBagUI)
@@ -273,6 +288,17 @@ namespace androLib
 						return true;
 					}
 				}
+			}
+
+			foreach (int bagItemType in bagItemTypes) {
+				//Check adj tiles for this bag.
+				int createTile = ContentSamples.ItemsByType[bagItemType].createTile;
+				if (createTile > -1 && player.adjTile[createTile])
+					return true;
+
+				//Check if UI is open
+				if (StorageManager.VacuumStorageIndexesFromBagTypes.TryGetValue(bagItemType, out int bagID) && StorageManager.BagUIs[bagID].DisplayBagUI)
+					return true;
 			}
 
 			return false;
@@ -297,7 +323,7 @@ namespace androLib
 		#region Lists and Dictionaries
 
 		private static SortedDictionary<string, int> vacuumStorageIndexes = new();
-		private static SortedDictionary<int, int> VacuumStorageIndexesFromBagTypes {
+		public static SortedDictionary<int, int> VacuumStorageIndexesFromBagTypes {
 			get {
 				if (vacuumStorageIndexesFromBagTypes == null)
 					PopulateVacuumStorageIndexesFromBagTypes();
@@ -407,11 +433,11 @@ namespace androLib
 			}
 		}
 
-		public static bool TryVacuumItemToTile(ref Item item, Player player, int storageID) {
+		public static bool TryQuickStackItemToTile(ref Item item, Player player, int storageID) {
 			if (!ValidModID(storageID))
 				return false;
 
-			return BagUIs[storageID].TryVacuumItem(ref item, player, true, false);
+			return BagUIs[storageID].QuickStack(ref item, player, true, false);
 		}
 
 		#endregion
@@ -461,7 +487,8 @@ namespace androLib
 
 			CanVacuumItemHandler.Add((Item item, Player player) => bagUI.CanVacuumItem(item, player));
 			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
-			TryQuickStackItemHandler.Add((Item item) => bagUI.QuickStack(ref item));
+			TryRestockItemHandler.Add((Item item) => bagUI.Restock(ref item));
+			TryQuickStackItemHandler.Add((Item item, Player player) => bagUI.QuickStack(ref item, player));
 			CloseAllStorageUIEvent += () => {
 				if (bagUI.DisplayBagUI)
 					bagUI.CloseBag();
@@ -623,7 +650,7 @@ namespace androLib
 		}
 		public static TryVacuumItemFunc TryVacuumItemHandler = new();
 		public static bool TryVacuumItem(ref Item item, Player player) => TryVacuumItemHandler.Invoke(ref item, player);
-		public class TryQuickStackItemFunc
+		public class TryRestockItemFunc
 		{
 			private event Func<Item, bool> eventHandler;
 			public void Add(Func<Item, bool> func) {
@@ -634,7 +661,28 @@ namespace androLib
 					return false;
 
 				foreach (Func<Item, bool> func in eventHandler.GetInvocationList()) {
-					if (func.Invoke(item) && item.NullOrAir() || item.stack <= 0)
+					if (func.Invoke(item) && (item.NullOrAir() || item.stack <= 0))
+						return true;
+				}
+
+				return false;
+			}
+		}
+		public static TryRestockItemFunc TryRestockItemHandler = new();
+		public static bool TryRestock(ref Item item) => TryRestockItemHandler.Invoke(ref item);
+
+		public class TryQuickStackItemFunc
+		{
+			private event Func<Item, Player, bool> eventHandler;
+			public void Add(Func<Item, Player, bool> func) {
+				eventHandler += func;
+			}
+			public bool Invoke(ref Item item, Player player) {
+				if (eventHandler == null)
+					return false;
+
+				foreach (Func<Item, Player, bool> func in eventHandler.GetInvocationList()) {
+					if (func.Invoke(item, player) && (item.NullOrAir() || item.stack <= 0))
 						return true;
 				}
 
@@ -642,7 +690,7 @@ namespace androLib
 			}
 		}
 		public static TryQuickStackItemFunc TryQuickStackItemHandler = new();
-		public static bool TryQuickStack(ref Item item) => TryQuickStackItemHandler.Invoke(ref item);
+		public static bool TryQuickStack(ref Item item, Player player) => TryQuickStackItemHandler.Invoke(ref item, player);
 
 		public static event Action CloseAllStorageUIEvent;
 		public static void CloseAllStorageUI() {

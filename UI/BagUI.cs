@@ -193,7 +193,7 @@ namespace androLib.UI
 				}
 
 				UITextData thisButton = new(GetUI_ID(Bag_UI_ID.BagLootAll) + buttonIndex, buttonsLeft, currentButtonTop, text, scale, color, ancorBotomLeft: true);
-				 textButtons.Add(thisButton);
+				textButtons.Add(thisButton);
 				longestButtonNameWidth = Math.Max(longestButtonNameWidth, thisButton.Width);
 				currentButtonTop += (int)(thisButton.BaseHeight * 0.9f);
 			}
@@ -345,7 +345,7 @@ namespace androLib.UI
 					break;
 
 				ref Item item = ref inventory[inventoryIndex];
-				if (! usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
+				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
 					// slotData[inventoryIndex] = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
 					UIItemSlotData slotData =  slotDatas[inventoryIndex];
 					if (slotData.MouseHovering()) {
@@ -398,17 +398,19 @@ namespace androLib.UI
 			}
 
 			//Text Buttons Draw
+			int bagUIID = GetUI_ID(Bag_UI_ID.BagLootAll);
 			for (int buttonIndex = 0; buttonIndex <  textButtons.Count; buttonIndex++) {
 				UITextData textButton =  textButtons[buttonIndex];
+				int buttonID =  textButton.ID - bagUIID;
 				//textButton.Draw(spriteBatch);
 				if (MasterUIManager.MouseHovering(textButton, true)) {
-					ButtonScale[buttonIndex] += 0.05f;
+					ButtonScale[buttonID] += 0.05f;
 
-					if (ButtonScale[buttonIndex] > buttonScaleMaximum)
-						ButtonScale[buttonIndex] = buttonScaleMaximum;
+					if (ButtonScale[buttonID] > buttonScaleMaximum)
+						ButtonScale[buttonID] = buttonScaleMaximum;
 
 					if (MasterUIManager.LeftMouseClicked) {
-						switch (buttonIndex) {
+						switch (buttonID) {
 							case BagButtonID.LootAll:
 								LootAll();
 								break;
@@ -416,7 +418,7 @@ namespace androLib.UI
 								DepositAll(Main.LocalPlayer.inventory);
 								break;
 							case BagButtonID.QuickStack:
-								QuickStack(Main.LocalPlayer.inventory);
+								QuickStack(Main.LocalPlayer.inventory, Main.LocalPlayer);
 								break;
 							case BagButtonID.Sort:
 								Sort();
@@ -436,10 +438,10 @@ namespace androLib.UI
 					}
 				}
 				else {
-					ButtonScale[buttonIndex] -= 0.05f;
+					ButtonScale[buttonID] -= 0.05f;
 
-					if (ButtonScale[buttonIndex] < buttonScaleMinimum)
-						ButtonScale[buttonIndex] = buttonScaleMinimum;
+					if (ButtonScale[buttonID] < buttonScaleMinimum)
+						ButtonScale[buttonID] = buttonScaleMinimum;
 				}
 			}
 
@@ -584,7 +586,7 @@ namespace androLib.UI
 		}
 		public bool DepositAll(ref Item item, bool playSound = true) => DepositAll(new Item[] { item }, playSound);
 		public bool DepositAll(Item[] inv, bool playSound = true) {
-			bool transferedAnyItem = QuickStack(inv, false);
+			bool transferedAnyItem = Restock(inv, false);
 			int storageIndex = 0;
 			Item[] oreBagInventory = Inventory;
 			for (int i = 0; i < inv.Length; i++) {
@@ -622,6 +624,9 @@ namespace androLib.UI
 		}
 		public bool VacuumAllowed(Item item) => Storage.IsVacuumBag == true || Storage.IsVacuumBag == null && (ContainsItem(item) || ItemSlot.ShiftInUse && MasterUIManager.LeftMouseClicked && DisplayBagUI);
 		public bool ContainsItem(Item item) {
+			if (item.NullOrAir())
+				return false;
+
 			Item[] inv = Inventory;
 			for (int i = 0; i < inv.Length; i++) {
 				if (inv[i].type == item.type)
@@ -630,8 +635,26 @@ namespace androLib.UI
 
 			return false;
 		}
-		public bool QuickStack(ref Item item) => QuickStack(new Item[] { item });
-		public bool QuickStack(Item[] inv, bool playSound = true) {
+		public bool QuickStack(ref Item item, Player player, bool ignoreTile = false, bool playSound = true) {
+			if (ContainsItem(item))
+				return TryVacuumItem(ref item, player, ignoreTile, playSound);
+
+			return false;
+		}
+		public void QuickStack(Item[] inv, Player player) {
+			for (int i = 0; i < inv.Length; i++) {
+				ref Item item = ref inv[i];
+				if (item.NullOrAir())
+					continue;
+
+				if (item.favorited)
+					continue;
+
+				QuickStack(ref item, player);
+			}
+		}
+		public bool Restock(ref Item item) => Restock(new Item[] { item });
+		public bool Restock(Item[] inv, bool playSound = true) {
 			Item[] oreBagInventory = Inventory;
 			bool transferedAnyItem = false;
 			SortedDictionary<int, List<int>> nonAirItemsInStorage = new();

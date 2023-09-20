@@ -65,6 +65,11 @@ namespace androLib
 		public const string AnyRareGem = "AnyRareGem";
 		public const string AnyAlignedSoul = "AnyAlignedSoul";
 		public const string Workbenches = "Workbenches";
+		public const string StarsAboveAnyKingSlimeEssence = "AnyKingSlimeEssence";
+		public const string StarsAboveAnyEyeOfCthulhuEssence = "AnyEyeOfCthulhuEssence";
+		public const string StarsAboveAnyEaterOfWorldsOrBrainOfCthulhuEssence = "AnyEaterOfWorldsOrBrainOfCthulhuEssence";
+		public const string StarsAboveAnyQueenBeeEssence = "AnyQueenBeeEssence";
+		public const string StarsAboveAnySkeletronEssence = "AnySkeletronEssence";
 		public override void AddRecipeGroups() {
 			RecipeGroup group = new RecipeGroup(() => AnyCommonGem.AddSpaces(), GemSets.CommonGems.ToArray());
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyCommonGem}", group);
@@ -122,6 +127,101 @@ namespace androLib
 				ItemID.SoulofNight
 			});
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyAlignedSoul}", group);
+
+			if (AndroMod.starsAboveEnabled) {
+				//King Slime
+				string[] kingSlimeEssences = {
+					"EssenceOfTheAegis",
+					"EssenceOfStyle"
+				};
+
+				List<int> kingSlimeEssenceTypes = new();
+				foreach (string essenceName in kingSlimeEssences) {
+					if (AndroMod.starsAboveMod.TryFind(essenceName, out ModItem essenceModItem))
+						kingSlimeEssenceTypes.Add(essenceModItem.Type);
+				}
+
+				if (kingSlimeEssenceTypes.Count > 0) {
+					group = new RecipeGroup(() => StarsAboveAnyKingSlimeEssence.AddSpaces(), kingSlimeEssenceTypes.ToArray());
+					RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{StarsAboveAnyKingSlimeEssence}", group);
+				}
+
+				//Eye of Cthulhu
+				string[] eyeOfCthulhuEssences = {
+					"EssenceOfTheDarkMoon",
+					"EssenceOfTheGardener"
+				};
+
+				List<int> eyeOfCthulhuEssenceTypes = new();
+				foreach (string essenceName in eyeOfCthulhuEssences) {
+					if (AndroMod.starsAboveMod.TryFind(essenceName, out ModItem essenceModItem))
+						eyeOfCthulhuEssenceTypes.Add(essenceModItem.Type);
+				}
+
+				if (eyeOfCthulhuEssenceTypes.Count > 0) {
+					group = new RecipeGroup(() => StarsAboveAnyEyeOfCthulhuEssence.AddSpaces(), eyeOfCthulhuEssenceTypes.ToArray());
+					RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{StarsAboveAnyEyeOfCthulhuEssence}", group);
+				}
+
+				//Queen Bee
+				string[] queenBeeEssences = {
+					"EssenceOfFingers",
+					"EssenceOfBitterfrost"
+				};
+
+				List<int> queenBeeEssenceTypes = new();
+				foreach (string essenceName in queenBeeEssences) {
+					if (AndroMod.starsAboveMod.TryFind(essenceName, out ModItem essenceModItem))
+						queenBeeEssenceTypes.Add(essenceModItem.Type);
+				}
+
+				if (queenBeeEssenceTypes.Count > 0) {
+					group = new RecipeGroup(() => StarsAboveAnyQueenBeeEssence.AddSpaces(), queenBeeEssenceTypes.ToArray());
+					RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{StarsAboveAnyQueenBeeEssence}", group);
+				}
+
+				//Eater of Worlds or Brain of Cthulhu
+				string[] eaterOfWorldsOrBrainOfCthulhuEssences = {
+					"EssenceOfAsh",
+					"EssenceOfTheAnomaly",
+					"EssenceOfTheSoldier",
+					"EssenceOfOuterGods"
+				};
+
+				List<int> eaterOfWorldsOrBrainOfCthulhuEssenceTypes = new();
+				foreach (string essenceName in eaterOfWorldsOrBrainOfCthulhuEssences) {
+					if (AndroMod.starsAboveMod.TryFind(essenceName, out ModItem essenceModItem))
+						eaterOfWorldsOrBrainOfCthulhuEssenceTypes.Add(essenceModItem.Type);
+				}
+
+				if (eaterOfWorldsOrBrainOfCthulhuEssenceTypes.Count > 0) {
+					group = new RecipeGroup(() => StarsAboveAnyEaterOfWorldsOrBrainOfCthulhuEssence.AddSpaces(), eaterOfWorldsOrBrainOfCthulhuEssenceTypes.ToArray());
+					RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{StarsAboveAnyEaterOfWorldsOrBrainOfCthulhuEssence}", group);
+				}
+
+				//Skeletron
+				string[] skeletronEssences = {
+					"EssenceOfTheFreeshooter",
+					"EssenceOfThePegasus",
+					"EssenceOfTheOcean",
+					"EssenceOfTheSharpshooter",
+					"EssenceOfTheAutomaton",
+					"EssenceOfMisery",
+					"EssenceOfNanomachines",
+					"EssenceOfTheHallownest"
+				};
+
+				List<int> skeletronEssenceTypes = new();
+				foreach (string essenceName in skeletronEssences) {
+					if (AndroMod.starsAboveMod.TryFind(essenceName, out ModItem essenceModItem))
+						skeletronEssenceTypes.Add(essenceModItem.Type);
+				}
+
+				if (skeletronEssenceTypes.Count > 0) {
+					group = new RecipeGroup(() => StarsAboveAnySkeletronEssence.AddSpaces(), skeletronEssenceTypes.ToArray());
+					RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{StarsAboveAnySkeletronEssence}", group);
+				}
+			}
 		}
 	}
 }
