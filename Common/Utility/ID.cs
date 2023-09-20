@@ -553,5 +553,30 @@ namespace androLib.Common.Utility
 		public static bool IsWaterTorch(this Item item) => !item.NullOrAir() && ItemID.Sets.WaterTorches[item.type];
 		public static bool IsGlowstick(this Item item) => !item.NullOrAir() && ItemID.Sets.Glowsticks[item.type];
 		public static bool ISFlareGun(this Item item) => !item.NullOrAir() && item.useAmmo == ItemID.Flare;
+		public static SortedSet<int> RequiredTiles {
+			get {
+				if (requiredTiles == null) {
+					requiredTiles = new();
+
+					for (int i = 0; i < Main.recipe.Length; i++) {
+						Recipe r = Main.recipe[i];
+
+						if (r.createItem.NullOrAir())
+							continue;
+
+						foreach (int tile in r.requiredTile) {
+							if (tile < TileID.Dirt)
+								continue;
+
+							requiredTiles.Add(tile);
+						}
+					}
+				}
+
+				return requiredTiles;
+			}
+		}
+		private static SortedSet<int> requiredTiles = null;
+		public static bool IsRequiredTile(this Item item) => !item.NullOrAir() && item.createTile > -1 && RequiredTiles.Contains(item.createTile);
 	}
 }
