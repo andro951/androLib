@@ -497,9 +497,7 @@ namespace androLib.UI
 				}
 			}
 
-			if (Storage.HasSelectItemForUIOnlyFunc()) {
-				selectedItemSlots = new();
-			}
+			selectedItemSlots.Clear();
 		}
 
 
@@ -720,10 +718,8 @@ namespace androLib.UI
 		}
 		public void AddSelectedItemSlot(int selectedItemSlot, int context) => selectedItemSlots.TryAdd(selectedItemSlot, context);
 		private void UpdateSelectedItemSlots() {
-			if (selectedItemSlots.Count == 0) {
-				Storage.SelectItemSlotFunc();
-			}
-			else if (selectedItemSlots.Count == 1) {
+			Storage.SelectItemSlotFunc();
+			if (selectedItemSlots.Count == 1) {
 				Item selectedItem = Inventory[selectedItemSlots.First().Key];
 				if (selectedItem.stack < 1)
 					selectedItem.favorited = false;

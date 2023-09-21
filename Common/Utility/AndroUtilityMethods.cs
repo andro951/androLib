@@ -24,7 +24,9 @@ namespace androLib.Common.Utility
 		#region General
 
 		public static Item CSI(this int type) => ContentSamples.ItemsByType[type];
+        public static Item CSI(this short type) => ContentSamples.ItemsByType[type];
 		public static NPC CSNPC(this int netID) => ContentSamples.NpcsByNetId[netID];
+        public static NPC CSNPC(this short netID) => ContentSamples.NpcsByNetId[netID];
 		public static void ReplaceItemWithCoins(ref Item item, int coins) {
             int coinType = ItemID.PlatinumCoin;
             int coinValue = 1000000;
@@ -50,18 +52,18 @@ namespace androLib.Common.Utility
                     player.QuickSpawnItem(player.GetSource_GiftOrReward(), ItemID.CopperCoin + i, coins);
             }
         }
-		public static bool AnyFavoritedItem(this IEnumerable<Item> items) {
+		public static bool AnyFavoritedItem(this IEnumerable<Item> items, Func<Item, bool> doesntCountTowardsTotal = null) {
 			foreach (Item item in items) {
 				if (item.NullOrAir())
 					continue;
 
-				if (item?.favorited == true)
+				if (item.favorited == true && (doesntCountTowardsTotal == null || !doesntCountTowardsTotal(item)))
 					return true;
 			}
 
 			return false;
 		}
-        public static bool AnyFavoritedItem(this IEnumerable<KeyValuePair<int, Item>> indexItemsPairs) => indexItemsPairs.Select(p => p.Value).AnyFavoritedItem();
+        public static bool AnyFavoritedItem(this IEnumerable<KeyValuePair<int, Item>> indexItemsPairs, Func<Item, bool> doesntCountTowardsTotal) => indexItemsPairs.Select(p => p.Value).AnyFavoritedItem();
 
         /// <summary>
 		/// Randomly selects an item from the list if the chance is higher than the randomly generated float.<br/>

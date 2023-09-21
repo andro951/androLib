@@ -52,6 +52,8 @@ namespace androLib
 		public Action SelectItemForUIOnly { get; }
 		public bool ShouldRefreshInfoAccs { get; }
 		private string modFullName;
+		private int myLastBagLocation = -1;
+		private int myLastIndexInTheBag = -1;
 
 		public Storage(
 				Mod mod, 
@@ -245,12 +247,18 @@ namespace androLib
 		}
 		public static readonly int RequiredItemNotFound = -1;
 		public static readonly int ReuiredItemInABagStartingIndex = -2;
-		public Item GetItemFromHasRequiredItemToUseStorageIndex(Player player, int hasRequiredItemToUseStorageIndex) {
+		public static Item GetItemFromHasRequiredItemToUseStorageIndex(Player player, int lastBagUIFoundIn, int hasRequiredItemToUseStorageIndex) {
 			if (hasRequiredItemToUseStorageIndex > RequiredItemNotFound)
 				return player.inventory[hasRequiredItemToUseStorageIndex];
 
+			if (lastBagUIFoundIn < 0)
+				return null;
+
 			int index = ItemsIndexFromHasRequiredItemToUseStorageIndex(hasRequiredItemToUseStorageIndex);
-			return Items[index];
+			if (index < 0)
+				return null;
+
+			return StoragePlayer.LocalStoragePlayer.Storages[lastBagUIFoundIn].Items[index];
 		}
 		public static int ItemsIndexFromHasRequiredItemToUseStorageIndex(int hasRequiredItemToUseStorageIndex) => -(hasRequiredItemToUseStorageIndex - ReuiredItemInABagStartingIndex);
 		/// <summary>
@@ -267,10 +275,29 @@ namespace androLib
 			if (validItemType != true)
 				return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
 
+			Item lastLocationItem = GetItemFromHasRequiredItemToUseStorageIndex(player, myLastBagLocation, myLastIndexInTheBag);
+			if (!lastLocationItem.NullOrAir()) {
+				bool inPlayerInventory = myLastIndexInTheBag > RequiredItemNotFound;
+				foreach (int bagItemType in bagItemTypes) {
+					if (bagItemType == lastLocationItem.type) {
+						//Bag is in player's inventory or item is in a bag and this bag's UI is open or that bag's UI is open.
+						bool canUse = inPlayerInventory || StorageManager.VacuumStorageIndexesFromBagTypes.TryGetValue(bagItemType, out int bagID) && StorageManager.BagUIs[bagID].DisplayBagUI || myLastBagLocation > -1 && StorageManager.BagUIs[myLastBagLocation].DisplayBagUI;
+						if (!canUse)
+							continue;
+
+						bagFoundInID = myLastBagLocation;
+						index = myLastIndexInTheBag;
+						return true;
+					}
+				}
+			}
+			
 			//Check player inventory for this bag.
 			for (int i = 0; i < player.inventory.Length; i++) {
 				if (bagItemTypes.Contains(player.inventory[i].type)) {
 					index = i;
+					myLastBagLocation = bagFoundInID;
+					myLastIndexInTheBag = index;
 					return true;
 				}
 			}
@@ -285,6 +312,8 @@ namespace androLib
 					if (bagItemTypes.Contains(bagUI.Storage.Items[i].type)) {
 						index = -i + ReuiredItemInABagStartingIndex;
 						bagFoundInID = j;
+						myLastBagLocation = bagFoundInID;
+						myLastIndexInTheBag = index;
 						return true;
 					}
 				}
@@ -293,13 +322,15 @@ namespace androLib
 			foreach (int bagItemType in bagItemTypes) {
 				//Check adj tiles for this bag.
 				int createTile = ContentSamples.ItemsByType[bagItemType].createTile;
-				if (createTile > -1 && player.adjTile[createTile])
+				if (createTile > -1 && player.adjTile[createTile]) {
+					myLastBagLocation = -1;
+					myLastIndexInTheBag = RequiredItemNotFound;
 					return true;
-
-				//Check if UI is open
-				if (StorageManager.VacuumStorageIndexesFromBagTypes.TryGetValue(bagItemType, out int bagID) && StorageManager.BagUIs[bagID].DisplayBagUI)
-					return true;
+				}
 			}
+
+			myLastBagLocation = -1;
+			myLastIndexInTheBag = RequiredItemNotFound;
 
 			return false;
 		}

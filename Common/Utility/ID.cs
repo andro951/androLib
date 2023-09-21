@@ -468,7 +468,7 @@ namespace androLib.Common.Utility
 					return item.mana > 0 && !IsWeaponItem(item);
 			}
 		}
-		public static bool IsBanner(this Item item, out int banner) => IsBannerItem(item.NullOrAir() ? item.type : ItemID.None, out banner);
+		public static bool IsBanner(this Item item, out int banner) => IsBannerItem(!item.NullOrAir() ? item.type : ItemID.None, out banner);
 		public static bool IsBannerItem(this int itemType, out int banner) => ItemToBanner.TryGetValue(itemType, out banner);
 		public static bool IsBanner(this Item item) => !item.NullOrAir() && IsBannerItem(item.type);
 		public static bool IsBannerItem(this int itemType) => ItemToBanner.ContainsKey(itemType);
@@ -489,9 +489,9 @@ namespace androLib.Common.Utility
 				NPC npc = ContentSamples.NpcsByNetId[npcid];
 				int bannerID = Item.NPCtoBanner(npc.BannerID());
 				int bannerItemID = Item.BannerToItem(bannerID);
-				if (bannerItemID >= 0 && bannerItemID < ItemLoader.ItemCount) {
+				if (bannerItemID > ItemID.None && bannerItemID < ItemLoader.ItemCount && bannerID > 0) {
 					if (!itemToBanner.TryAdd(bannerItemID, bannerID) && Debugger.IsAttached)
-						$"banner {bannerID} already exists.  current [{itemToBanner[bannerItemID].GetItemIDOrName()}], new [{bannerItemID.GetItemIDOrName()}, npc: {npc.S()}]".LogSimple();
+						$"banner {bannerID} already exists.  current [{ContentSamples.NpcsByNetId[Item.BannerToNPC(itemToBanner[bannerItemID])].S()}], new [{bannerItemID.GetItemIDOrName()}, npc: {npc.S()}]".LogSimple();
 				}
 			}
 		}
@@ -578,5 +578,108 @@ namespace androLib.Common.Utility
 		}
 		private static SortedSet<int> requiredTiles = null;
 		public static bool IsRequiredTile(this Item item) => !item.NullOrAir() && item.createTile > -1 && RequiredTiles.Contains(item.createTile);
+		private static void Campfire(SceneMetrics sceneMetrics) => sceneMetrics.HasCampfire = true;
+		private static void CatBast(SceneMetrics sceneMetrics) => sceneMetrics.HasCatBast = true;
+		private static void HeartLantern(SceneMetrics sceneMetrics) => sceneMetrics.HasHeartLantern = true;
+		private static void StarInBottle(SceneMetrics sceneMetrics) => sceneMetrics.HasStarInBottle = true;
+		private static void Sunflower(SceneMetrics sceneMetrics) => sceneMetrics.HasSunflower = true;
+		private static void GardenGnome(SceneMetrics sceneMetrics) => sceneMetrics.HasGardenGnome = true;
+		private static void PeaceCandle(SceneMetrics sceneMetrics) => sceneMetrics.PeaceCandleCount++;
+		private static void WaterCandle(SceneMetrics sceneMetrics) => sceneMetrics.WaterCandleCount++;
+		private static void ShadowCandle(SceneMetrics sceneMetrics) =>	sceneMetrics.ShadowCandleCount++;
+		private static bool HasCampfire(SceneMetrics sceneMetrics) => sceneMetrics.HasCampfire;
+		private static bool HasCatBast(SceneMetrics sceneMetrics) => sceneMetrics.HasCatBast;
+		private static bool HasHeartLantern(SceneMetrics sceneMetrics) => sceneMetrics.HasHeartLantern;
+		private static bool HasStarInBottle(SceneMetrics sceneMetrics) => sceneMetrics.HasStarInBottle;
+		private static bool HasSunflower(SceneMetrics sceneMetrics) => sceneMetrics.HasSunflower;
+		private static bool HasGardenGnome(SceneMetrics sceneMetrics) => sceneMetrics.HasGardenGnome;
+		private static bool HasPeaceCandle(SceneMetrics sceneMetrics) => sceneMetrics.PeaceCandleCount > 0;
+		private static bool HasWaterCandle(SceneMetrics sceneMetrics) => sceneMetrics.WaterCandleCount > 0;
+		private static bool HasShadowCandle(SceneMetrics sceneMetrics) => sceneMetrics.ShadowCandleCount > 0;
+		private static void SetupPassiveBuffTileEffectDictionaries() {
+			passiveBuffTileEffects = new() {
+				{ ItemID.CatBast, CatBast },
+				{ ItemID.HeartLantern, HeartLantern },
+				{ ItemID.StarinaBottle, StarInBottle },
+				{ ItemID.Sunflower, Sunflower },
+				{ ItemID.GardenGnome, GardenGnome },
+				{ ItemID.PeaceCandle, PeaceCandle },
+				{ ItemID.WaterCandle, WaterCandle },
+				{ ItemID.ShadowCandle, ShadowCandle },
+			};
+
+			passiveBuffTileEffectsAlreadyActive = new() {
+				{ ItemID.CatBast, HasCatBast },
+				{ ItemID.HeartLantern, HasHeartLantern },
+				{ ItemID.StarinaBottle, HasStarInBottle },
+				{ ItemID.Sunflower, HasSunflower },
+				{ ItemID.GardenGnome, HasGardenGnome },
+				{ ItemID.PeaceCandle, HasPeaceCandle },
+				{ ItemID.WaterCandle, HasWaterCandle },
+				{ ItemID.ShadowCandle, HasShadowCandle },
+			};
+
+			int setCount = TileID.Sets.Campfire.Length;
+			foreach (Item item in ContentSamples.ItemsByType.Select(p => p.Value)) {
+				if (item.createTile > -1 && item.createTile < setCount) {
+					if (TileID.Sets.Campfire[item.createTile]) {
+						passiveBuffTileEffects.Add(item.type, Campfire);
+						passiveBuffTileEffectsAlreadyActive.Add(item.type, HasCampfire);
+					}
+				}
+			}
+		}
+		public static SortedDictionary<int, Action<SceneMetrics>> PassiveBuffTileEffects {
+			get {
+				if (passiveBuffTileEffects == null)
+					SetupPassiveBuffTileEffectDictionaries();
+
+				return passiveBuffTileEffects;
+			}
+		}
+		public static SortedDictionary<int, Action<SceneMetrics>> passiveBuffTileEffects = null;
+		public static SortedDictionary<int, Func<SceneMetrics, bool>> PassiveBuffTileEffectsAlreadyActive {
+			get {
+				if (passiveBuffTileEffectsAlreadyActive == null)
+					SetupPassiveBuffTileEffectDictionaries();
+
+				return passiveBuffTileEffectsAlreadyActive;
+			}
+		}
+		public static SortedDictionary<int, Func<SceneMetrics, bool>> passiveBuffTileEffectsAlreadyActive = null;
+		public static bool IsPassiveBuffTile(this Item item, out Action<SceneMetrics> buff) {
+			if (!item.NullOrAir() && PassiveBuffTileEffects.TryGetValue(item.type, out buff))
+				return true;
+
+			buff = null;
+			return false;
+		}
+		public static bool IsPassiveBuffTile(this Item item) => PassiveBuffTileEffects.ContainsKey(item.type);
+		private static SortedSet<int> passiveBuffCandles = new() {
+			ItemID.WaterCandle,
+			ItemID.PeaceCandle,
+			ItemID.ShadowCandle,
+		};
+		public static bool IsPassiveBuffCandle(this Item item) => passiveBuffCandles.Contains(item.type);
+		public static bool PassiveBuffTileIsActive(this Item item, SceneMetrics sceneMetrics) {
+			if (!PassiveBuffTileEffectsAlreadyActive.TryGetValue(item.type, out Func<SceneMetrics, bool> active))
+				return false;
+
+			if (!active(sceneMetrics))
+				return false;
+
+			return true;
+		}
+		public static SortedSet<int> Buckets = new() {
+			ItemID.EmptyBucket,
+			ItemID.WaterBucket,
+			ItemID.LavaBucket,
+			ItemID.HoneyBucket,
+			ItemID.BottomlessBucket,
+			ItemID.BottomlessLavaBucket,
+			ItemID.BottomlessHoneyBucket,
+			ItemID.BottomlessShimmerBucket
+		};
+		public static bool IsBucket(this Item item) => !item.NullOrAir() && Buckets.Contains(item.type);
 	}
 }

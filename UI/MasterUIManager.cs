@@ -353,6 +353,12 @@ namespace androLib.UI
 				//case ItemSlotContextID.Orange when item.favorited:
 				//	texture = (Texture2D)ModContent.Request<Texture2D>("androLib/UI/Sprites/ItemSlotBack_Orange(Favorited)");
 				//	break;
+				case ItemSlotContextID.BrightGreenSelected when !item.favorited:
+					texture = (Texture2D)ModContent.Request<Texture2D>("androLib/UI/Sprites/Inventory_Back_BrightGreen");
+					break;
+				case ItemSlotContextID.BrightGreenSelected when item.favorited:
+					texture = (Texture2D)ModContent.Request<Texture2D>("androLib/UI/Sprites/Inventory_Back_BrightGreen(Favorited)");
+					break;
 				case ItemSlotContextID.Red:
 					texture = TextureAssets.InventoryBack5.Value;
 					break;
@@ -704,6 +710,7 @@ namespace androLib.UI
 	}
 	public static class ItemSlotContextID
 	{
+		public const int BrightGreenSelected = -3;
 		//public const int Orange = -2;
 		public const int MarkedTrash = -1;
 		public const int Normal = 0;
