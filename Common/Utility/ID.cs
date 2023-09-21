@@ -11,6 +11,8 @@ using androLib.Common.Globals;
 using Terraria.ModLoader;
 using System.Diagnostics;
 using static Terraria.ID.ContentSamples.CreativeHelper;
+using rail;
+using Terraria.Audio;
 
 namespace androLib.Common.Utility
 {
@@ -578,6 +580,9 @@ namespace androLib.Common.Utility
 		}
 		private static SortedSet<int> requiredTiles = null;
 		public static bool IsRequiredTile(this Item item) => !item.NullOrAir() && item.createTile > -1 && RequiredTiles.Contains(item.createTile);
+
+		#region Passive Tile Buffs
+
 		private static void Campfire(SceneMetrics sceneMetrics) => sceneMetrics.HasCampfire = true;
 		private static void CatBast(SceneMetrics sceneMetrics) => sceneMetrics.HasCatBast = true;
 		private static void HeartLantern(SceneMetrics sceneMetrics) => sceneMetrics.HasHeartLantern = true;
@@ -681,5 +686,101 @@ namespace androLib.Common.Utility
 			ItemID.BottomlessShimmerBucket
 		};
 		public static bool IsBucket(this Item item) => !item.NullOrAir() && Buckets.Contains(item.type);
+
+		#endregion
+
+		#region Active Tile Buffs
+
+		public const int InfiniteBuffDuration = 108000;
+		public const int SliceOfCakeBuffDuration = 7200;
+		private static void AmmoBox(Player player) => player.AddBuff(BuffID.AmmoBox, InfiniteBuffDuration);
+		private static void BewitchingTable(Player player) => player.AddBuff(BuffID.Bewitched, InfiniteBuffDuration);
+		private static void CrystalBall(Player player) => player.AddBuff(BuffID.Clairvoyance, InfiniteBuffDuration);
+		private static void SharpeningStation(Player player) => player.AddBuff(BuffID.Sharpened, InfiniteBuffDuration);
+		private static void WarTable(Player player) => player.AddBuff(BuffID.WarTable, InfiniteBuffDuration);
+		private static void SliceOfCake(Player player) => player.AddBuff(BuffID.SugarRush, SliceOfCakeBuffDuration);
+		private static bool HasAmmoBox(Player player) => player.HasBuff(BuffID.AmmoBox);
+		private static bool HasBewitchingTable(Player player) => player.HasBuff(BuffID.Bewitched);
+		private static bool HasCrystalBall(Player player) => player.HasBuff(BuffID.Clairvoyance);
+		private static bool HasSharpeningStation(Player player) => player.HasBuff(BuffID.Sharpened);
+		private static bool HasWarTable(Player player) => player.HasBuff(BuffID.WarTable);
+		private static bool HasSliceOfCake(Player player) => player.HasBuff(BuffID.SugarRush);
+		private static void AmmoBoxSound(Player player) => SoundEngine.PlaySound(SoundID.Item149, player.position);
+		private static void BewitchingTableSound(Player player) => SoundEngine.PlaySound(SoundID.Item4, player.position);
+		private static void CrystalBallSound(Player player) => SoundEngine.PlaySound(SoundID.Item4, player.position);
+		private static void SharpeningStationSound(Player player) => SoundEngine.PlaySound(SoundID.Item37, player.position);
+		private static void WarTableSound(Player player) => SoundEngine.PlaySound(SoundID.Item4, player.position);
+		private static void SliceOfCakeSound(Player player) => SoundEngine.PlaySound(SoundID.Item2, player.position);
+		private static void SetupActiveBuffTileEffectDictionaries() {
+			activeBuffTileEffects = new() {
+				{ ItemID.AmmoBox, AmmoBox },
+				{ ItemID.BewitchingTable, BewitchingTable },
+				{ ItemID.CrystalBall, CrystalBall },
+				{ ItemID.SharpeningStation, SharpeningStation },
+				{ ItemID.WarTable, WarTable },
+				{ ItemID.SliceOfCake, SliceOfCake },
+			};
+
+			activeBuffTileEffectsAlreadyActive = new() {
+				{ ItemID.AmmoBox, HasAmmoBox },
+				{ ItemID.BewitchingTable, HasBewitchingTable },
+				{ ItemID.CrystalBall, HasCrystalBall },
+				{ ItemID.SharpeningStation, HasSharpeningStation },
+				{ ItemID.WarTable, HasWarTable },
+				{ ItemID.SliceOfCake, HasSliceOfCake },
+			};
+
+			activeBuffTileSounds = new() {
+				{ ItemID.AmmoBox, AmmoBoxSound },
+				{ ItemID.BewitchingTable, BewitchingTableSound },
+				{ ItemID.CrystalBall, CrystalBallSound },
+				{ ItemID.SharpeningStation, SharpeningStationSound },
+				{ ItemID.WarTable, WarTableSound },
+				{ ItemID.SliceOfCake, SliceOfCakeSound },
+			};
+		}
+		public static SortedDictionary<int, Action<Player>> ActiveBuffTileEffects {
+			get {
+				if (activeBuffTileEffects == null)
+					SetupActiveBuffTileEffectDictionaries();
+
+				return activeBuffTileEffects;
+			}
+		}
+		public static SortedDictionary<int, Action<Player>> activeBuffTileEffects = null;
+		public static SortedDictionary<int, Func<Player, bool>> ActiveBuffTileEffectsAlreadyActive {
+			get {
+				if (activeBuffTileEffectsAlreadyActive == null)
+					SetupActiveBuffTileEffectDictionaries();
+
+				return activeBuffTileEffectsAlreadyActive;
+			}
+		}
+		public static SortedDictionary<int, Func<Player, bool>> activeBuffTileEffectsAlreadyActive = null;
+		public static SortedDictionary<int, Action<Player>> ActiveBuffTileSounds {
+			get {
+				if (activeBuffTileSounds == null)
+					SetupActiveBuffTileEffectDictionaries();
+
+				return activeBuffTileSounds;
+			}
+		}
+		public static SortedDictionary<int, Action<Player>> activeBuffTileSounds = null;
+		public static bool IsActiveBuffTile(this Item item, out Action<Player> buff) {
+			if (!item.NullOrAir() && ActiveBuffTileEffects.TryGetValue(item.type, out buff))
+				return true;
+
+			buff = null;
+			return false;
+		}
+		public static bool IsActiveBuffTile(this Item item) => !item.NullOrAir() && ActiveBuffTileEffects.ContainsKey(item.type);
+		public static bool IsActiveBuffTileAndHasBuff(this Item item, Player player) => IsActiveBuffTile(item) && HasActiveTileBuff(item, player);
+		public static bool HasActiveTileBuff(this Item item, Player player) => !item.NullOrAir() && ActiveBuffTileEffectsAlreadyActive.TryGetValue(item.type, out Func<Player, bool> func) && func(player);
+		public static void PlayActiveBuffTileSound(this Item item, Player player) {
+			if (!item.NullOrAir() && ActiveBuffTileSounds.TryGetValue(item.type, out Action<Player> sound))
+				sound(player);
+		}
+
+		#endregion
 	}
 }

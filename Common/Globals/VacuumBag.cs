@@ -29,7 +29,12 @@ namespace androLib.Common.Globals
 				return;
 
 			if (StorageManager.BagUIs[bagStorageID].DisplayBagUI && Main.LocalPlayer.chest == -1) {
-				bagUI.CloseBag(true);
+				if (Main.playerInventory) {
+					bagUI.CloseBag(true);
+				}
+				else {
+					Main.playerInventory = true;
+				}
 			}
 			else {
 				bagUI.OpenBag();
