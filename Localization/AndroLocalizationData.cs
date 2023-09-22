@@ -53,33 +53,23 @@ namespace androLib.Localization
 							dict: new() {
 
 						}) },
-						{ L_ID1.Config.ToString(), new(children: new() {
-							{ nameof(AndroClientConfig.UITransparency), new(dict: new() {
-								{ L_ID3.Label.ToString(), nameof(AndroClientConfig.UITransparency).AddSpaces() }
+						{ L_ID1.Configs.ToString(), new(children: new() {
+							{ nameof(AndroClientConfig), new(children: new() {
+								{ nameof(AndroClientConfig.UITransparency), new(dict: new() {
+										{ L_ID3.Label.ToString(), nameof(AndroClientConfig.UITransparency).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "The transparency of all UIs that depend on androLib.  0 is invisible, 255 fully saturated." }
+								}) },
+								{ nameof(AndroClientConfig.PrintLocalizationLists), new(dict: new() {
+										{ L_ID3.Label.ToString(), "Log all translation lists" },
+									{ L_ID3.Tooltip.ToString(), "The lists are printed to the client.log when you enter a world.\nThe client.log default location is C:\\Steam\\SteamApps\\common\\tModLoader\\tModLoader-Logs" }
+								}) },
+							},
+							dict: new() {
+								{ L_ID2.DisplayName.ToString(), "Client Config" },
+								{ AndroClientConfig.DisplaySettingsKey, AndroClientConfig.DisplaySettingsKey.AddSpaces() },
+								{ AndroClientConfig.LoggingInformationKey, AndroClientConfig.LoggingInformationKey.AddSpaces() }
+
 							}) },
-							{ nameof(AndroClientConfig.PrintLocalizationLists), new(dict: new() {
-								{ L_ID3.Label.ToString(), "Log all translation lists" },
-								{ L_ID3.Tooltip.ToString(), "The lists are printed to the client.log when you enter a world.\nThe client.log default location is C:\\Steam\\SteamApps\\common\\tModLoader\\tModLoader-Logs" }
-							}) },
-							}, dict: new() {
-								{ "DisplaySettings", "Display Settings" },
-								{ "LoggingInformation", "Logging Information" }/*,
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" },
-								{ "", "" }
-								*/
 						}) }
 					};
 

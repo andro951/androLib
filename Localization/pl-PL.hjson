@@ -1,20 +1,26 @@
 #
 Mods: {
 	androLib: {
-		Config: {
-			DisplaySettings: Ustawienia wyświetlania
-			LoggingInformation: Informacje o logowaniu
+		Configs: {
+			AndroClientConfig: {
+				DisplayName: Konfiguracja klienta
+				DisplaySettings: Ustawienia wyświetlania
+				LoggingInformation: Informacje o logowaniu
 
-			PrintLocalizationLists: {
-				Label: Rejestruj wszystkie listy tłumaczeń
-				Tooltip:
-					'''
-					Listy są drukowane w pliku client.log, kiedy wchodzisz do świata.
-					Domyślna lokalizacja dziennika klienta to C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
-					'''
+				PrintLocalizationLists: {
+					Label: Rejestruj wszystkie listy tłumaczeń
+					Tooltip:
+						'''
+						Listy są drukowane w pliku client.log po wejściu do świata.
+						Domyślna lokalizacja pliku Client.log to C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
+						'''
+				}
+
+				UITransparency: {
+					Label: Przejrzystość interfejsu użytkownika
+					Tooltip: Przejrzystość wszystkich interfejsów użytkownika zależnych od androLib. 0 jest niewidoczne, 255 w pełni nasycone.
+				}
 			}
-
-			UITransparency.Label: Przejrzystość interfejsu użytkownika
 		}
 
 		Items: {
@@ -31,22 +37,6 @@ Mods: {
 			Search: Szukaj
 			Sort: Sortować
 			ToggleVacuum: Przełącz próżnię
-		}
-
-		Configs: {
-			AndroClientConfig: {
-				// DisplayName: Andro Client Config
-
-				UITransparency: {
-					// Label: "{$Mods.androLib.Config.UITransparency.Label}"
-					// Tooltip: ""
-				}
-
-				PrintLocalizationLists: {
-					// Label: "{$Mods.androLib.Config.PrintLocalizationLists.Label}"
-					// Tooltip: "{$Mods.androLib.Config.PrintLocalizationLists.Tooltip}"
-				}
-			}
 		}
 	}
 }

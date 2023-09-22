@@ -21,7 +21,7 @@ namespace androLib
 	public class AndroMod : Mod {
 		//public static AndroServerConfig serverConfig = ModContent.GetInstance<AndroServerConfig>();
 		public static AndroClientConfig clientConfig = ModContent.GetInstance<AndroClientConfig>();
-		public static string ModName = ModContent.GetInstance<AndroMod>().Name;
+		public const string ModName = "androLib";
 		public const string magicStorageName = "MagicStorage";
 		public static Mod magicStroageMod;
 		public static bool magicStorageEnabled = ModLoader.TryGetMod(magicStorageName, out magicStroageMod);

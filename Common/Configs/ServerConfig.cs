@@ -18,20 +18,23 @@ namespace androLib.Common.Configs
 	//}
 
 	public class AndroClientConfig : ModConfig {
+		public const string ClientConfigName = "AndroClientConfig";
 		public override ConfigScope Mode => ConfigScope.ClientSide;
 
 		//Display Settings
-		[Header("$Mods.androLib.Config.DisplaySettings")]
+		[JsonIgnore]
+		public const string DisplaySettingsKey = "DisplaySettings";
+		[Header($"$Mods.{AndroMod.ModName}.{L_ID_Tags.Configs}.{ClientConfigName}.{DisplaySettingsKey}")]
 
-		[Label("$Mods.androLib.Config.UITransparency.Label")]
 		[DefaultValue(100)]
 		[Range(0, (int)byte.MaxValue)]
 		public int UITransparency;
 
-		[Header("$Mods.androLib.Config.LoggingInformation")]
+		//Logging Information
+		[JsonIgnore]
+		public const string LoggingInformationKey = "LoggingInformation";
+		[Header($"$Mods.{AndroMod.ModName}.{L_ID_Tags.Configs}.{ClientConfigName}.{LoggingInformationKey}")]
 
-		[Label("$Mods.androLib.Config.PrintLocalizationLists.Label")]
-		[Tooltip("$Mods.androLib.Config.PrintLocalizationLists.Tooltip")]
 		[DefaultValue(false)]
 		[ReloadRequired]
 		public bool PrintLocalizationLists;

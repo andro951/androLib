@@ -32,7 +32,9 @@ namespace androLib.Common.Utility
 		Ki
 	} //Located in DamageClassLoader.cs
 
-
+	public static class L_ID_Tags {
+		public const string Configs = "Configs";
+	}
 	public enum L_ID1
 	{
 		Items,
@@ -45,7 +47,7 @@ namespace androLib.Common.Utility
 		Ores,
 		TableText,
 		EnchantmentStorageText,
-		Config,
+		Configs,
 		UIText,
 		StorageText,
 		MagicStorageButtonsText,
