@@ -47,6 +47,12 @@ namespace androLib
 		public static string weaponEnchantmentsName = "WeaponEnchantments";
 		public static Mod weaponEnchantmentsMod;
 		public static bool weaponEnchantmentsLoaded = ModLoader.TryGetMod(weaponEnchantmentsName, out weaponEnchantmentsMod);
+		public static string spookyModName = "Spooky";
+		public static Mod spookyMod;
+		public static bool spookyModEnabled = ModLoader.TryGetMod(spookyModName, out spookyMod);
+		public static string secretsOfTheShadowsName = "SOTS";
+		public static Mod secretsOfTheShadowsMod;
+		public static bool secretsOfTheShadowsEnabled = ModLoader.TryGetMod(secretsOfTheShadowsName, out secretsOfTheShadowsMod);
 		private enum CallID {
 			None = -1,
 
