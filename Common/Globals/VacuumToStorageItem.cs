@@ -16,7 +16,7 @@ namespace androLib.Common.Globals
 		public bool favorited;
 		public override bool InstancePerEntity => true;
 		public override bool AppliesToEntity(Item entity, bool lateInstantiation) {
-			return true;
+			return !ItemID.Sets.IsAPickup[entity.type];
 		}
 		public override void LoadData(Item item, TagCompound tag) {
 			favorited = item.favorited;

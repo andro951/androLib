@@ -784,5 +784,26 @@ namespace androLib.Common.Utility
 		}
 
 		#endregion
+
+		public static SortedSet<int> PotionBuffs {
+			get {
+				if (potionBuffs == null)
+					SetupBuffToItem();
+
+				return potionBuffs;
+			}
+		}
+		public static SortedSet<int> potionBuffs = null;
+		private static void SetupBuffToItem() {
+			potionBuffs = new();
+			for (int i = 0; i < ItemLoader.ItemCount; i++) {
+				Item item = ContentSamples.ItemsByType[i];
+				if (item.buffType > 0 && item.consumable && !Main.debuff[item.buffType])
+					potionBuffs.Add(item.buffType);
+			}
+
+			potionBuffs.Remove(BuffID.Honey);
+		}
+		public static bool IsPotionBuff(int buffType) => PotionBuffs.Contains(buffType);
 	}
 }

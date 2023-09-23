@@ -268,13 +268,18 @@ namespace androLib
 		/// <param name="index">The index in the players inventory.  If found in a bag, the index will be -index + ReuiredItemInABagStartingIndex.<\br>
 		/// Use GetItemFromHasRequiredItemToUseStorageIndex() to get the item savely.</param>
 		/// <returns></returns>
-		public bool HasRequiredItemToUseStorage(Player player, out int bagFoundInID, out int index) {
+		public bool HasRequiredItemToUseStorage(Player player, out int bagFoundInID, out int index, int specifiedBagType = -1) {
 			index = RequiredItemNotFound;
 			bagFoundInID = -1;
 			bool? validItemType = ValidItemTypeGetters(out SortedSet<int> bagItemTypes);
 			if (validItemType != true)
 				return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
 
+			if (specifiedBagType != -1) {
+				bagItemTypes.Clear();
+				bagItemTypes.Add(specifiedBagType);
+			}
+				
 			Item lastLocationItem = GetItemFromHasRequiredItemToUseStorageIndex(player, myLastBagLocation, myLastIndexInTheBag);
 			if (!lastLocationItem.NullOrAir()) {
 				bool inPlayerInventory = myLastIndexInTheBag > RequiredItemNotFound;
@@ -294,7 +299,8 @@ namespace androLib
 			
 			//Check player inventory for this bag.
 			for (int i = 0; i < player.inventory.Length; i++) {
-				if (bagItemTypes.Contains(player.inventory[i].type)) {
+				Item item = player.inventory[i];
+				if (bagItemTypes.Contains(item.type)) {
 					index = i;
 					myLastBagLocation = bagFoundInID;
 					myLastIndexInTheBag = index;
@@ -309,7 +315,8 @@ namespace androLib
 					continue;
 
 				for (int i = 0; i < bagUI.Storage.Items.Length; i++) {
-					if (bagItemTypes.Contains(bagUI.Storage.Items[i].type)) {
+					Item item = bagUI.Storage.Items[i];
+					if (bagItemTypes.Contains(item.type)) {
 						index = -i + ReuiredItemInABagStartingIndex;
 						bagFoundInID = j;
 						myLastBagLocation = bagFoundInID;
@@ -392,10 +399,10 @@ namespace androLib
 		/// <param name="storageBagFoundIn">Storage items that the bag is in.  storageBagFoundIn[index] is the bag of type bagType.  Make sure to null check storageBagFoundIn before using it or check index >= 0.</param>
 		/// <param name="indexFoundAt"></param>
 		/// <returns></returns>
-		public static bool HasRequiredItemToUseStorageFromBagType(Player player, int bagType, out int bagInventoryIndex) {
+		public static bool HasRequiredItemToUseStorageFromBagType(Player player, int bagType, out int bagInventoryIndex, bool onlyThisBagType = false) {
 			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
 				Storage storage = BagUIs[storageID].Storage;
-				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out bagInventoryIndex))
+				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
 					return true;
 			}
 
