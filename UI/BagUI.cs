@@ -308,7 +308,7 @@ namespace androLib.UI
 				return;
 
 			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
-				if (!Main.mouseItem.IsAir || !CanVacuumItem(Main.HoverItem, storagePlayer.Player, forShiftClickFromInventory: true)) {
+				if (!Main.mouseItem.IsAir || Main.HoverItem.favorited || !CanVacuumItem(Main.HoverItem, storagePlayer.Player, forShiftClickFromInventory: true)) {
 					Main.cursorOverride = -1;
 				}
 				else {
