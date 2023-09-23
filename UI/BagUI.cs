@@ -415,10 +415,10 @@ namespace androLib.UI
 								LootAll();
 								break;
 							case BagButtonID.DepositAll:
-								DepositAll(Main.LocalPlayer.inventory);
+								DepositAll(Main.LocalPlayer.inventory.TakePlayerInventory40());
 								break;
 							case BagButtonID.QuickStack:
-								QuickStack(Main.LocalPlayer.inventory, Main.LocalPlayer);
+								QuickStack(Main.LocalPlayer.inventory.TakePlayerInventory40(), Main.LocalPlayer);
 								break;
 							case BagButtonID.Sort:
 								Sort();

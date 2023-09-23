@@ -491,6 +491,10 @@ namespace androLib.Common.Utility
             
             return false;
         }
+        public const int InventoryHotbarCount = 10;
+        public const int InventoryStorageCount = 40;
+        public static Item[] TakePlayerInventory40(this Item[] inv) => inv.Skip(inv.Length >= InventoryHotbarCount ? InventoryHotbarCount : inv.Length)
+            .Take(inv.Length >= InventoryHotbarCount + InventoryStorageCount ? InventoryStorageCount : inv.Length - InventoryHotbarCount).ToArray();
 
 		#endregion
 	}

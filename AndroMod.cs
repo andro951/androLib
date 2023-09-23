@@ -249,8 +249,9 @@ namespace androLib
 		private void On_Player_QuickStackAllChests(On_Player.orig_QuickStackAllChests orig, Player self) {
 			orig(self);
 
-			for (int i = 0; i < self.inventory.Length; i++) {
-				ref Item item = ref self.inventory[i];
+			Item[] inv = self.inventory.TakePlayerInventory40();
+			for (int i = 0; i < inv.Length; i++) {
+				ref Item item = ref inv[i];
 				if (item.favorited)
 					continue;
 
