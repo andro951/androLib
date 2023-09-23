@@ -40,7 +40,7 @@ namespace androLib.ModIntegration
             if (!AndroMod.magicStorageEnabled)
                 return false;
 
-            return TryDepositToMagicStorage(items);
+            return TryDepositToMagicStorage(items.Where(i => !i.favorited));
         }
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
