@@ -1,11 +1,46 @@
 #
 Mods: {
 	androLib: {
+		AndroLibGameMessages: {
+			AddedToBlacklist: "{0} blacklisted for the {1}.  Items can be whitelisted by placing them into the {1} with the mouse."
+			AddedToWhitelist: "{0} whitelisted for the {1}.  Items can be blacklisted by right clicking on them in the {1} with the shift key held."
+		}
+
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Client Config
 				DisplaySettings: Display Settings
+				ItemLists: Allowed Lists (Should be modified in game instead!)
 				LoggingInformation: Logging Information
+				StorageSettings: Storage Settings
+
+				BlackLists: {
+					Label: Black Lists (Manage in game instead!)
+					Tooltip:
+						'''
+						Items can be blacklisted in game by right clicking on an item in a storage bag with the shift key held.
+						Changing the Mod Full Name will prevent that list from working and a new blank one will be made.
+						'''
+				}
+
+				ForceAllowedListUpdate: {
+					Label: Force Allowed List Update
+					Tooltip:
+						'''
+						This will force changes made to the Whitelists and Blacklists that you made by manually adjusting the config to be updated.
+						This will be immediately turned back off when the update is complete.  It is not required if updating the white/black lists in game.
+						This is prevents requiring a reload when changing the lists.
+						'''
+				}
+
+				LogAllPlayerWhiteAndBlackLists: {
+					Label: Log All Player White And Black Lists
+					Tooltip:
+						'''
+						If true, all player white lists and black lists will be logged to the client.log.
+						If you make changes to the white/black lists that you think should be standard changes for everyone, please print them and send me your client.log. -andro951
+						'''
+				}
 
 				PrintLocalizationLists: {
 					Label: Log all translation lists
@@ -16,9 +51,41 @@ Mods: {
 						'''
 				}
 
+				RemoveItemsWhenBlacklisted: {
+					Label: Remove Items When Blacklisted
+					Tooltip:
+						'''
+						If true, items will be removed from the storage when blacklisted.
+						Items can be blacklisted by right clicking on them in the storage with the shift key held.
+						'''
+				}
+
 				UITransparency: {
 					Label: UI Transparency
 					Tooltip: The transparency of all UIs that depend on androLib.  0 is invisible, 255 fully saturated.
+				}
+
+				WhiteLists: {
+					Label: White Lists (Manage in game instead!)
+					Tooltip:
+						'''
+						Items can be whitelisted in game by manually clicking them into a storage bag with your mouse.
+						Changing the Mod Full Name will prevent that list from working and a new blank one will be made.
+						'''
+				}
+			}
+
+			ItemList: {
+				Tooltip: Allows you to edit the whitelist/blacklist of the bags.
+
+				ItemDefinitions: {
+					Label: Item Definitions
+					Tooltip: Items in the list.  This will override my white/black lists.
+				}
+
+				ModFullName: {
+					Label: Mod Full Name
+					Tooltip: Editing this will prevent the list from working.  It is the key used to determine which storage the list belongs to.
 				}
 			}
 		}

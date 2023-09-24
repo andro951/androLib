@@ -1,11 +1,46 @@
 #
 Mods: {
 	androLib: {
+		AndroLibGameMessages: {
+			AddedToBlacklist: „{0} wurde für die {1} auf die schwarze Liste gesetzt. Elemente können auf die weiße Liste gesetzt werden, indem Sie sie mit der Maus in die {1} platzieren.“
+			AddedToWhitelist: „{0} wurde für {1} auf die Whitelist gesetzt. Elemente können auf die Blacklist gesetzt werden, indem Sie bei gedrückter Umschalttaste mit der rechten Maustaste auf sie in {1} klicken.“
+		}
+
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Client-Konfiguration
 				DisplaySettings: Bildschirmeinstellungen
+				ItemLists: Erlaubte Listen (Sollten stattdessen im Spiel geändert werden!)
 				LoggingInformation: Protokollierungsinformationen
+				StorageSettings: Speichereinstellungen
+
+				BlackLists: {
+					Label: Schwarze Listen (Stattdessen im Spiel verwalten!)
+					Tooltip:
+						'''
+						Gegenstände können im Spiel auf die schwarze Liste gesetzt werden, indem man bei gedrückter Umschalttaste mit der rechten Maustaste auf einen Gegenstand in einer Aufbewahrungstasche klickt.
+						Wenn Sie den vollständigen Mod-Namen ändern, funktioniert diese Liste nicht mehr und es wird eine neue, leere Liste erstellt.
+						'''
+				}
+
+				ForceAllowedListUpdate: {
+					Label: Aktualisierung der Zulassungsliste erzwingen
+					Tooltip:
+						'''
+						Dadurch werden Änderungen an den Whitelists und Blacklists erzwungen, die Sie durch manuelles Anpassen der zu aktualisierenden Konfiguration vorgenommen haben.
+						Dies wird sofort wieder deaktiviert, wenn das Update abgeschlossen ist. Dies ist nicht erforderlich, wenn die weißen/schwarzen Listen im Spiel aktualisiert werden.
+						Dadurch wird verhindert, dass beim Ändern der Listen ein Neuladen erforderlich ist.
+						'''
+				}
+
+				LogAllPlayerWhiteAndBlackLists: {
+					Label: Protokollieren Sie die weißen und schwarzen Listen aller Spieler
+					Tooltip:
+						'''
+						Bei „true“ werden alle Whitelists und Blacklists der Spieler im client.log protokolliert.
+						Wenn Sie Änderungen an den White/Black-Listen vornehmen, die Ihrer Meinung nach für alle Standardänderungen sein sollten, drucken Sie diese bitte aus und senden Sie mir Ihr client.log. -andro951
+						'''
+				}
 
 				PrintLocalizationLists: {
 					Label: Protokollieren Sie alle Übersetzungslisten
@@ -16,9 +51,41 @@ Mods: {
 						'''
 				}
 
+				RemoveItemsWhenBlacklisted: {
+					Label: Entfernen Sie Elemente, wenn sie auf der schwarzen Liste stehen
+					Tooltip:
+						'''
+						Wenn „true“, werden Elemente aus dem Speicher entfernt, wenn sie auf die schwarze Liste gesetzt werden.
+						Elemente können auf die schwarze Liste gesetzt werden, indem Sie mit der rechten Maustaste im Speicher darauf klicken und dabei die Umschalttaste gedrückt halten.
+						'''
+				}
+
 				UITransparency: {
 					Label: UI-Transparenz
 					Tooltip: Die Transparenz aller Benutzeroberflächen, die von androLib abhängen. 0 ist unsichtbar, 255 vollständig gesättigt.
+				}
+
+				WhiteLists: {
+					Label: Weiße Listen (Stattdessen im Spiel verwalten!)
+					Tooltip:
+						'''
+						Gegenstände können im Spiel auf die Whitelist gesetzt werden, indem man sie manuell mit der Maus in eine Aufbewahrungstasche klickt.
+						Wenn Sie den vollständigen Mod-Namen ändern, funktioniert diese Liste nicht mehr und es wird eine neue, leere Liste erstellt.
+						'''
+				}
+			}
+
+			ItemList: {
+				Tooltip: Ermöglicht Ihnen, die Whitelist/Blacklist der Taschen zu bearbeiten.
+
+				ItemDefinitions: {
+					Label: Artikeldefinitionen
+					Tooltip: Elemente in der Liste. Dadurch werden meine weißen/schwarzen Listen überschrieben.
+				}
+
+				ModFullName: {
+					Label: Vollständiger Mod-Name
+					Tooltip: Wenn Sie dies bearbeiten, funktioniert die Liste nicht mehr. Dies ist der Schlüssel, der verwendet wird, um zu bestimmen, zu welchem Speicher die Liste gehört.
 				}
 			}
 		}

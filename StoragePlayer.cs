@@ -1,8 +1,11 @@
-﻿using androLib.Common.Utility;
+﻿using androLib.Common.Globals;
+using androLib.Common.Utility;
+using androLib.Items;
 using androLib.UI;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -100,6 +103,7 @@ namespace androLib
 		}
 		public override void OnEnterWorld() {
 			StorageManager.CanVacuumItem(new(1), Player);//Sets up all allowed Lists
+			CheckClientConfigChanged();
 		}
 		public override void PreUpdateMovement() {
 			CenterBeforeMoveUpdate = Player.Center;
@@ -123,6 +127,72 @@ namespace androLib
 				}
 			}
 		}
+		public static void PostSetupRecipes() {
+			SetupAllAllowedItemManagers();
+		}
+
+		#region Allowed Lists
+
+		public static bool PrintDevOnlyAllowedItemListInfo => Debugger.IsAttached && AndroMod.clientConfig.LogAllPlayerWhiteAndBlackLists;
+		private static void SetupAllAllowedItemManagers() {
+			List<INeedsSetUpAllowedList> iNeedsSetUpAllowedLists = StorageManager.AllBagTypesFirstForEachInventory.Select(t => ContentSamples.ItemsByType[t].ModItem).OfType<INeedsSetUpAllowedList>().ToList();
+			List<AllowedItemsManager> allowedItemManagers = iNeedsSetUpAllowedLists.Select(b => b.GetAllowedItemsManager).ToList();
+			SortedDictionary<int, SortedSet<int>> enchantedItemsAllowedInBags = new();
+			foreach (AllowedItemsManager allowedItemsManager in allowedItemManagers) {
+				allowedItemsManager.Setup();
+				if (PrintDevOnlyAllowedItemListInfo)
+					enchantedItemsAllowedInBags.TryAdd(allowedItemsManager.OwningBagItemType, new());
+			}
+
+			List<int> itemsNotAdded = new List<int>();
+
+			for (int i = 0; i < ItemLoader.ItemCount; i++) {
+				ItemSetInfo info = new(i);
+				if (info.NullOrAir())
+					continue;
+
+				if (StorageManager.AllBagTypesSorted.Contains(info.Type))
+					continue;
+
+				bool forWhitelistOnlyCheck = false;
+				foreach (AllowedItemsManager allowedItemsManager in allowedItemManagers) {
+					if (allowedItemsManager.TryAddToAllowedItems(info, forWhitelistOnlyCheck)) {
+						forWhitelistOnlyCheck = true;
+						if (PrintDevOnlyAllowedItemListInfo && ContentSamples.ItemsByType[i].IsEnchantable())
+							enchantedItemsAllowedInBags[allowedItemsManager.OwningBagItemType].Add(info.Type);
+					}
+				}
+
+				if (!forWhitelistOnlyCheck)
+					itemsNotAdded.Add(info.Type);
+			}
+
+			if (PrintDevOnlyAllowedItemListInfo) {
+				IEnumerable<Item> itemsNotSelected = itemsNotAdded.Select(t => ContentSamples.ItemsByType[t]);
+				//itemsNotSelected.Select(i => i.S()).S("All Items that don't fit in bags:").LogSimple();
+				itemsNotSelected.Where(i => !i.IsEnchantable()).Select(i => i.S()).S("All Non-Enchantable Items that don't fit in bags:").LogSimple();
+				SortedSet<int> sortedItemsNotSelected = new(itemsNotAdded);
+				IEnumerable<Item> allOtherItems = ContentSamples.ItemsByType.Select(p => p.Value).Where(i => !sortedItemsNotSelected.Contains(i.type));
+				enchantedItemsAllowedInBags.Select(p => p.Value.Select(i => ContentSamples.ItemsByType[i].S()).S(ContentSamples.ItemsByType[p.Key].Name)).S("All Enchantable Items that fit in bags:").LogSimple();
+			}
+
+			foreach (AllowedItemsManager allowedItemsManager in allowedItemManagers) {
+				allowedItemsManager.ClearSetupLists();
+			}
+
+			foreach (INeedsSetUpAllowedList list in iNeedsSetUpAllowedLists) {
+				list.PostSetup();
+			}
+		}
+		public static bool ClientConfigChanged = false;
+		public static void CheckClientConfigChanged() {
+			if (ClientConfigChanged && !Main.gameMenu) {
+				SetupAllAllowedItemManagers();
+				ClientConfigChanged = false;
+			}
+		}
+
+		#endregion
 	}
 	public static class StoragePlayerFunctions {
 		public static Item[] GetChestItems(this Player player, int chest = int.MinValue) {

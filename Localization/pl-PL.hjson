@@ -1,11 +1,46 @@
 #
 Mods: {
 	androLib: {
+		AndroLibGameMessages: {
+			AddedToBlacklist: "{0} na czarnej liście dla {1}. Elementy można umieścić na białej liście, umieszczając je na {1} za pomocą myszy."
+			AddedToWhitelist: „{0} na białej liście dla {1}. Elementy można umieścić na czarnej liście, klikając je prawym przyciskiem myszy w {1}, przytrzymując klawisz Shift.”
+		}
+
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Konfiguracja klienta
 				DisplaySettings: Ustawienia wyświetlania
+				ItemLists: Listy dozwolonych (zamiast tego należy je zmodyfikować w grze!)
 				LoggingInformation: Informacje o logowaniu
+				StorageSettings: Ustawienia przechowywania
+
+				BlackLists: {
+					Label: Czarne listy (zamiast tego zarządzaj w grze!)
+					Tooltip:
+						'''
+						Przedmioty można umieścić na czarnej liście w grze, klikając prawym przyciskiem myszy przedmiot w torbie do przechowywania, przytrzymując klawisz Shift.
+						Zmiana pełnej nazwy moda uniemożliwi działanie tej listy i zostanie utworzona nowa, pusta.
+						'''
+				}
+
+				ForceAllowedListUpdate: {
+					Label: Wymuś aktualizację listy dozwolonych
+					Tooltip:
+						'''
+						Wymusi to zmiany na białych i czarnych listach wprowadzone poprzez ręczne dostosowanie konfiguracji do aktualizacji.
+						Funkcja ta zostanie natychmiast wyłączona po zakończeniu aktualizacji. Nie jest to wymagane w przypadku aktualizacji białych/czarnych list w grze.
+						Zapobiega to konieczności ponownego ładowania podczas zmiany list.
+						'''
+				}
+
+				LogAllPlayerWhiteAndBlackLists: {
+					Label: Zaloguj wszystkich białych i czarnych list graczy
+					Tooltip:
+						'''
+						Jeśli ma wartość true, wszystkie białe i czarne listy graczy będą rejestrowane w pliku client.log.
+						Jeśli dokonasz zmian na białych/czarnych listach, które Twoim zdaniem powinny być standardowymi zmianami dla wszystkich, wydrukuj je i wyślij mi swój plik Client.log. -andro951
+						'''
+				}
 
 				PrintLocalizationLists: {
 					Label: Rejestruj wszystkie listy tłumaczeń
@@ -16,9 +51,41 @@ Mods: {
 						'''
 				}
 
+				RemoveItemsWhenBlacklisted: {
+					Label: Usuń elementy, gdy znajdują się na czarnej liście
+					Tooltip:
+						'''
+						Jeśli ma wartość true, elementy zostaną usunięte z magazynu po umieszczeniu na czarnej liście.
+						Przedmioty można umieścić na czarnej liście, klikając je prawym przyciskiem myszy w magazynie, przytrzymując klawisz Shift.
+						'''
+				}
+
 				UITransparency: {
 					Label: Przejrzystość interfejsu użytkownika
 					Tooltip: Przejrzystość wszystkich interfejsów użytkownika zależnych od androLib. 0 jest niewidoczne, 255 w pełni nasycone.
+				}
+
+				WhiteLists: {
+					Label: Białe listy (zamiast tego zarządzaj w grze!)
+					Tooltip:
+						'''
+						Przedmioty można dodać do białej listy w grze, ręcznie umieszczając je myszką w torbie do przechowywania.
+						Zmiana pełnej nazwy moda uniemożliwi działanie tej listy i zostanie utworzona nowa, pusta.
+						'''
+				}
+			}
+
+			ItemList: {
+				Tooltip: Umożliwia edycję białej/czarnej listy toreb.
+
+				ItemDefinitions: {
+					Label: Definicje przedmiotów
+					Tooltip: Pozycje na liście. Spowoduje to zastąpienie moich białych/czarnych list.
+				}
+
+				ModFullName: {
+					Label: Pełna nazwa moda
+					Tooltip: Edycja tego spowoduje, że lista nie będzie działać. Jest to klucz używany do określenia, do którego magazynu należy dana lista.
 				}
 			}
 		}

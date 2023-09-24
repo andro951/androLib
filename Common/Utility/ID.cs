@@ -51,7 +51,8 @@ namespace androLib.Common.Utility
 		UIText,
 		StorageText,
 		MagicStorageButtonsText,
-		GameMessages
+		GameMessages,
+		AndroLibGameMessages
 	}
 	public enum L_ID2
 	{
@@ -117,6 +118,10 @@ namespace androLib.Common.Utility
 	}
 	public enum MagicStorageButtonsTextID {
 		DepositAllFromVacuumBags
+	}
+	public enum AndroLibGameMessages {
+		AddedToWhitelist,
+		AddedToBlacklist,
 	}
 
 	public enum WikiTypeID

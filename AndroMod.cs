@@ -20,6 +20,7 @@ namespace androLib
 {
 	public class AndroMod : Mod {
 		//public static AndroServerConfig serverConfig = ModContent.GetInstance<AndroServerConfig>();
+		public static Mod Instance = ModContent.GetInstance<AndroMod>();
 		public static AndroClientConfig clientConfig = ModContent.GetInstance<AndroClientConfig>();
 		public const string ModName = "androLib";
 		public const string magicStorageName = "MagicStorage";
@@ -99,7 +100,7 @@ namespace androLib
 
 			switch(id) {
 				case CallID.Register:
-					if (args.Length < 3 || args.Length > 13)
+					if (args.Length < 3 || args.Length > 14)
 						return -1;
 
 					int modIndex = idIndex + 1;
@@ -160,6 +161,11 @@ namespace androLib
 					if (args.Length >= topIndex + 1 && args[topIndex] is int UI_DefaultTopLocationOnScreenArg)
 						UI_DefaultTopLocationOnScreen = UI_DefaultTopLocationOnScreenArg;
 
+					int getAllowedListIndex = topIndex + 1;
+					Func<SortedSet<int>> GetAllowedList = null;
+					if (args.Length >= getAllowedListIndex + 1 && args[getAllowedListIndex] is Func<SortedSet<int>> GetAllowedListArg)
+						GetAllowedList = GetAllowedListArg;
+
 					return StorageManager.RegisterVacuumStorageClass(
 						mod, 
 						VacuumStorageType, 
@@ -172,7 +178,8 @@ namespace androLib
 						GetButtonHoverColor,
 						StorageItemTypeGetter,
 						UI_DefaultLeftLocationOnScreen, 
-						UI_DefaultTopLocationOnScreen
+						UI_DefaultTopLocationOnScreen,
+						GetAllowedList
 					);
 
 				case CallID.GetItems:

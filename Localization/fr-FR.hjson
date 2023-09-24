@@ -1,11 +1,46 @@
 #
 Mods: {
 	androLib: {
+		AndroLibGameMessages: {
+			AddedToBlacklist: "{0} sur liste noire pour le {1}. Les éléments peuvent être ajoutés à la liste blanche en les plaçant dans le {1} avec la souris."
+			AddedToWhitelist: "{0} sur liste blanche pour le {1}. Les éléments peuvent être mis sur liste noire en faisant un clic droit dessus dans le {1} avec la touche Maj enfoncée."
+		}
+
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Configuration client
 				DisplaySettings: Paramètres d'affichage
+				ItemLists: Listes autorisées (doivent plutôt être modifiées dans le jeu !)
 				LoggingInformation: Informations de journalisation
+				StorageSettings: Paramètres de stockage
+
+				BlackLists: {
+					Label: Listes noires (à gérer plutôt dans le jeu !)
+					Tooltip:
+						'''
+						Les objets peuvent être mis sur liste noire dans le jeu en cliquant avec le bouton droit sur un objet dans un sac de rangement avec la touche Maj enfoncée.
+						Changer le nom complet du module empêchera cette liste de fonctionner et une nouvelle liste vide sera créée.
+						'''
+				}
+
+				ForceAllowedListUpdate: {
+					Label: Forcer la mise à jour de la liste autorisée
+					Tooltip:
+						'''
+						Cela forcera la mise à jour des modifications apportées aux listes blanches et aux listes noires que vous avez effectuées en ajustant manuellement la configuration.
+						Ceci sera immédiatement désactivé une fois la mise à jour terminée. Ce n'est pas obligatoire si vous mettez à jour les listes blanches/noires dans le jeu.
+						Cela évite de devoir recharger lors du changement de liste.
+						'''
+				}
+
+				LogAllPlayerWhiteAndBlackLists: {
+					Label: Enregistrez toutes les listes blanches et noires de tous les joueurs
+					Tooltip:
+						'''
+						Si c'est vrai, toutes les listes blanches et noires des joueurs seront enregistrées dans le client.log.
+						Si vous apportez des modifications aux listes blanches/noires qui, selon vous, devraient être des modifications standard pour tout le monde, veuillez les imprimer et m'envoyer votre client.log. -andro951
+						'''
+				}
 
 				PrintLocalizationLists: {
 					Label: Enregistrez toutes les listes de traduction
@@ -16,9 +51,41 @@ Mods: {
 						'''
 				}
 
+				RemoveItemsWhenBlacklisted: {
+					Label: Supprimer les éléments lorsqu'ils sont sur la liste noire
+					Tooltip:
+						'''
+						Si c'est vrai, les éléments seront supprimés du stockage lorsqu'ils seront mis sur liste noire.
+						Les éléments peuvent être mis sur liste noire en cliquant dessus avec le bouton droit dans le stockage avec la touche Maj enfoncée.
+						'''
+				}
+
 				UITransparency: {
 					Label: Transparence de l'interface utilisateur
 					Tooltip: La transparence de toutes les interfaces utilisateur qui dépendent d'androLib. 0 est invisible, 255 entièrement saturé.
+				}
+
+				WhiteLists: {
+					Label: Listes blanches (à gérer plutôt dans le jeu !)
+					Tooltip:
+						'''
+						Les objets peuvent être ajoutés à la liste blanche dans le jeu en les cliquant manuellement dans un sac de rangement avec votre souris.
+						Changer le nom complet du module empêchera cette liste de fonctionner et une nouvelle liste vide sera créée.
+						'''
+				}
+			}
+
+			ItemList: {
+				Tooltip: Permet d'éditer la liste blanche/liste noire des sacs.
+
+				ItemDefinitions: {
+					Label: Définitions des éléments
+					Tooltip: Éléments dans la liste. Cela remplacera mes listes blanche/noire.
+				}
+
+				ModFullName: {
+					Label: Nom complet du module
+					Tooltip: Modifier ceci empêchera la liste de fonctionner. C'est la clé utilisée pour déterminer à quel stockage appartient la liste.
 				}
 			}
 		}

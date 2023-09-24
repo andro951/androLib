@@ -63,14 +63,59 @@ namespace androLib.Localization
 										{ L_ID3.Label.ToString(), "Log all translation lists" },
 									{ L_ID3.Tooltip.ToString(), "The lists are printed to the client.log when you enter a world.\nThe client.log default location is C:\\Steam\\SteamApps\\common\\tModLoader\\tModLoader-Logs" }
 								}) },
+								{ nameof(AndroClientConfig.LogAllPlayerWhiteAndBlackLists), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.LogAllPlayerWhiteAndBlackLists).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "If true, all player white lists and black lists will be logged to the client.log.\n" +
+										"If you make changes to the white/black lists that you think should be standard changes for everyone, please print them and send me your client.log. -andro951" }
+								}) },
+								{ nameof(AndroClientConfig.RemoveItemsWhenBlacklisted), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.RemoveItemsWhenBlacklisted).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "If true, items will be removed from the storage when blacklisted.\n" +
+										"Items can be blacklisted by right clicking on them in the storage with the shift key held." }
+								}) },
+								{ nameof(AndroClientConfig.ForceAllowedListUpdate), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ForceAllowedListUpdate).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "This will force changes made to the Whitelists and Blacklists that you made by manually adjusting the config to be updated.\n" +
+										"This will be immediately turned back off when the update is complete.  It is not required if updating the white/black lists in game.\n" +
+										"This is prevents requiring a reload when changing the lists." }
+								}) },
+								{ nameof(AndroClientConfig.WhiteLists), new(dict: new() {
+									{ L_ID3.Label.ToString(), $"{nameof(AndroClientConfig.WhiteLists).AddSpaces()} (Manage in game instead!)" },
+									{ L_ID3.Tooltip.ToString(), "Items can be whitelisted in game by manually clicking them into a storage bag with your mouse.\n" +
+										"Changing the Mod Full Name will prevent that list from working and a new blank one will be made." }
+								}) },
+								{ nameof(AndroClientConfig.BlackLists), new(dict: new() {
+									{ L_ID3.Label.ToString(), $"{nameof(AndroClientConfig.BlackLists).AddSpaces()} (Manage in game instead!)" },
+									{ L_ID3.Tooltip.ToString(), "Items can be blacklisted in game by right clicking on an item in a storage bag with the shift key held.\n" +
+										"Changing the Mod Full Name will prevent that list from working and a new blank one will be made." }
+								}) },
 							},
 							dict: new() {
 								{ L_ID2.DisplayName.ToString(), "Client Config" },
 								{ AndroClientConfig.DisplaySettingsKey, AndroClientConfig.DisplaySettingsKey.AddSpaces() },
-								{ AndroClientConfig.LoggingInformationKey, AndroClientConfig.LoggingInformationKey.AddSpaces() }
-
+								{ AndroClientConfig.LoggingInformationKey, AndroClientConfig.LoggingInformationKey.AddSpaces() },
+								{ AndroClientConfig.StorageSettingsKey, AndroClientConfig.StorageSettingsKey.AddSpaces() },
+								{ AndroClientConfig.ItemListsKey, "Allowed Lists (Should be modified in game instead!)" }
 							}) },
-						}) }
+							{ nameof(ItemList), new(children: new() {
+								{ nameof(ItemList.ItemDefinitions), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(ItemList.ItemDefinitions).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "Items in the list.  This will override my white/black lists." }
+								}) },
+								{ nameof(ItemList.ModFullName), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(ItemList.ModFullName).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "Editing this will prevent the list from working.  It is the key used to determine which storage the list belongs to." }
+								}) },
+							},
+							dict: new() {
+								{ L_ID3.Tooltip.ToString(), "Allows you to edit the whitelist/blacklist of the bags." },
+							}) },
+						}) },
+						{ L_ID1.AndroLibGameMessages.ToString(), new(
+							dict: new() {
+								{ AndroLibGameMessages.AddedToWhitelist.ToString(), "{0} whitelisted for the {1}.  Items can be blacklisted by right clicking on them in the {1} with the shift key held." },
+								{ AndroLibGameMessages.AddedToBlacklist.ToString(), "{0} blacklisted for the {1}.  Items can be whitelisted by placing them into the {1} with the mouse." }
+						}) },
 					};
 
 					//Mod androMod = ModContent.GetInstance<AndroMod>();

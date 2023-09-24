@@ -21,6 +21,9 @@ namespace androLib
 		public override void PostAddRecipes() {
 			StartedPostAddRecipes = true;
 		}
+		public override void PostSetupRecipes() {
+			StoragePlayer.PostSetupRecipes();
+		}
 		public override void PostDrawInterface(SpriteBatch spriteBatch) {
 			MasterUIManager.PostDrawInterface(spriteBatch);
 		}

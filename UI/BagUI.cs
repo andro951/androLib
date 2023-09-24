@@ -18,6 +18,7 @@ using androLib.Common.Utility;
 using androLib.Common.Globals;
 using androLib.ModIntegration;
 using static androLib.UI.BagUI;
+using Terraria.ModLoader.Default;
 
 namespace androLib.UI
 {
@@ -359,8 +360,39 @@ namespace androLib.UI
 									vacummItem2.favorited = item.favorited;
 							}
 						}
-						else if (Main.mouseItem.NullOrAir() || CanBeStored(Main.mouseItem)) {
-							slotData.ClickInteractions(ref item);
+						else {
+							if (ItemSlot.ShiftInUse && Main.mouseRight && Main.mouseItem.NullOrAir()) {
+								bool unloaded = item.ModItem is UnloadedItem;
+								if (MasterUIManager.RightMouseClicked && !item.NullOrAir() && !item.favorited) {
+									int type = item.type;
+									bool allowed = CanBeStored(item);
+									if (unloaded || !allowed || TryAddToPlayerBlacklist(type)) {
+										if (!unloaded && allowed)
+											SoundEngine.PlaySound(SoundID.Research);
+
+										if (unloaded || AndroMod.clientConfig.RemoveItemsWhenBlacklisted) {
+											for (int i = 0; i < inventory.Length; i++) {
+												ref Item checkItem = ref inventory[i];
+												if (checkItem.type == type) {
+													if (!StorageManager.TryReturnItemToPlayer(ref checkItem, Main.LocalPlayer))
+														break;
+												}
+											}
+										}
+									}
+								}
+							}
+							else {
+								bool doClickInteractions = Main.mouseItem.NullOrAir();
+								bool unloaded = Main.mouseItem.ModItem is UnloadedItem;
+								if (!doClickInteractions && MasterUIManager.LeftMouseClicked && (item.NullOrAir() || Main.mouseItem.type == item.type) && !CanBeStored(Main.mouseItem)) {
+									if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
+										SoundEngine.PlaySound(SoundID.ResearchComplete);
+								}
+
+								if (doClickInteractions || CanBeStored(Main.mouseItem) || Main.mouseItem.type == item.type || unloaded)
+									slotData.ClickInteractions(ref item);
+							}
 						}
 					}
 
@@ -462,9 +494,9 @@ namespace androLib.UI
 					MasterUIManager.UIBeingHovered = Bag_UI_ID.BagScrollPanel;
 					scrollPanelY = Main.mouseY -  scrollPanelSize / 2;
 					scrollPanelY.Clamp( scrollPanelMinY,  scrollPanelMaxY);
-					 scrollPanelData.SetCenterY(scrollPanelY);
+					scrollPanelData.SetCenterY(scrollPanelY);
 
-					 scrollPanelData.TryStartDraggingUI();
+					scrollPanelData.TryStartDraggingUI();
 				}
 			}
 
@@ -473,25 +505,25 @@ namespace androLib.UI
 			
 			
 
-			if ( scrollPanelData.ShouldDragUI()) {
+			if (scrollPanelData.ShouldDragUI()) {
 				MasterUIManager.DragUI(out _, out scrollPanelY);
 			}
 			else if ( draggingScrollPanel) {
-				int scrollPanelRange =  scrollPanelMaxY -  scrollPanelMinY;
-				scrollPanelPosition = ((scrollPanelY -  scrollPanelMinY) *  possiblePanelPositions).RoundDivide(scrollPanelRange);
+				int scrollPanelRange = scrollPanelMaxY - scrollPanelMinY;
+				scrollPanelPosition = ((scrollPanelY - scrollPanelMinY) * possiblePanelPositions).RoundDivide(scrollPanelRange);
 			}
 
 			//Panel Hover and Drag
-			if ( panel.MouseHovering()) {
+			if (panel.MouseHovering()) {
 				 panel.TryStartDraggingUI();
 			}
 
-			if ( panel.ShouldDragUI())
+			if (panel.ShouldDragUI())
 				MasterUIManager.DragUI(out Storage.UILeft, out Storage.UITop);
 
 			int scrollWheelTicks = MasterUIManager.ScrollWheelTicks;
 			if (scrollWheelTicks != 0 && Hovering && MasterUIManager.NoPanelBeingDragged) {
-				if (scrollPanelPosition > 0 && scrollWheelTicks < 0 || scrollPanelPosition <  possiblePanelPositions && scrollWheelTicks > 0) {
+				if (scrollPanelPosition > 0 && scrollWheelTicks < 0 || scrollPanelPosition < possiblePanelPositions && scrollWheelTicks > 0) {
 					SoundEngine.PlaySound(SoundID.MenuTick);
 					scrollPanelPosition += scrollWheelTicks;
 				}
@@ -499,8 +531,6 @@ namespace androLib.UI
 
 			selectedItemSlots.Clear();
 		}
-
-
 		public void OpenBag() {
 			scrollPanelY = int.MinValue;
 			Main.playerInventory = true;
@@ -724,6 +754,22 @@ namespace androLib.UI
 				if (selectedItem.stack < 1)
 					selectedItem.favorited = false;
 			}
+		}
+		public bool TryAddToPlayerWhitelist(int type) {
+			if (Storage.TryAddToPlayerWhitelist(type)) {
+				StorageManager.AddToPlayerWhitelist(StorageID, type);
+				return true;
+			}
+
+			return false;
+		}
+		public bool TryAddToPlayerBlacklist(int type) {
+			if (Storage.TryAddToPlayerBlacklist(type)) {
+				StorageManager.AddToPlayerBlacklist(StorageID, type);
+				return true;
+			}
+
+			return false;
 		}
 	}
 }
