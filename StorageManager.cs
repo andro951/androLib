@@ -58,6 +58,7 @@ namespace androLib
 		private int myLastBagLocation = -1;
 		private int myLastIndexInTheBag = -1;
 		private Func<SortedSet<int>> GetAllowedList;
+		private bool IsBlacklistGetter;
 
 		public Storage(
 				Mod mod, 
@@ -73,6 +74,7 @@ namespace androLib
 				int uiLeftDefault, 
 				int uiTopDefault,
 				Func<SortedSet<int>> getAllowedList,
+				bool isBlackListGetter,
 				Action selectItemForUIOnly,
 				bool shouldRefreshInfoAccs
 			) {
@@ -91,6 +93,7 @@ namespace androLib
 			UILeft = UILeftDefault;
 			UITop = UITopDefault;
 			GetAllowedList = getAllowedList;
+			IsBlacklistGetter = isBlackListGetter;
 			SelectItemForUIOnly = selectItemForUIOnly;
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
@@ -200,6 +203,7 @@ namespace androLib
 				UILeftDefault,
 				UITopDefault,
 				GetAllowedList,
+				IsBlacklistGetter,
 				SelectItemForUIOnly,
 				ShouldRefreshInfoAccs
 			);
@@ -359,24 +363,36 @@ namespace androLib
 		}
 		public bool HasSelectItemForUIOnlyFunc() => SelectItemForUIOnly != null;
 		public bool TryAddToPlayerWhitelist(int type) {
-			if (GetAllowedList == null)
+			if (!HasWhiteOreBlacklistGetter)
 				return false;
 
 			SortedSet<int> allowedList = GetAllowedList();
-			allowedList.Add(type);
+			if (IsBlacklistGetter) {
+				allowedList.Remove(type);
+			}
+			else {
+				allowedList.Add(type);
+			}
 
 			return true;
 		}
 		public bool TryAddToPlayerBlacklist(int type) {
-			if (GetAllowedList == null)
+			if (!HasWhiteOreBlacklistGetter)
 				return false;
 
 			SortedSet<int> allowedList = GetAllowedList();
-			allowedList.Remove(type);
+			if (IsBlacklistGetter) {
+				allowedList.Add(type);
+			}
+			else {
+				allowedList.Remove(type);
+			}
 
 			return true;
 		}
-		public bool HasAllowedListGetter => GetAllowedList != null;
+		public bool HasWhiteListGetter => !IsBlacklistGetter && HasWhiteOreBlacklistGetter;
+		//public bool HasBlackListGetter => IsBlacklistGetter && HasWhiteOreBlacklistGetter;
+		public bool HasWhiteOreBlacklistGetter => GetAllowedList != null;
 	}
 	public static class StorageManager {
 		public static int DefaultLeftLocationOnScreen => 80;
@@ -539,7 +555,7 @@ namespace androLib
 			}
 
 			foreach (KeyValuePair<string, int> pair in vacuumStorageIndexes) {
-				if (!RegisteredStorages[pair.Value].HasAllowedListGetter)
+				if (!RegisteredStorages[pair.Value].HasWhiteListGetter)
 					continue;
 
 				if (!whitelistIndexes.ContainsKey(pair.Value)) {
@@ -563,7 +579,7 @@ namespace androLib
 			}
 
 			foreach (KeyValuePair<string, int> pair in vacuumStorageIndexes) {
-				if (!RegisteredStorages[pair.Value].HasAllowedListGetter)
+				if (!RegisteredStorages[pair.Value].HasWhiteOreBlacklistGetter)
 					continue;
 
 				if (!blacklistIndexes.ContainsKey(pair.Value)) {
@@ -606,28 +622,49 @@ namespace androLib
 
 			return blacklists[blacklistIndex];
 		}
+		public static bool TryGetPlayerWhitelist(int storageID, out ItemList itemList) {
+			if (!RegisteredStorages[storageID].HasWhiteListGetter) {
+				itemList = null;
+				return false;
+			}
+			
+			itemList = GetPlayerWhitelist(storageID);
+			return true;
+		}
+		public static bool TryGetPlayerBlacklist(int storageID, out ItemList itemList) {
+			if (!RegisteredStorages[storageID].HasWhiteOreBlacklistGetter) {
+				itemList = null;
+				return false;
+			}
+			
+			itemList = GetPlayerBlacklist(storageID);
+			return true;
+		}
 		public static void AddToPlayerWhitelist(int storageID, int itemType) {
-			//Need to check for HasAllowedListGetter first!
-			ItemList whiteList = GetPlayerWhitelist(storageID);
-			for (int i = 0; i < whiteList.ItemDefinitions.Count; i++) {
-				if (whiteList.ItemDefinitions[i].Type == itemType)
-					return;
+			if (TryGetPlayerWhitelist(storageID, out ItemList whiteList)) {
+				for (int i = 0; i < whiteList.ItemDefinitions.Count; i++) {
+					if (whiteList.ItemDefinitions[i].Type == itemType)
+						break;
+				}
+
+				whiteList.ItemDefinitions.Add(new(itemType));
 			}
 
 			if (RegisteredStorages[storageID].ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
 				string bagName = bagItemTypes.First().CSI().Name;
 				Main.NewText(AndroLibGameMessages.AddedToWhitelist.ToString().Lang(AndroMod.ModName, L_ID1.AndroLibGameMessages, new object[] { itemType.CSI().Name, bagName }));
 			}
-			
-			whiteList.ItemDefinitions.Add(new(itemType));
-			RemoveFromPlayerBlacklist(storageID, itemType, true);
+
+			TryRemoveFromPlayerBlacklist(storageID, itemType, true);
 		}
 		public static void AddToPlayerBlacklist(int storageID, int itemType) {
-			//Need to check for HasAllowedListGetter first!
-			ItemList blackList = GetPlayerBlacklist(storageID);
-			for (int i = 0; i < blackList.ItemDefinitions.Count; i++) {
-				if (blackList.ItemDefinitions[i].Type == itemType)
-					return;
+			if (TryGetPlayerBlacklist(storageID, out ItemList blackList)) {
+				for (int i = 0; i < blackList.ItemDefinitions.Count; i++) {
+					if (blackList.ItemDefinitions[i].Type == itemType)
+						break;
+				}
+
+				blackList.ItemDefinitions.Add(new(itemType));
 			}
 
 			if (RegisteredStorages[storageID].ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
@@ -635,55 +672,44 @@ namespace androLib
 				Main.NewText(AndroLibGameMessages.AddedToBlacklist.ToString().Lang(AndroMod.ModName, L_ID1.AndroLibGameMessages, new object[] { itemType.CSI().Name, bagName }));
 			}
 
-			blackList.ItemDefinitions.Add(new(itemType));
-			RemoveFromPlayerWhitelist(storageID, itemType, true);
-		}
-		public static void RemoveFromPlayerWhitelist(int storageID, int itemType, bool forseSave = false) {
-			ItemList whiteList = GetPlayerWhitelist(storageID);
-			bool shouldSave = forseSave;
-			for (int i = 0; i < whiteList.ItemDefinitions.Count; i++) {
-				if (whiteList.ItemDefinitions[i].Type == itemType) {
-					whiteList.ItemDefinitions.RemoveAt(i);
-					shouldSave = true;
-					break;
-				}
-			}
-
-			if (!shouldSave)
-				return;
-
-			SaveClientAndroConfig();
-		}
-		public static void RemoveFromPlayerBlacklist(int storageID, int itemType, bool forseSave = false) {
-			ItemList blackList = GetPlayerBlacklist(storageID);
-			bool shouldSave = forseSave;
-			for (int i = 0; i < blackList.ItemDefinitions.Count; i++) {
-				if (blackList.ItemDefinitions[i].Type == itemType) {
-					blackList.ItemDefinitions.RemoveAt(i);
-					shouldSave = true;
-					break;
-				}
-			}
-
-			if (!shouldSave)
-				return;
-
-			SaveClientAndroConfig();
+			TryRemoveFromPlayerWhitelist(storageID, itemType, true);
 		}
 		public static void TryRemoveFromPlayerWhitelist(int storageID, int itemType, bool forseSave = false) {
-			if (RegisteredStorages[storageID].HasAllowedListGetter)
+			bool shouldSave = forseSave;
+			if (TryGetPlayerWhitelist(storageID, out ItemList whiteList)) {
+				for (int i = 0; i < whiteList.ItemDefinitions.Count; i++) {
+					if (whiteList.ItemDefinitions[i].Type == itemType) {
+						whiteList.ItemDefinitions.RemoveAt(i);
+						shouldSave = true;
+						break;
+					}
+				}
+			}
+
+			if (!shouldSave)
 				return;
 
-			RemoveFromPlayerWhitelist(storageID, itemType, forseSave);
+			SaveClientAndroConfig();
 		}
 		public static void TryRemoveFromPlayerBlacklist(int storageID, int itemType, bool forseSave = false) {
-			if (RegisteredStorages[storageID].HasAllowedListGetter)
+			bool shouldSave = forseSave;
+			if (TryGetPlayerBlacklist(storageID, out ItemList blackList)) {
+				for (int i = 0; i < blackList.ItemDefinitions.Count; i++) {
+					if (blackList.ItemDefinitions[i].Type == itemType) {
+						blackList.ItemDefinitions.RemoveAt(i);
+						shouldSave = true;
+						break;
+					}
+				}
+			}
+
+			if (!shouldSave)
 				return;
 
-			RemoveFromPlayerBlacklist(storageID, itemType, forseSave);
+			SaveClientAndroConfig();
 		}
-		public static SortedSet<int> GetPlayerWhiteListSortedSet(int storageID) => new(GetPlayerWhitelist(storageID).ItemDefinitions.Select(d => d.Type));
-		public static SortedSet<int> GetPlayerBlackListSortedSet(int storageID) => new(GetPlayerBlacklist(storageID).ItemDefinitions.Select(d => d.Type));
+		public static SortedSet<int> GetPlayerWhiteListSortedSet(int storageID) => TryGetPlayerWhitelist(storageID, out ItemList whiteList) ? new (whiteList.ItemDefinitions.Select(d => d.Type)) : new();
+		public static SortedSet<int> GetPlayerBlackListSortedSet(int storageID) => TryGetPlayerBlacklist(storageID, out ItemList blackList) ? new (blackList.ItemDefinitions.Select(d => d.Type)) : new();
 		private static void SaveClientAndroConfig() {
 			typeof(ConfigManager).GetMethod("Save", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { AndroMod.clientConfig });
 		}
@@ -712,6 +738,7 @@ namespace androLib
 				int uiLeft,
 				int uiTop,
 				Func<SortedSet<int>> getAllowedList = null,
+				bool isBlacklistGetter = false,
 				Action selectItemForUIOnly = null,
 				bool shouldRefreshInfoAccs = false
 			) {
@@ -733,6 +760,7 @@ namespace androLib
 				uiLeft, 
 				uiTop,
 				getAllowedList,
+				isBlacklistGetter,
 				selectItemForUIOnly,
 				shouldRefreshInfoAccs
 			);

@@ -355,7 +355,6 @@ namespace androLib.UI
 							if (MasterUIManager.LeftMouseClicked) {
 								item.favorited = !item.favorited;
 								SoundEngine.PlaySound(SoundID.MenuTick);
-								//if (item.TryGetGlobalItem(out VacuumToOreBagItems vacummItem2))
 								if (item.TryGetGlobalItem(out VacuumToStorageItem vacummItem2))
 									vacummItem2.favorited = item.favorited;
 							}

@@ -39,7 +39,8 @@ namespace androLib
 		public static Mod fargosMod;
 		public static bool fargosEnabled = ModLoader.TryGetMod(fargosModName, out fargosMod);
 		public static string fargosSoulsModName = "FargowiltasSouls";
-		public static bool fargosSoulsEnabled = ModLoader.TryGetMod(fargosSoulsModName, out Mod _);
+		public static Mod fargosSoulsMod;
+		public static bool fargosSoulsEnabled = ModLoader.TryGetMod(fargosSoulsModName, out fargosSoulsMod);
 		public static string amuletOfManyMinionsName = "AmuletOfManyMinions";
 		public static bool amuletOfManyMinionsEnabled = ModLoader.TryGetMod(amuletOfManyMinionsName, out Mod _);
 		public static string vacuumBagsName = "VacuumBags";
@@ -100,7 +101,7 @@ namespace androLib
 
 			switch(id) {
 				case CallID.Register:
-					if (args.Length < 3 || args.Length > 14)
+					if (args.Length < 3 || args.Length > 15)
 						return -1;
 
 					int modIndex = idIndex + 1;
@@ -166,6 +167,11 @@ namespace androLib
 					if (args.Length >= getAllowedListIndex + 1 && args[getAllowedListIndex] is Func<SortedSet<int>> GetAllowedListArg)
 						GetAllowedList = GetAllowedListArg;
 
+					int isBlacklistGetterIndex = getAllowedListIndex + 1;
+					bool IsBlacklistGetter = false;
+					if (args.Length >= isBlacklistGetterIndex + 1 && args[isBlacklistGetterIndex] is bool IsBlacklistGetterArg)
+						IsBlacklistGetter = IsBlacklistGetterArg;
+
 					return StorageManager.RegisterVacuumStorageClass(
 						mod, 
 						VacuumStorageType, 
@@ -179,7 +185,8 @@ namespace androLib
 						StorageItemTypeGetter,
 						UI_DefaultLeftLocationOnScreen, 
 						UI_DefaultTopLocationOnScreen,
-						GetAllowedList
+						GetAllowedList,
+						IsBlacklistGetter
 					);
 
 				case CallID.GetItems:
