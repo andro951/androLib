@@ -11,11 +11,16 @@ using static Terraria.Localization.GameCulture;
 using androLib.Common.Utility;
 using androLib.Common.Globals;
 using androLib.Common.Configs;
+using Terraria.ID;
+using Terraria;
 
 namespace androLib.Localization
 {
 	public class AndroLocalizationData {
 		public static void RegisterSDataPackage() {
+			if (Main.netMode == NetmodeID.Server)
+				return;
+
 			AndroLogModSystem.RegisterModLocalizationSDataPackage(new(ModContent.GetInstance<AndroMod>, () => AllData, () => ChangedData, () => RenamedKeys, () => RenamedFullKeys, () => SameAsEnglish));
 		}
 

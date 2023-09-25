@@ -305,11 +305,11 @@ namespace androLib.UI
 		}
 		public void UpdateInterface() {
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
-			if (!DisplayBagUI || !Main.playerInventory)
+			if (!DisplayBagUI || !Main.playerInventory || drawnUIData == null)
 				return;
 
 			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(BagButtonID.DepositAll)))) {
-				if (!Main.mouseItem.IsAir || Main.HoverItem.favorited || !CanVacuumItem(Main.HoverItem, storagePlayer.Player, forShiftClickFromInventory: true)) {
+				if (!Main.mouseItem.IsAir || Main.HoverItem.favorited || !CanShiftClickNonBagItemToBag(Main.HoverItem)) {
 					Main.cursorOverride = -1;
 				}
 				else {
@@ -547,20 +547,26 @@ namespace androLib.UI
 					SoundEngine.PlaySound(SoundID.Grab);
 			}
 		}
+		
+		private void LootAll() {
+			Item[] inv = Inventory;
+			for (int i = 0; i < inv.Length; i++) {
+				Item item = inv[i];
+				if (item.type > ItemID.None && !item.favorited) {
+					inv[i] = Main.LocalPlayer.GetItem(Main.myPlayer, inv[i], GetItemSettings.LootAllSettings);
+				}
+			}
+		}
+		
+		#region Single
+
 		public bool CanBeStored(Item item) => !item.NullOrAir() && Storage.ItemAllowedToBeStored(item);
-		public bool RoomInStorage(Item item, Player player = null) {
-			if (Main.netMode == NetmodeID.Server)
-				return false;
-
-			if (player == null)
-				player = Main.LocalPlayer;
-
-			if (player.whoAmI != Main.myPlayer)
-				return false;
-
+		public bool VacuumAllowed(Item item) => Storage.IsVacuumBag == true || Storage.IsVacuumBag == null && ContainsItem(item);
+		public bool ContainsItem(Item item) => Storage.ContainsSlow(item);
+		public bool RoomInStorage(Item item) {
 			Item[] inv = Inventory;
 			int stack = item.stack;
-			for (int i = 0; i < inv.Length; i++) {
+			for (int i = inv.Length - 1; i >= 0; i--) {
 				Item invItem = inv[i];
 				if (invItem.IsAir) {
 					return true;
@@ -574,16 +580,19 @@ namespace androLib.UI
 
 			return false;
 		}
-		private void LootAll() {
-			Item[] inv = Inventory;
-			for (int i = 0; i < inv.Length; i++) {
-				Item item = inv[i];
-				if (item.type > ItemID.None && !item.favorited) {
-					inv[i] = Main.LocalPlayer.GetItem(Main.myPlayer, inv[i], GetItemSettings.LootAllSettings);
-				}
-			}
+		public bool CanDeposit(Item item) {
+			if (item.NullOrAir())
+				return false;
+
+			if (!CanBeStored(item))
+				return false;
+
+			if (!RoomInStorage(item))
+				return false;
+
+			return true;
 		}
-		public bool CanVacuumItem(Item item, Player player, bool ignoreNeedBagInInventory = false, bool forShiftClickFromInventory = false) {
+		public bool CanVacuumItem(Item item, Player player, bool ignoreNeedBagInInventory = false) {
 			if (item.NullOrAir())
 				return false;
 
@@ -593,51 +602,108 @@ namespace androLib.UI
 			if (!CanBeStored(item))
 				return false;
 
-			if (!ignoreNeedBagInInventory && !Storage.HasRequiredItemToUseStorage(player, out _, out _))
-				return false;
-
-			if (!RoomInStorage(item))
-				return false;
-
 			//If bag is a "Quick Stack" only style bag, check if item is already in inventory
-			if (!forShiftClickFromInventory && !VacuumAllowed(item))
+			if (!VacuumAllowed(item))
+				return false;
+
+			if (!ignoreNeedBagInInventory && !Storage.HasRequiredItemToUseStorageSlow(player))
+				return false;
+			//return false;
+			if (!RoomInStorage(item))
 				return false;
 
 			return true;
 		}
-		public bool TryVacuumItem(ref Item item, Player player, bool ignoreTile = false, bool playSound = true) {
-			if (CanVacuumItem(item, player, ignoreTile))
-				return DepositAll(ref item, playSound);
+		public bool TryVacuumItem(ref Item item, Player player, bool ignoreNeedBagInInventory = false, bool playSound = true) {
+			if (CanVacuumItem(item, player, ignoreNeedBagInInventory))
+				return Deposit(ref item, playSound);
 
 			return false;
 		}
-		public bool DepositAll(ref Item item, bool playSound = true) => DepositAll(new Item[] { item }, playSound);
-		public bool DepositAll(Item[] inv, bool playSound = true) {
-			bool transferedAnyItem = Restock(inv, false);
-			int storageIndex = 0;
-			Item[] oreBagInventory = Inventory;
-			for (int i = 0; i < inv.Length; i++) {
-				if (i == 58 && Main.mouseItem.type == inv[i].type)//Skip Mouse Item
-					continue;
+		public bool Deposit(ref Item item, bool playSound = true) {
+			if (item.NullOrAir())
+				return false;
 
-				ref Item item = ref inv[i];
-				if (!VacuumAllowed(item))
-					continue;
+			if (item.favorited)
+				return false;
 
-				if (!item.favorited && CanBeStored(item)) {
-					while (storageIndex < oreBagInventory.Length && oreBagInventory[storageIndex].type > ItemID.None) {
-						storageIndex++;
-					}
+			if (Restock(ref item))
+				return true;
 
-					if (storageIndex < oreBagInventory.Length) {
-						oreBagInventory[storageIndex] = item.Clone();
-						item.TurnToAir();
-						transferedAnyItem = true;
-					}
-					else {
-						break;
+			int index = 0;
+			Item[] inv = Inventory;
+			while (!inv[index].IsAir && index < inv.Length) {
+				index++;
+			}
+
+			if (index == inv.Length)
+				return false;
+
+			inv[index] = item.Clone();
+			item.TurnToAir();
+			if (playSound)
+				SoundEngine.PlaySound(SoundID.Grab);
+
+			return true;
+		}
+		public bool Restock(ref Item item, bool playSound = true) {
+			Item[] bagInventory = Inventory;
+			for (int i = 0; i < bagInventory.Length; i++) {
+				Item bagItem = bagInventory[i];
+				if (!bagItem.NullOrAir() && bagItem.type == item.type && bagItem.stack < bagItem.maxStack) {
+					if (ItemLoader.TryStackItems(bagItem, item, out _)) {
+						if (item.stack < 1) {
+							item.TurnToAir();
+							if (playSound)
+								SoundEngine.PlaySound(SoundID.Grab);
+
+							return true;
+						}
 					}
 				}
+			}
+
+			return false;
+		}
+		public bool CanShiftClickNonBagItemToBag(Item item) {
+			if (!DisplayBagUI)
+				return false;
+
+			if (!CanDeposit(item))
+				return false;
+
+			return true;
+		}
+		public bool TryShiftClickNonBagItemToBag(ref Item item) {
+			if (CanShiftClickNonBagItemToBag(item))
+				return Deposit(ref item);
+
+			return false;
+		}
+
+		#endregion
+
+		#region Multiple
+
+		public bool DepositAll(IEnumerable<Item> inv, bool playSound = true) {
+			IEnumerable<Item> items = inv.Where(i => !i.NullOrAir() && !i.favorited && CanBeStored(i));
+			bool transferedAnyItem = Restock(items, false);
+			int index = 0;
+			Item[] bagInventory = Inventory;
+			foreach (Item item in items) {
+				if (item.NullOrAir())
+					continue;
+
+				while (!bagInventory[index].IsAir && index < bagInventory.Length) {
+					index++;
+				}
+
+				if (index >= bagInventory.Length)
+					break;
+
+				bagInventory[index] = item.Clone();
+				item.TurnToAir();
+				transferedAnyItem = true;
 			}
 
 			if (transferedAnyItem) {
@@ -649,55 +715,22 @@ namespace androLib.UI
 
 			return transferedAnyItem;
 		}
-		public bool VacuumAllowed(Item item) => Storage.IsVacuumBag == true || Storage.IsVacuumBag == null && (ContainsItem(item) || ItemSlot.ShiftInUse && MasterUIManager.LeftMouseClicked && DisplayBagUI);
-		public bool ContainsItem(Item item) {
-			if (item.NullOrAir())
-				return false;
-
-			Item[] inv = Inventory;
-			for (int i = 0; i < inv.Length; i++) {
-				if (inv[i].type == item.type)
-					return true;
-			}
-
-			return false;
-		}
-		public bool QuickStack(ref Item item, Player player, bool ignoreTile = false, bool playSound = true) {
-			if (ContainsItem(item))
-				return TryVacuumItem(ref item, player, ignoreTile, playSound);
-
-			return false;
-		}
-		public void QuickStack(Item[] inv, Player player) {
-			for (int i = 0; i < inv.Length; i++) {
-				ref Item item = ref inv[i];
-				if (item.NullOrAir())
-					continue;
-
-				if (item.favorited)
-					continue;
-
-				QuickStack(ref item, player);
-			}
-		}
-		public bool Restock(ref Item item) => Restock(new Item[] { item });
-		public bool Restock(Item[] inv, bool playSound = true) {
-			Item[] oreBagInventory = Inventory;
+		public bool Restock(IEnumerable<Item> inv, bool playSound = true) {
+			Item[] bagInventory = Inventory;
 			bool transferedAnyItem = false;
 			SortedDictionary<int, List<int>> nonAirItemsInStorage = new();
-			for (int i = 0; i < oreBagInventory.Length; i++) {
-				int type = oreBagInventory[i].type;
-				if (type > ItemID.None)
-					nonAirItemsInStorage.AddOrCombine(type, i);
+			for (int i = 0; i < bagInventory.Length; i++) {
+				Item bagItem = bagInventory[i];
+				if (!bagItem.NullOrAir() && bagItem.stack < bagItem.maxStack)
+					nonAirItemsInStorage.AddOrCombine(bagItem.type, i);
 			}
 
-			for (int i = 0; i < inv.Length; i++) {
-				ref Item item = ref inv[i];
-				if (!item.favorited && CanBeStored(item) && nonAirItemsInStorage.TryGetValue(item.type, out List<int> storageIndexes)) {
-					foreach (int storageIndex in storageIndexes) {
-						ref Item storageItem = ref oreBagInventory[storageIndex];
-						if (storageItem.stack < item.maxStack) {
-							if (ItemLoader.TryStackItems(storageItem, item, out int transfered)) {
+			foreach (Item item in inv) {
+				if (nonAirItemsInStorage.TryGetValue(item.type, out List<int> storageIndexes)) {
+					foreach (int bagIndex in storageIndexes) {
+						ref Item bagItem = ref bagInventory[bagIndex];
+						if (bagItem.stack < item.maxStack) {
+							if (ItemLoader.TryStackItems(bagItem, item, out _)) {
 								transferedAnyItem = true;
 								if (item.stack < 1) {
 									item.TurnToAir();
@@ -716,6 +749,28 @@ namespace androLib.UI
 
 			return transferedAnyItem;
 		}
+
+		#endregion
+
+		public bool QuickStack(ref Item item, Player player, bool ignoreTile = false, bool playSound = true) {
+			if (ContainsItem(item))
+				return TryVacuumItem(ref item, player, ignoreTile, playSound);
+
+			return false;
+		}
+		public void QuickStack(Item[] inv, Player player) {
+			for (int i = 0; i < inv.Length; i++) {
+				ref Item item = ref inv[i];
+				if (item.NullOrAir())
+					continue;
+
+				if (item.favorited)
+					continue;
+
+				QuickStack(ref item, player);
+			}
+		}
+		
 		private void Sort() {
 			MasterUIManager.SortItems(ref Storage.Items);
 			Type itemSlotType = typeof(ItemSlot);

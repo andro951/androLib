@@ -57,8 +57,18 @@ namespace androLib
 		private string modFullName;
 		private int myLastBagLocation = -1;
 		private int myLastIndexInTheBag = -1;
+		private int foundBagType = -1;
 		private Func<SortedSet<int>> GetAllowedList;
 		private bool IsBlacklistGetter;
+		uint nextBagCheck = 0;
+		private SortedDictionary<int, int> ItemsIHaveThisTick = new();
+
+		#region Simple HasRequiredItemToUseStorage
+
+		private uint nextBagItemCheckTime = 0;
+		private bool found = false;
+
+		#endregion
 
 		public Storage(
 				Mod mod, 
@@ -279,32 +289,41 @@ namespace androLib
 		/// Use GetItemFromHasRequiredItemToUseStorageIndex() to get the item savely.</param>
 		/// <returns></returns>
 		public bool HasRequiredItemToUseStorage(Player player, out int bagFoundInID, out int index, int specifiedBagType = -1) {
-			index = RequiredItemNotFound;
-			bagFoundInID = -1;
-			bool? validItemType = ValidItemTypeGetters(out SortedSet<int> bagItemTypes);
-			if (validItemType != true)
-				return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
+			bool found = true;
+			if (foundBagType == -1)
+				found = false;
 
-			if (specifiedBagType != -1) {
-				bagItemTypes.Clear();
-				bagItemTypes.Add(specifiedBagType);
-			}
-				
-			Item lastLocationItem = GetItemFromHasRequiredItemToUseStorageIndex(player, myLastBagLocation, myLastIndexInTheBag);
-			if (!lastLocationItem.NullOrAir()) {
-				bool inPlayerInventory = myLastIndexInTheBag > RequiredItemNotFound;
-				foreach (int bagItemType in bagItemTypes) {
-					if (bagItemType == lastLocationItem.type) {
-						//Bag is in player's inventory or item is in a bag and this bag's UI is open or that bag's UI is open.
-						bool canUse = inPlayerInventory || StorageManager.VacuumStorageIndexesFromBagTypes.TryGetValue(bagItemType, out int bagID) && StorageManager.BagUIs[bagID].DisplayBagUI || myLastBagLocation > -1 && StorageManager.BagUIs[myLastBagLocation].DisplayBagUI;
-						if (!canUse)
-							continue;
-
+			if (found) {
+				Item lastBagLocationItem = GetItemFromHasRequiredItemToUseStorageIndex(player, myLastBagLocation, myLastIndexInTheBag);
+				if (foundBagType == lastBagLocationItem?.type) {
+					bool inPlayerInventory = myLastIndexInTheBag > RequiredItemNotFound;
+					if (inPlayerInventory || StorageManager.VacuumStorageIndexesFromBagTypes.TryGetValue(foundBagType, out int bagID) && StorageManager.BagUIs[bagID].DisplayBagUI || myLastBagLocation > -1 && StorageManager.BagUIs[myLastBagLocation].DisplayBagUI) {
 						bagFoundInID = myLastBagLocation;
 						index = myLastIndexInTheBag;
 						return true;
 					}
 				}
+			}
+
+			if (nextBagCheck > Main.GameUpdateCount) {
+				bagFoundInID = -1;
+				index = RequiredItemNotFound;
+				return false;
+			}
+			else {
+				nextBagCheck = Main.GameUpdateCount + 1u;
+			}
+
+			index = RequiredItemNotFound;
+			bagFoundInID = -1;
+			SortedSet<int> bagItemTypes;
+			if (specifiedBagType != -1) {
+				bagItemTypes = new() { specifiedBagType };
+			}
+			else {
+				bool? validItemType = ValidItemTypeGetters(out bagItemTypes);
+				if (validItemType != true)
+					return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
 			}
 			
 			//Check player inventory for this bag.
@@ -314,23 +333,25 @@ namespace androLib
 					index = i;
 					myLastBagLocation = bagFoundInID;
 					myLastIndexInTheBag = index;
+					foundBagType = item.type;
 					return true;
 				}
 			}
 
 			//Check all other bags for this bag.
-			for (int j = 0; j < StorageManager.BagUIs.Count; j++) {
-				BagUI bagUI = StorageManager.BagUIs[j];
-				if (!bagUI.DisplayBagUI)
-					continue;
+			foreach (int bagType in bagItemTypes) {
+				Item bagItem = bagType.CSI();
+				for (int j = 0; j < StorageManager.BagUIs.Count; j++) {
+					BagUI bagUI = StorageManager.BagUIs[j];
+					if (!bagUI.DisplayBagUI || !bagUI.CanBeStored(bagItem))
+						continue;
 
-				for (int i = 0; i < bagUI.Storage.Items.Length; i++) {
-					Item item = bagUI.Storage.Items[i];
-					if (bagItemTypes.Contains(item.type)) {
-						index = -i + ReuiredItemInABagStartingIndex;
+					if (bagUI.Storage.ContainsSlow(bagType, out int myLastIndex)) {
+						index = -myLastIndex + ReuiredItemInABagStartingIndex;
 						bagFoundInID = j;
 						myLastBagLocation = bagFoundInID;
 						myLastIndexInTheBag = index;
+						foundBagType = bagType;
 						return true;
 					}
 				}
@@ -350,6 +371,28 @@ namespace androLib
 			myLastIndexInTheBag = RequiredItemNotFound;
 
 			return false;
+		}
+		public bool HasRequiredItemToUseStorageSlow(Player player) {
+			if (Main.GameUpdateCount < nextBagItemCheckTime)
+				return found;
+
+			nextBagItemCheckTime = Main.GameUpdateCount + (found ? 30u : 10u);//It can wait a little longer to stop having a bag.
+			found = HasRequiredItemToUseStorage(player, out _, out _);
+			return found;
+		}
+		/// <summary>
+		/// Don't forget to check the type of the found item if using this method since it only checks every 10-30 ticks if that amount if time is important.
+		/// </summary>
+		public bool HasRequiredItemToUseStorageSlow(Player player, out int bagFoundInID, out int index, int specifiedBagType = -1) {
+			if (Main.GameUpdateCount < nextBagItemCheckTime) {
+				bagFoundInID = myLastBagLocation;
+				index = myLastIndexInTheBag;
+				return found;
+			}
+
+			nextBagItemCheckTime = Main.GameUpdateCount + (found ? 30u : 10u);//It can wait a little longer to stop having a bag.
+			found = HasRequiredItemToUseStorage(player, out bagFoundInID, out index, specifiedBagType);
+			return found;
 		}
 		public void RegisterItemTypeGetter(Func<int> itemTypeGetter) {
 			if (itemTypeGetter == null)
@@ -393,6 +436,63 @@ namespace androLib
 		public bool HasWhiteListGetter => !IsBlacklistGetter && HasWhiteOreBlacklistGetter;
 		//public bool HasBlackListGetter => IsBlacklistGetter && HasWhiteOreBlacklistGetter;
 		public bool HasWhiteOreBlacklistGetter => GetAllowedList != null;
+		private uint nextContainsUpdate = 0;
+		public bool Contains(Item item, out int index) => Contains(item.type, out index);
+		public bool Contains(int itemType, out int index) {
+			if (Main.GameUpdateCount >= nextContainsUpdate) {
+				nextContainsUpdate = Main.GameUpdateCount + 1u;
+				nextSlowUpdate = Main.GameUpdateCount + 10u;
+				if (nextSlowUpdate < nextContainsUpdate)
+					nextSlowUpdate = nextContainsUpdate;
+
+				ItemsIHaveThisTick = new();
+				for (int i = 0; i < Items.Length; i++) {
+					Item myItem = Items[i];
+					if (myItem.NullOrAir())
+						continue;
+
+					ItemsIHaveThisTick.TryAdd(myItem.type, i);
+				}
+			}
+			
+			return ItemsIHaveThisTick.TryGetValue(itemType, out index);
+		}
+		private uint nextSlowUpdate = 0;
+
+		public bool ContainsSlow(Item item, out int index) => ContainsSlow(item.type, out index);
+		public bool ContainsSlow(int itemType, out int index) {
+			if (Main.GameUpdateCount >= nextContainsUpdate) {
+				nextContainsUpdate = Main.GameUpdateCount + 10u;
+				ItemsIHaveThisTick = new();
+				for (int i = 0; i < Items.Length; i++) {
+					Item myItem = Items[i];
+					if (myItem.NullOrAir())
+						continue;
+
+					ItemsIHaveThisTick.TryAdd(myItem.type, i);
+				}
+			}
+
+
+			return ItemsIHaveThisTick.TryGetValue(itemType, out index);
+		}
+		public bool ContainsSlow(Item item) => ContainsSlow(item.type);
+		public bool ContainsSlow(int itemType) {
+			if (Main.GameUpdateCount >= nextContainsUpdate) {
+				nextContainsUpdate = Main.GameUpdateCount + 10u;
+				ItemsIHaveThisTick = new();
+				for (int i = 0; i < Items.Length; i++) {
+					Item myItem = Items[i];
+					if (myItem.NullOrAir())
+						continue;
+
+					ItemsIHaveThisTick.TryAdd(myItem.type, i);
+				}
+			}
+
+
+			return ItemsIHaveThisTick.ContainsKey(itemType);
+		}
 	}
 	public static class StorageManager {
 		public static int DefaultLeftLocationOnScreen => 80;
@@ -443,7 +543,26 @@ namespace androLib
 		public static bool HasRequiredItemToUseStorageFromBagType(Player player, int bagType, out int bagInventoryIndex, bool onlyThisBagType = false) {
 			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
 				Storage storage = BagUIs[storageID].Storage;
-				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
+				if (storage.HasRequiredItemToUseStorage(player, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
+					return true;
+			}
+
+			bagInventoryIndex = Storage.RequiredItemNotFound;
+			return false;
+		}
+		public static bool HasRequiredItemToUseStorageFromBagTypeSlow(Player player, int bagType) {
+			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
+				Storage storage = BagUIs[storageID].Storage;
+				if (storage.HasRequiredItemToUseStorageSlow(player))
+					return true;
+			}
+
+			return false;
+		}
+		public static bool HasRequiredItemToUseStorageFromBagTypeSlow(Player player, int bagType, out int bagInventoryIndex, bool onlyThisBagType = false) {
+			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
+				Storage storage = BagUIs[storageID].Storage;
+				if (storage.HasRequiredItemToUseStorageSlow(player, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
 					return true;
 			}
 
@@ -742,6 +861,9 @@ namespace androLib
 				Action selectItemForUIOnly = null,
 				bool shouldRefreshInfoAccs = false
 			) {
+			if (Main.netMode == NetmodeID.Server)
+				return 0;
+
 			int storageID = BagUIs.Count;
 
 			int registeredUI_ID = MasterUIManager.RegisterUI_ID();

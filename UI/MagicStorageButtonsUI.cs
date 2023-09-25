@@ -10,11 +10,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Terraria;
+using Terraria.ID;
 
 namespace androLib.UI
 {
 	public static class MagicStorageButtonsUI {
 		public static void RegisterWithMasterUIManager() {
+			if (Main.netMode == NetmodeID.Server)
+				return;
+
 			UI_ID.MagicStorageDepositAll_UITypeID = MasterUIManager.RegisterUI_ID();
 			MasterUIManager.IsDisplayingUI.Add(() => IsOpen);
 			MasterUIManager.DrawAllInterfaces += PostDrawInterface;

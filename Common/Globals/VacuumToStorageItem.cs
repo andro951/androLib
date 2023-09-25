@@ -63,7 +63,6 @@ namespace androLib.Common.Globals
 				return true;
 
 			return StorageManager.CanVacuumItem(item, player);
-			//return OreBagUI.CanVacuumItem(player, item);
 		}
 	}
 

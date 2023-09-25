@@ -161,6 +161,9 @@ namespace androLib.UI
 		}
 		
 		public static void PostUpdateEverything() {
+			if (Main.netMode == NetmodeID.Server)
+				return;
+
 			if (Main.focusRecipe != FocusRecipe && ShouldPreventRecipeScrolling.Invoke())
 				Main.focusRecipe = FocusRecipe;
 		}

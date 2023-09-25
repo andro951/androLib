@@ -88,7 +88,7 @@ namespace androLib
 				foreach (BagUI bagUI in StorageManager.BagUIs) {
 					if (bagUI.DisplayBagUI && bagUI.CanBeStored(item)) {
 						openAndCouldStore = true;
-						if (bagUI.TryVacuumItem(ref item, Main.LocalPlayer))
+						if (bagUI.TryShiftClickNonBagItemToBag(ref item))
 							return true;
 					}
 				}
@@ -109,6 +109,9 @@ namespace androLib
 			CenterBeforeMoveUpdate = Player.Center;
 		}
 		public override void ResetInfoAccessories() {
+			if (Main.netMode == NetmodeID.Server)
+				return;
+
 			if (Main.LocalPlayer == null)
 				return;
 
@@ -135,6 +138,9 @@ namespace androLib
 
 		public static bool PrintDevOnlyAllowedItemListInfo => Debugger.IsAttached && AndroMod.clientConfig.LogAllPlayerWhiteAndBlackLists;
 		private static void SetupAllAllowedItemManagers() {
+			if (Main.netMode == NetmodeID.Server)
+				return;
+
 			List<INeedsSetUpAllowedList> iNeedsSetUpAllowedLists = StorageManager.AllBagTypesFirstForEachInventory.Select(t => ContentSamples.ItemsByType[t].ModItem).OfType<INeedsSetUpAllowedList>().ToList();
 			List<AllowedItemsManager> allowedItemManagers = iNeedsSetUpAllowedLists.Select(b => b.GetAllowedItemsManager).ToList();
 			SortedDictionary<int, SortedSet<int>> enchantedItemsAllowedInBags = new();
