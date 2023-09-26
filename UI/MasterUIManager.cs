@@ -19,19 +19,14 @@ using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.UI.Chat;
 using Terraria.UI.Gamepad;
-//using androLib.Common.Configs;
 using androLib.Common.Globals;
 using androLib.Common.Utility;
-//using androLib.Content.NPCs;
 using androLib;
 using static androLib.UI.MasterUIManager;
-using System.Globalization;
 
 namespace androLib.UI
 {
 	public static class MasterUIManager {
-		//TODO: Re-evaluate the need for any of this.  Probably taking care of everything via StorageManager and BagUI.
-
 		public static event Action UpdateUIAlpha;
 
 		public static BoolCheck IsDisplayingUI = new();
@@ -69,6 +64,9 @@ namespace androLib.UI
 		public static bool LeftMouseClicked => Main.mouseLeft && !lastMouseLeft;
 		public static bool RightMouseClicked => Main.mouseRight && !lastMouseRight;
 		public static bool LeftMouseDown = false;
+		public static Point lastClickPosition;
+		public static uint lastClickTime = 0;
+		public static bool DoubleClick;
 		public static Color MouseColor {
 			get {
 				Color mouseColor = Color.White * (1f - (255f - (float)(int)Main.mouseTextColor) / 255f * 0.5f);
@@ -100,7 +98,22 @@ namespace androLib.UI
 				genericModPlayer.disableLeftShiftTrashCan = false;
 			}
 
+			if (LeftMouseClicked) {
+				Point clickPosition = new(Main.mouseX, Main.mouseY);
+				if (Main.GameUpdateCount - lastClickTime <= 18) {
+					if (lastClickPosition.Distance(clickPosition) < 8)
+						DoubleClick = true;
+				}
+
+				lastClickTime = Main.GameUpdateCount;
+				lastClickPosition = clickPosition;
+			}
+			else {
+				DoubleClick = false;
+			}
+
 			if (DisplayingAnyUI) {
+
 				if (NoPanelBeingDragged) {
 					if (!NoUIBeingHovered && UIBeingHovered == LastUIBeingHovered) {
 						HoverTime++;
@@ -306,6 +319,7 @@ namespace androLib.UI
 		public static void DrawUIPanel(SpriteBatch spriteBatch, Vector2 panelTopLeft, Vector2 panelBottomRight, Color panelColor) {
 			DrawUIPanel(spriteBatch, (int)panelTopLeft.X, (int)panelTopLeft.Y, (int)panelBottomRight.X, (int)panelBottomRight.Y, panelColor);
 		}
+		private static int minPanelSize = -8;
 		public static void DrawUIPanel(SpriteBatch spriteBatch, int Left, int Top, int Right, int Bottom, Color panelColor) {
 			int _barSize = 4;
 			int cornerSize = 12;
@@ -313,6 +327,18 @@ namespace androLib.UI
 			Bottom -= cornerSize;
 			int width = Right - Left - cornerSize;
 			int height = Bottom - Top - cornerSize;
+			if (width < minPanelSize) {
+				int diff = minPanelSize - width - 1;
+				Left -= (diff / 2 + 1);
+				Right += (diff / 2 + 1);
+			}
+
+			if (height < minPanelSize) {
+				int diff = minPanelSize - height - 1;
+				Top -= (diff / 2 + 1);
+				Bottom += (diff / 2 + 1);
+			}
+
 			Color[] colors = { panelColor, Color.Black };
 			for (int i = 0; i < uiTextures.Length; i++) {
 				Texture2D texture = uiTextures[i].Value;
@@ -588,7 +614,7 @@ namespace androLib.UI
 			Center = center;
 			Color = color;
 			AncorBotomLeft = ancorBotomLeft;
-			Vector2 baseSize = textData.Text != null ? FontAssets.MouseText.Value.MeasureString(Text) : Vector2.Zero;
+			Vector2 baseSize = GetBaseSize(textData.Text);
 			BaseTextSize = baseSize;
 			Vector2 size = baseSize * textData.Scale;
 			TextSize = size;
@@ -602,6 +628,7 @@ namespace androLib.UI
 			int left = Center ? TopLeft.X - Width / 2: TopLeft.X;
 			ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.MouseText.Value, Text, new Vector2(left, TopLeft.Y), Color, 0f, Position, new Vector2(Scale), -1f, 1.5f);
 		}
+		public static Vector2 GetBaseSize(string text) => text != null ? FontAssets.MouseText.Value.MeasureString(text) : Vector2.Zero;
 	}
 	public struct TextData {
 		public string Text;

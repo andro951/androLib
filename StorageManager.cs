@@ -49,6 +49,15 @@ namespace androLib
 		public int UITopDefault { get; }
 		public int UILeft;
 		public int UITop;
+		public int UIResizePanelX;
+		public int UIResizePanelY;
+		public int LastUIResizePanelX;
+		public int LastUIResizePanelY;
+		public static int DefaultResizePanelIncrement = 100000;
+		public static int UIResizePanelDefaultX = DefaultResizePanelIncrement * 10;
+		public static int UIResizePanelDefaultY = DefaultResizePanelIncrement * 3;
+		public int LastUIResizePanelDefaultX;
+		public int LastUIResizePanelDefaultY;
 		public Item[] Items;
 		public int RegisteredUI_ID { get; }
 		public bool DisplayBagUI = false;
@@ -102,6 +111,9 @@ namespace androLib
 			UITopDefault = uiTopDefault;
 			UILeft = UILeftDefault;
 			UITop = UITopDefault;
+			int columns = StorageSize < 80 ? 10 : 20;
+			LastUIResizePanelDefaultX = columns * DefaultResizePanelIncrement;
+			LastUIResizePanelDefaultY = StorageSize < 200 ? StorageSize.CeilingDivide(columns) * DefaultResizePanelIncrement : UIResizePanelDefaultX;
 			GetAllowedList = getAllowedList;
 			IsBlacklistGetter = isBlackListGetter;
 			SelectItemForUIOnly = selectItemForUIOnly;
@@ -127,12 +139,20 @@ namespace androLib
 		public const string UILeftTag = "_UILeft";
 		public const string UITopTag = "_UITop";
 		public const string ShouldVacuumItemsTag = "_ShouldVacuumItems";
+		public const string UIResizePanelXTag = "_UIResizePanelX";
+		public const string UIResizePanelYTag = "_UIResizePanelY";
+		public const string LastUIResizePanelXTag = "_LastUIResizePanelX";
+		public const string LastUIResizePanelYTag = "_LastUIResizePanelY";
 		public void SaveData(TagCompound tag) {
 			string modFullName = GetModFullName();
 			tag[$"{modFullName}{ItemsTag}"] = Items;
 			tag[$"{modFullName}{UILeftTag}"] = UILeft;
 			tag[$"{modFullName}{UITopTag}"] = UITop;
-			tag[$"{modFullName}{ShouldVacuumItemsTag}"] = ShouldVacuum; 
+			tag[$"{modFullName}{ShouldVacuumItemsTag}"] = ShouldVacuum;
+			tag[$"{modFullName}{UIResizePanelXTag}"] = UIResizePanelX;
+			tag[$"{modFullName}{UIResizePanelYTag}"] = UIResizePanelY;
+			tag[$"{modFullName}{LastUIResizePanelXTag}"] = LastUIResizePanelX;
+			tag[$"{modFullName}{LastUIResizePanelYTag}"] = LastUIResizePanelY;
 		}
 		public void LoadData(TagCompound tag) {
 			int itemCount = StorageSize;
@@ -157,6 +177,18 @@ namespace androLib
 			UITop = uiTop;
 
 			ShouldVacuum = tag.Get<bool>($"{modFullName}{ShouldVacuumItemsTag}");
+
+			if (!tag.TryGet<int>($"{modFullName}{UIResizePanelXTag}", out UIResizePanelX))
+				UIResizePanelX = UIResizePanelDefaultX;
+
+			if (!tag.TryGet<int>($"{modFullName}{UIResizePanelYTag}", out UIResizePanelY))
+				UIResizePanelY = UIResizePanelDefaultY;
+
+			if (!tag.TryGet<int>($"{modFullName}{LastUIResizePanelXTag}", out LastUIResizePanelX))
+				LastUIResizePanelX = LastUIResizePanelDefaultX;
+
+			if (!tag.TryGet<int>($"{modFullName}{LastUIResizePanelYTag}", out LastUIResizePanelY))
+				LastUIResizePanelY = LastUIResizePanelDefaultY;
 		}
 		private void TryShiftDownAndReduceToMaxSize(ref Item[] items, int itemCount) {
 			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
@@ -955,20 +987,38 @@ namespace androLib
 
 		#endregion
 
-		private static bool ValidModID(int modID) => modID >= 0 && modID < BagUIs.Count;
-		public static bool TryGetBagUI(int modID, out BagUI bagUI) {
-			if (!ValidModID(modID)) {
+		private static bool ValidModID(int storageID) => storageID >= 0 && storageID < BagUIs.Count;
+		public static bool TryGetBagUI(int storageID, out BagUI bagUI) {
+			if (!ValidModID(storageID)) {
 				bagUI = null;
 				return false;
 			}
 
-			bagUI = BagUIs[modID];
+			bagUI = BagUIs[storageID];
 			return true;
 		}
 		public static IEnumerable<Item[]> AllItems => BagUIs.Select(bagUI => bagUI.Storage.Items);
-		
+		private static SortedDictionary<int, List<Action<BagUI>>> BagUIEdits = new();
+		public static void AddBagUIEdit(int storageID, Action<BagUI> edit) {
+			BagUIEdits.AddOrCombine(storageID, edit);
+		}
+		public static void PostSetupResipes() {
+			foreach (BagUI bagUI in BagUIs) {
+				bagUI.PreSetup();
+			}
 
+			foreach (KeyValuePair<int, List<Action<BagUI>>> edits in BagUIEdits) {
+				foreach (Action<BagUI> edit in edits.Value) {
+					edit(BagUIs[edits.Key]);
+				}
+			}
 
+			BagUIEdits.Clear();
+
+			foreach (BagUI bagUI in BagUIs) {
+				bagUI.PostSetup();
+			}
+		}
 		public static void TryUpdateMouseOverrideForDeposit(Item item) {
 			if (item.IsAir)
 				return;

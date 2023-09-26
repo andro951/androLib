@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -218,7 +219,7 @@ namespace androLib.Common.Utility
 
 			return total;
 		}
-		public static int CeilingDivide(this int num, int denom) {
+		public static int SlowCeilingDivide(this int num, int denom) {
 			int result = num / denom;
 			int r = num % denom;
 			if (r > 0)
@@ -226,6 +227,7 @@ namespace androLib.Common.Utility
 
 			return result;
 		}
+		public static int CeilingDivide(this int num, int denom) => (num - 1) / denom + 1;
 		public static int RoundDivide(this int num, int denom) {
 			int result = num / denom;
 			int r = num % denom;
@@ -242,6 +244,11 @@ namespace androLib.Common.Utility
 			return result;
 		}
 		public static int Abs(this int v) => v < 0 ? -v : v;
+		public static int Distance(this Point point1, Point point2) {
+			int x = point1.X - point2.X;
+			int y = point1.Y - point2.Y;
+			return (int)Math.Sqrt(x * x + y * y);
+		}
 
 		#endregion
 	}

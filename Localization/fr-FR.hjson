@@ -96,6 +96,7 @@ Mods: {
 		MagicStorageButtonsText.DepositAllFromVacuumBags: Déposez tout à partir de sacs sous vide
 
 		StorageText: {
+			ClearTrash: Effacer la corbeille
 			CloseBag: Fermer le sac
 			DepositAll: Tout déposer
 			DepositAllMagicStorage: Déposez tout le stockage magique

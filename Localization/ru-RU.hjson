@@ -96,6 +96,7 @@ Mods: {
 		MagicStorageButtonsText.DepositAllFromVacuumBags: Сдать все из вакуумных пакетов
 
 		StorageText: {
+			ClearTrash: Очистить мусор
 			CloseBag: Закрыть сумку
 			DepositAll: Депозит Все
 			DepositAllMagicStorage: Депонируйте все магическое хранилище

@@ -96,6 +96,7 @@ Mods: {
 		MagicStorageButtonsText.DepositAllFromVacuumBags: Bewahren Sie alles aus Vakuumbeuteln auf
 
 		StorageText: {
+			ClearTrash: Leeren Sie den Papierkorb
 			CloseBag: Beutel schließen
 			DepositAll: Alles einzahlen
 			DepositAllMagicStorage: Deponieren Sie den gesamten magischen Speicher

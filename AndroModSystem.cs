@@ -22,6 +22,7 @@ namespace androLib
 			StartedPostAddRecipes = true;
 		}
 		public override void PostSetupRecipes() {
+			StorageManager.PostSetupResipes();
 			StoragePlayer.PostSetupRecipes();
 		}
 		public override void PostDrawInterface(SpriteBatch spriteBatch) {

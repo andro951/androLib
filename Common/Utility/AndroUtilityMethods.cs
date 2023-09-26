@@ -276,7 +276,7 @@ namespace androLib.Common.Utility
                     dict.Remove(key);
             }
         }
-        public static void AddOrCombine<T>(this IDictionary<T, List<int>> dict, T key, int value) {
+        public static void AddOrCombine<TKey, T>(this IDictionary<TKey, List<T>> dict, TKey key, T value) {
 			if (dict.ContainsKey(key)) {
 				dict[key].Add(value);
 			}
@@ -317,7 +317,7 @@ namespace androLib.Common.Utility
                 dict.Add(key, value);
             }
         }
-        public static void AddOrCombine<TKey, T1, T2>(this IDictionary<TKey, List<(T1, T2)>> dict, TKey key, (T1, T2) value) {
+        public static void AddOrCombineTouple<TKey, T1, T2>(this IDictionary<TKey, List<(T1, T2)>> dict, TKey key, (T1, T2) value) {
             if (dict.ContainsKey(key)) {
                 dict[key].Add(value);
             }

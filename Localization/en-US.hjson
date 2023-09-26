@@ -96,6 +96,7 @@ Mods: {
 		MagicStorageButtonsText.DepositAllFromVacuumBags: Deposit All From Vacuum Bags
 
 		StorageText: {
+			ClearTrash: Clear Trash
 			CloseBag: Close Bag
 			DepositAll: Deposit All
 			DepositAllMagicStorage: Deposit All Magic Storage

@@ -115,6 +115,7 @@ namespace androLib.Common.Utility
 		//NotEnoughEnchantments,
 		//Add,
 		//Loadout
+		ClearTrash,
 	}
 	public enum MagicStorageButtonsTextID {
 		DepositAllFromVacuumBags

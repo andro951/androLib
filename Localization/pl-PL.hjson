@@ -96,6 +96,7 @@ Mods: {
 		MagicStorageButtonsText.DepositAllFromVacuumBags: Zdeponuj wszystko z worków próżniowych
 
 		StorageText: {
+			ClearTrash: Wyczyść Kosz
 			CloseBag: Zamknij torbę
 			DepositAll: Wpłać wszystko
 			DepositAllMagicStorage: Zdeponuj cały magazyn Magic

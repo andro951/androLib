@@ -96,6 +96,7 @@ Mods: {
 		MagicStorageButtonsText.DepositAllFromVacuumBags: 全部存放在真空袋中
 
 		StorageText: {
+			ClearTrash: 清除垃圾
 			CloseBag: 关闭袋子
 			DepositAll: 全部存入
 			DepositAllMagicStorage: 存入所有魔法储存
