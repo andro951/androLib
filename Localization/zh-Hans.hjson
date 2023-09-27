@@ -23,6 +23,11 @@ Mods: {
 						'''
 				}
 
+				ClosingInventoryClosesBags: {
+					Label: 关闭库存关闭袋子
+					Tooltip: 如果为真，关闭玩家库存将关闭所有包。
+				}
+
 				ForceAllowedListUpdate: {
 					Label: 强制更新允许列表
 					Tooltip:
@@ -104,6 +109,8 @@ Mods: {
 			QuickStack: 快速堆叠
 			Search: 搜索
 			Sort: 种类
+			Switch: 转变
+			ToggleMagicStorageDeposit: 切换魔法存储存款
 			ToggleVacuum: 切换真空
 		}
 	}

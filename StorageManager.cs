@@ -20,8 +20,8 @@ using Terraria.ModLoader.Config;
 
 namespace androLib
 {
-
 	public class Storage {
+		public int StorageID { get; }
 		public Mod Mod { get; set; }
 		public Type VacuumStorageType { get; set; }
 		public Func<Item, bool> ItemAllowedToBeStored { get; set; }
@@ -71,6 +71,8 @@ namespace androLib
 		private bool IsBlacklistGetter;
 		uint nextBagCheck = 0;
 		private SortedDictionary<int, int> ItemsIHaveThisTick = new();
+		public int SwitcherStorageID;
+		public bool ShouldDepositToMagicStorage = false;
 
 		#region Simple HasRequiredItemToUseStorage
 
@@ -80,6 +82,7 @@ namespace androLib
 		#endregion
 
 		public Storage(
+				int storageID,
 				Mod mod, 
 				Type vacuumStorageType, 
 				Func<Item, bool> itemAllowedToBeStored, 
@@ -97,6 +100,7 @@ namespace androLib
 				Action selectItemForUIOnly,
 				bool shouldRefreshInfoAccs
 			) {
+			StorageID = storageID;
 			Mod = mod;
 			VacuumStorageType = vacuumStorageType;
 			ItemAllowedToBeStored = itemAllowedToBeStored;
@@ -143,6 +147,8 @@ namespace androLib
 		public const string UIResizePanelYTag = "_UIResizePanelY";
 		public const string LastUIResizePanelXTag = "_LastUIResizePanelX";
 		public const string LastUIResizePanelYTag = "_LastUIResizePanelY";
+		public const string SwitcherStorageIDTag = "_SwitcherStorageID";
+		public const string ShouldDepositToMagicStorageTag = "_ShouldDepositToMagicStorage";
 		public void SaveData(TagCompound tag) {
 			string modFullName = GetModFullName();
 			tag[$"{modFullName}{ItemsTag}"] = Items;
@@ -153,6 +159,8 @@ namespace androLib
 			tag[$"{modFullName}{UIResizePanelYTag}"] = UIResizePanelY;
 			tag[$"{modFullName}{LastUIResizePanelXTag}"] = LastUIResizePanelX;
 			tag[$"{modFullName}{LastUIResizePanelYTag}"] = LastUIResizePanelY;
+			tag[$"{modFullName}{SwitcherStorageIDTag}"] = SwitcherStorageID;
+			tag[$"{modFullName}{ShouldDepositToMagicStorageTag}"] = ShouldDepositToMagicStorage;
 		}
 		public void LoadData(TagCompound tag) {
 			int itemCount = StorageSize;
@@ -189,6 +197,15 @@ namespace androLib
 
 			if (!tag.TryGet<int>($"{modFullName}{LastUIResizePanelYTag}", out LastUIResizePanelY))
 				LastUIResizePanelY = LastUIResizePanelDefaultY;
+
+			if (tag.TryGet<int>($"{modFullName}{SwitcherStorageIDTag}", out int switcherStorageID)) {
+				SwitcherStorageID = switcherStorageID;
+			}
+			else {
+				SwitcherStorageID = StorageID;
+			}
+
+			ShouldDepositToMagicStorage = tag.Get<bool>($"{modFullName}{ShouldDepositToMagicStorageTag}");
 		}
 		private void TryShiftDownAndReduceToMaxSize(ref Item[] items, int itemCount) {
 			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
@@ -232,6 +249,7 @@ namespace androLib
 		}
 		public Storage Clone() {
 			Storage clone = new Storage(
+				StorageID,
 				Mod,
 				VacuumStorageType,
 				ItemAllowedToBeStored,
@@ -254,7 +272,13 @@ namespace androLib
 			clone.UITop = UITop;
 			clone.Items = new Item[StorageSize];
 			Array.Copy(Items, clone.Items, StorageSize);
-			ShouldVacuum = IsVacuumBag != false;
+			clone.ShouldVacuum = ShouldVacuum;
+			clone.UIResizePanelX = UIResizePanelX;
+			clone.UIResizePanelY = UIResizePanelY;
+			clone.LastUIResizePanelX = LastUIResizePanelX;
+			clone.LastUIResizePanelY = LastUIResizePanelY;
+			clone.SwitcherStorageID = SwitcherStorageID;
+			clone.ShouldDepositToMagicStorage = ShouldDepositToMagicStorage;
 
 			return clone;
 		}
@@ -378,7 +402,7 @@ namespace androLib
 					if (!bagUI.DisplayBagUI || !bagUI.CanBeStored(bagItem))
 						continue;
 
-					if (bagUI.Storage.ContainsSlow(bagType, out int myLastIndex)) {
+					if (bagUI.MyStorage.ContainsSlow(bagType, out int myLastIndex)) {
 						index = -myLastIndex + ReuiredItemInABagStartingIndex;
 						bagFoundInID = j;
 						myLastBagLocation = bagFoundInID;
@@ -466,7 +490,6 @@ namespace androLib
 			return true;
 		}
 		public bool HasWhiteListGetter => !IsBlacklistGetter && HasWhiteOreBlacklistGetter;
-		//public bool HasBlackListGetter => IsBlacklistGetter && HasWhiteOreBlacklistGetter;
 		public bool HasWhiteOreBlacklistGetter => GetAllowedList != null;
 		private uint nextContainsUpdate = 0;
 		public bool Contains(Item item, out int index) => Contains(item.type, out index);
@@ -525,6 +548,9 @@ namespace androLib
 
 			return ItemsIHaveThisTick.ContainsKey(itemType);
 		}
+		public override string ToString() {
+			return GetModFullName();
+		}
 	}
 	public static class StorageManager {
 		public static int DefaultLeftLocationOnScreen => 80;
@@ -574,7 +600,7 @@ namespace androLib
 		/// <returns></returns>
 		public static bool HasRequiredItemToUseStorageFromBagType(Player player, int bagType, out int bagInventoryIndex, bool onlyThisBagType = false) {
 			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
-				Storage storage = BagUIs[storageID].Storage;
+				Storage storage = BagUIs[storageID].MyStorage;
 				if (storage.HasRequiredItemToUseStorage(player, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
 					return true;
 			}
@@ -584,7 +610,7 @@ namespace androLib
 		}
 		public static bool HasRequiredItemToUseStorageFromBagTypeSlow(Player player, int bagType) {
 			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
-				Storage storage = BagUIs[storageID].Storage;
+				Storage storage = BagUIs[storageID].MyStorage;
 				if (storage.HasRequiredItemToUseStorageSlow(player))
 					return true;
 			}
@@ -593,7 +619,7 @@ namespace androLib
 		}
 		public static bool HasRequiredItemToUseStorageFromBagTypeSlow(Player player, int bagType, out int bagInventoryIndex, bool onlyThisBagType = false) {
 			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
-				Storage storage = BagUIs[storageID].Storage;
+				Storage storage = BagUIs[storageID].MyStorage;
 				if (storage.HasRequiredItemToUseStorageSlow(player, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
 					return true;
 			}
@@ -657,7 +683,7 @@ namespace androLib
 		private static void SetUpStorageItemAndTileTypes() {
 			storageItemTypes = new();
 			for (int i = 0; i < BagUIs.Count; i++) {
-				if (BagUIs[i].Storage.ValidItemTypeGetters(out SortedSet<int> itemTypes) == true) {
+				if (BagUIs[i].MyStorage.ValidItemTypeGetters(out SortedSet<int> itemTypes) == true) {
 					foreach (int itemType in itemTypes) {
 						storageItemTypes.Add(itemType, i);
 					}
@@ -901,6 +927,7 @@ namespace androLib
 			int registeredUI_ID = MasterUIManager.RegisterUI_ID();
 
 			Storage storage = new Storage(
+				storageID,
 				mod, 
 				vacuumStorageType, 
 				itemAllowedToBeStored, 
@@ -927,10 +954,6 @@ namespace androLib
 			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
 			TryRestockItemHandler.Add((Item item) => bagUI.Restock(ref item));
 			TryQuickStackItemHandler.Add((Item item, Player player) => bagUI.QuickStack(ref item, player));
-			CloseAllStorageUIEvent += () => {
-				if (bagUI.DisplayBagUI)
-					bagUI.CloseBag();
-			};
 
 			MasterUIManager.IsDisplayingUI.Add(() => bagUI.DisplayBagUI);
 			MasterUIManager.DrawAllInterfaces += bagUI.PostDrawInterface;
@@ -948,7 +971,7 @@ namespace androLib
 			if (!ValidModID(modID))
 				return new Item[0];
 
-			return BagUIs[modID].Storage.Items;
+			return BagUIs[modID].MyStorage.Items;
 		}
 		public static int GetStorageID(string modName, string bagName) {
 			if (vacuumStorageIndexes.TryGetValue($"{modName}_{bagName}", out int storageID))
@@ -969,7 +992,7 @@ namespace androLib
 			if (!ValidModID(modID))
 				return false;
 
-			BagUIs[modID].Storage.ShouldVacuum = shouldVacuum;
+			BagUIs[modID].MyStorage.ShouldVacuum = shouldVacuum;
 
 			return true;
 		}
@@ -977,8 +1000,8 @@ namespace androLib
 			if (!ValidModID(modID))
 				return false;
 
-			BagUIs[modID].Storage.UILeft = newPosition.left;
-			BagUIs[modID].Storage.UITop = newPosition.top;
+			BagUIs[modID].MyStorage.UILeft = newPosition.left;
+			BagUIs[modID].MyStorage.UITop = newPosition.top;
 
 			return true;
 		}
@@ -997,7 +1020,7 @@ namespace androLib
 			bagUI = BagUIs[storageID];
 			return true;
 		}
-		public static IEnumerable<Item[]> AllItems => BagUIs.Select(bagUI => bagUI.Storage.Items);
+		public static IEnumerable<Item[]> AllItems => BagUIs.Select(bagUI => bagUI.MyStorage.Items);
 		private static SortedDictionary<int, List<Action<BagUI>>> BagUIEdits = new();
 		public static void AddBagUIEdit(int storageID, Action<BagUI> edit) {
 			BagUIEdits.AddOrCombine(storageID, edit);
@@ -1021,6 +1044,8 @@ namespace androLib
 			foreach (BagUI bagUI in BagUIs) {
 				bagUI.PostSetup();
 			}
+
+			BagUI.StaticPostSetup();
 		}
 		public static void TryUpdateMouseOverrideForDeposit(Item item) {
 			if (item.IsAir)
@@ -1151,9 +1176,9 @@ namespace androLib
 		public static TryQuickStackItemFunc TryQuickStackItemHandler = new();
 		public static bool TryQuickStack(ref Item item, Player player) => TryQuickStackItemHandler.Invoke(ref item, player);
 
-		public static event Action CloseAllStorageUIEvent;
-		public static void CloseAllStorageUI() {
-			CloseAllStorageUIEvent?.Invoke();
+		public static event Action OnOpenMagicStorageCloseAllStorageUIEvent;
+		public static void OnOpenMagicStorageCloseAllStorageUI() {
+			OnOpenMagicStorageCloseAllStorageUIEvent?.Invoke();
 		}
 	}
 }

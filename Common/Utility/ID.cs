@@ -116,6 +116,8 @@ namespace androLib.Common.Utility
 		//Add,
 		//Loadout
 		ClearTrash,
+		Switch,
+		ToggleMagicStorageDeposit,
 	}
 	public enum MagicStorageButtonsTextID {
 		DepositAllFromVacuumBags
@@ -579,6 +581,20 @@ namespace androLib.Common.Utility
 								continue;
 
 							requiredTiles.Add(tile);
+						}
+					}
+
+					for (int i = TileID.Count; i < TileLoader.TileCount; i++) {
+						ModTile modTile = TileLoader.GetTile(i);
+						if (modTile == null)
+							continue;
+
+						int[] adjTiles = modTile.AdjTiles;
+						for (int j = 0; j < adjTiles.Length; j++) {
+							if (requiredTiles.Contains(adjTiles[j])) {
+								requiredTiles.Add(i);
+								break;
+							}
 						}
 					}
 				}

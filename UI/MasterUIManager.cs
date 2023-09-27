@@ -23,6 +23,7 @@ using androLib.Common.Globals;
 using androLib.Common.Utility;
 using androLib;
 using static androLib.UI.MasterUIManager;
+using androLib.Common.Configs;
 
 namespace androLib.UI
 {
@@ -91,6 +92,7 @@ namespace androLib.UI
 		public static string SearchBarString = "";
 		public static int SearchBarInUse = UI_ID.None;
 		public static bool TypingOnAnySearchBar = false;
+		public static Action PreDrawUIStaticFunctions;
 		public static void PostDrawInterface(SpriteBatch spriteBatch) {
 			StoragePlayer genericModPlayer = StoragePlayer.LocalStoragePlayer;
 			if (genericModPlayer.disableLeftShiftTrashCan) {
@@ -101,11 +103,12 @@ namespace androLib.UI
 			if (LeftMouseClicked) {
 				Point clickPosition = new(Main.mouseX, Main.mouseY);
 				if (Main.GameUpdateCount - lastClickTime <= 18) {
-					if (lastClickPosition.Distance(clickPosition) < 8)
+					if (lastClickPosition.Distance(clickPosition) < 8) {
 						DoubleClick = true;
+					}
 				}
 
-				lastClickTime = Main.GameUpdateCount;
+				lastClickTime = DoubleClick ? 0 : Main.GameUpdateCount;
 				lastClickPosition = clickPosition;
 			}
 			else {
@@ -113,7 +116,6 @@ namespace androLib.UI
 			}
 
 			if (DisplayingAnyUI) {
-
 				if (NoPanelBeingDragged) {
 					if (!NoUIBeingHovered && UIBeingHovered == LastUIBeingHovered) {
 						HoverTime++;
@@ -153,6 +155,7 @@ namespace androLib.UI
 					}
 				}
 
+				PreDrawUIStaticFunctions?.Invoke();
 				DrawAllInterfaces?.Invoke(spriteBatch);
 				if (UpdateInterfaces != null) {
 					Delegate[] invocationList = UpdateInterfaces.GetInvocationList();
@@ -247,6 +250,16 @@ namespace androLib.UI
 			return false;
 		}
 		public static bool MouseHovering(UIButtonData button, bool playSound = false, bool shouldSet = true) {
+			if (NoUIBeingHovered && button.IsMouseHovering) {
+				if (shouldSet)
+					SetMouseHovering(button.ID, playSound);
+
+				return true;
+			}
+
+			return false;
+		}
+		public static bool MouseHovering(UIItemButtonData button, bool playSound = false, bool shouldSet = true) {
 			if (NoUIBeingHovered && button.IsMouseHovering) {
 				if (shouldSet)
 					SetMouseHovering(button.ID, playSound);
@@ -703,6 +716,42 @@ namespace androLib.UI
 			MasterUIManager.DrawUIPanel(spriteBatch, TopLeft, BottomRight, MasterUIManager.MouseHovering(this, false, false) ? HoverColor : PanelColor);
 			ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.MouseText.Value, Text, TopLeft + Borders, Color, 0f, Position, new Vector2(Scale), -1f, 1.5f);
 		}
+	}
+	public struct UIItemButtonData {
+		public Point TopLeft;
+		public Point BottomRight;
+		Point Size;
+		public int ID;
+		int ItemType;
+		public Action OnClick;
+		public float Scale;
+		public static Color NotSelectedColor => new Color(80, 80, 80, ConfigValues.UIAlpha);
+		bool Selected;
+		public static int DefaultSize => ItemSlotSize;
+		public UIItemButtonData(int id, int left, int top, int itemType, Action onClick, bool selected, int width = -1, int height = -1) :
+			this (id, new(left, top), itemType, onClick, selected, width, height) {
+		}
+		public UIItemButtonData(int id, Point topLeft, int itemType, Action onClick, bool selected, int width = -1, int height = -1) {
+			if (width == -1)
+				width = DefaultSize;
+
+			if (height == -1)
+				height = DefaultSize;
+
+			ID = id;
+			TopLeft = topLeft;
+			Size = new(width, height);
+			BottomRight = TopLeft + Size;
+			OnClick = onClick;
+			ItemType = itemType;
+			Selected = selected;
+		}
+		public bool IsMouseHovering => Main.mouseX >= TopLeft.X && Main.mouseX <= BottomRight.X && Main.mouseY >= TopLeft.Y && Main.mouseY <= BottomRight.Y && !PlayerInput.IgnoreMouseInterface;
+		public Point Center => new((TopLeft.X + BottomRight.X) / 2, (TopLeft.Y + BottomRight.Y) / 2);
+		public void Draw(SpriteBatch spriteBatch) {
+			ItemSlot.DrawItemIcon(ItemType.CSI(), ItemSlotContextID.Normal, spriteBatch, Center.ToVector2(), Main.inventoryScale, 32f, Selected || IsMouseHovering ? Color.White : NotSelectedColor);
+		}
+		public bool MouseHovering() => MasterUIManager.MouseHovering(this, true);
 	}
 	public struct UIItemSlotData {
 		public Point TopLeft;

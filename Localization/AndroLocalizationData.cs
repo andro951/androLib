@@ -78,6 +78,10 @@ namespace androLib.Localization
 									{ L_ID3.Tooltip.ToString(), "If true, items will be removed from the storage when blacklisted.\n" +
 										"Items can be blacklisted by right clicking on them in the storage with the shift key held." }
 								}) },
+								{ nameof(AndroClientConfig.ClosingInventoryClosesBags), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ClosingInventoryClosesBags).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "If true, closing the players inventory will close all bags." }
+								}) },
 								{ nameof(AndroClientConfig.ForceAllowedListUpdate), new(dict: new() {
 									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ForceAllowedListUpdate).AddSpaces() },
 									{ L_ID3.Tooltip.ToString(), "This will force changes made to the Whitelists and Blacklists that you made by manually adjusting the config to be updated.\n" +

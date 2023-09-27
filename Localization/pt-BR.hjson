@@ -23,6 +23,11 @@ Mods: {
 						'''
 				}
 
+				ClosingInventoryClosesBags: {
+					Label: Fechando estoque fecha sacos
+					Tooltip: Se for verdade, fechar o inventário do jogador fechará todas as malas.
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Forçar atualização da lista permitida
 					Tooltip:
@@ -104,6 +109,8 @@ Mods: {
 			QuickStack: Empilhamento Rápido
 			Search: Procurar
 			Sort: Organizar
+			Switch: Trocar
+			ToggleMagicStorageDeposit: Alternar depósito de armazenamento mágico
 			ToggleVacuum: Alternar vácuo
 		}
 	}

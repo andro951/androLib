@@ -23,6 +23,11 @@ Mods: {
 						'''
 				}
 
+				ClosingInventoryClosesBags: {
+					Label: Zamknięcie zapasów zamyka torby
+					Tooltip: Jeśli to prawda, zamknięcie ekwipunku gracza spowoduje zamknięcie wszystkich toreb.
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Wymuś aktualizację listy dozwolonych
 					Tooltip:
@@ -104,6 +109,8 @@ Mods: {
 			QuickStack: Szybki stos
 			Search: Szukaj
 			Sort: Sortować
+			Switch: Przełącznik
+			ToggleMagicStorageDeposit: Przełącz depozyt w magicznym magazynie
 			ToggleVacuum: Przełącz próżnię
 		}
 	}

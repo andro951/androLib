@@ -18,6 +18,7 @@ using androLib.Common.Utility;
 using androLib.Common.Globals;
 using androLib.ModIntegration;
 using Terraria.ModLoader.Default;
+using Terraria.GameContent;
 
 namespace androLib.UI
 {
@@ -30,32 +31,22 @@ namespace androLib.UI
 			public const int BagScrollPanel = 2;
 			public const int BagSearch = 3;
 			public const int BagResizePannel = 4;
+			public const int BagCollapseButton = 5;
 			public const int BagButtons = 100;
-			//public const int BagDepositAll = 101;
-			//public const int BagQuickStack = 102;
-			//public const int BagSort = 103;
-			//public const int BagToggleVacuum = 104;
-			//public const int BagDepostAllMagicStorage = 105;
-			//public const int BagCloseBag = 106;
 			public const int BagItemSlot = 200;
+			public const int BagSwitcherPannel = 201;
+			public const int BagSwitcherButtons = 202;
 		}
 
 		public Item[] Inventory => Storage.Items;
+		public Item[] MyInventory => MyStorage.Items;
 		public Storage Storage => StoragePlayer.LocalStoragePlayer.Storages[StorageID];
+		public Storage MyStorage => StoragePlayer.LocalStoragePlayer.Storages[storageID];
+		public BagUI DisplayedBagUI => StorageManager.BagUIs[StorageID];
 		public int RegisteredUI_ID { get; }
-		public int StorageID { get; }
+		public int StorageID => displayAllBagButtons ? MyStorage.SwitcherStorageID : storageID;
+		private int storageID;
 		private int GetUI_ID(int id) => MasterUIManager.GetUI_ID(id, RegisteredUI_ID);
-		//public class BagButtonID {
-		//	public const int LootAll = 0;
-		//	public const int DepositAll = 1;
-		//	public const int QuickStack = 2;
-		//	public const int Sort = 3;
-		//	public const int ToggleVacuum = 4;
-		//	public const int DepositAllMagicStorage = 5;
-		//	public const int CloseBag = 6;
-		//	public const int Count = 7;
-		//	public const int LastButtonIndex = 100000;
-		//}
 		public struct ButtonProperties {
 			public int ButtonUI_ID { get; private set; }
 			public Action<BagUI> OnClicked;
@@ -69,19 +60,23 @@ namespace androLib.UI
 				ButtonColor = buttonColor;
 			}
 		}
-		public List<ButtonProperties> AllButtonProperites;
+		public List<ButtonProperties> DisplayedAllButtonProperites => DisplayedBagUI.MyButtonProperties;
+		public List<ButtonProperties> MyButtonProperties;
+
 		public int depositAllUIIndex;
 		public int ID => GetUI_ID(Bag_UI_ID.Bag);
 		public int SearchID => GetUI_ID(Bag_UI_ID.BagSearch);
 		public bool Hovering => MasterUIManager.HoveringMyUIType(RegisteredUI_ID);
-		public int BagUILeft => Storage.UILeft;
-		public int BagUITop => Storage.UITop;
-		public int ResizePanelX => Storage.UIResizePanelX;
-		public int ResizePanelY => Storage.UIResizePanelY;
+		public int BagUILeft => MyStorage.UILeft;
+		public int BagUITop => MyStorage.UITop;
+		public int ResizePanelX => MyStorage.UIResizePanelX;
+		public int ResizePanelY => MyStorage.UIResizePanelY;
 		public Color PanelColor => Storage.GetUIColor();
 		public Color ScrollBarColor => Storage.GetScrollBarColor();
 		public static Color SelectedTextGray => new(100, 100, 100);
 		public static Color VacuumPurple => new(162, 22, 255);
+		public static Color ShouldDepositGreen => new(0, 255, 0);
+		public static Color NoDepositRed => new(255, 0, 0);
 		private static int SpacingTiny => 1;
 		private static int SpacingSmall => 2;
 		private static int Spacing => 4;
@@ -92,18 +87,64 @@ namespace androLib.UI
 		public const float buttonScaleMinimum = 0.75f;
 		public const float buttonScaleMaximum = 1f;
 		public float[] ButtonScale;
-		private int glowTime = 0;
-		private float glowHue = 0f;
-		private int scrollPanelY = int.MinValue;
-		private int scrollPanelPosition = 0;
+		public void ResetButtonScaleArray() => ButtonScale = Enumerable.Repeat(buttonScaleMinimum, DisplayedAllButtonProperites.Count).ToArray();
+		public int glowTime {
+			get => DisplayedBagUI.myGlowTime;
+			set => DisplayedBagUI.myGlowTime = value;
+		}
+		public int myGlowTime = 0;
+		public float glowHue {
+			get => DisplayedBagUI.myGlowHue;
+			set => DisplayedBagUI.myGlowHue = value;
+		}
+		public float myGlowHue = 0;
+		public int scrollPanelY {
+			get => DisplayedBagUI.myScrollPanelY;
+			set => DisplayedBagUI.myScrollPanelY = value;
+		}
+		public ref int scrollPanelY_ref => ref DisplayedBagUI.myScrollPanelY;
+		public int myScrollPanelY = int.MinValue;
+		public int scrollPanelPosition {
+			get => DisplayedBagUI.myScrollPanelPosition;
+			set => DisplayedBagUI.myScrollPanelPosition = value;
+		}
+		public ref int scrollPanelPosition_ref => ref DisplayedBagUI.myScrollPanelPosition;
+		public int myScrollPanelPosition = 0;
+		private int myResizeUIXBeforeDoubleClick = 0;
+		private int myResizeUIYBeforeDoubleClick = 0;
 		/// <summary>
 		/// For changing how items are visually displayed when selected only.
 		/// </summary>
-		private SortedDictionary<int, int> selectedItemSlots = new();
-		public bool DisplayBagUI => Storage.DisplayBagUI && Main.LocalPlayer.chest == -1;
+		public SortedDictionary<int, int> selectedItemSlots => DisplayedBagUI.mySelectedItemSlots;
+		public SortedDictionary<int, int> mySelectedItemSlots { get; private set; } = new();
+		private bool displayAllBagButtons = false;
+		private static int displayAllBagButtonsCount = 0;
+		private static bool DisplayingAnyAllBagButtons => displayAllBagButtonsCount > 0;
+		private static List<KeyValuePair<int, int>> AllBagButtonInfos = new();//bagItemType, StorageID
+		private static void UpdateAllBagButtonsInfo() {
+			if (!DisplayingAnyAllBagButtons)
+				return;
+
+			AllBagButtonInfos.Clear();
+			Player player = Main.LocalPlayer;
+			for (int i = 0; i < StorageManager.BagUIs.Count; i++) {
+				Storage storage = StorageManager.BagUIs[i].MyStorage;
+				if (storage.HasRequiredItemToUseStorage(player, out int bagFoundIn, out int indexInBag)) {
+					Item bagItem = Storage.GetItemFromHasRequiredItemToUseStorageIndex(player, bagFoundIn, indexInBag);
+					if (!bagItem.NullOrAir()) {
+						int bagItemType = bagItem.type;
+						if (storage.ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
+							if (bagItemTypes.Contains(bagItemType))
+								AllBagButtonInfos.Add(new(bagItemType, i));
+						}
+					}
+				}
+			}
+		}
+		public bool DisplayBagUI => MyStorage.DisplayBagUI && Main.LocalPlayer.chest == -1;
 
 		public BagUI(int storageID, int registeredUI_ID) {
-			StorageID = storageID;
+			this.storageID = storageID;
 			RegisteredUI_ID = registeredUI_ID;
 		}
 		private DrawnUIData drawnUIData;
@@ -115,6 +156,7 @@ namespace androLib.UI
 			public UIItemSlotData[] slotData;
 			public UIPanelData scrollPanelData;
 			public UIPanelData resizePanelData;
+			public UIButtonData collapseButtonData;
 
 			public int inventoryIndexStart;
 			public int itemSlotsLeft;
@@ -133,29 +175,41 @@ namespace androLib.UI
 			public bool displayScrollbar;
 		}
 		public void AddButton(Action<BagUI> OnClicked, Func<string> GetText, Func<Color, Color> buttonColor = null) {
-			AllButtonProperites.Add(new(AllButtonProperites.Count, OnClicked, GetText, buttonColor));
+			MyButtonProperties.Add(new(MyButtonProperties.Count, OnClicked, GetText, buttonColor));
 		}
 		public void PreSetup() {
-			AllButtonProperites = new();
+			MyButtonProperties = new();
 			AddButton((bagUI) => bagUI.LootAll(), () => StorageTextID.LootAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			AddButton((bagUI) => bagUI.DepositAll(Main.LocalPlayer.inventory.TakePlayerInventory40()), () => StorageTextID.DepositAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
-			depositAllUIIndex = AllButtonProperites.Count - 1;
+			depositAllUIIndex = MyButtonProperties.Count - 1;
 			AddButton((bagUI) => bagUI.QuickStack(Main.LocalPlayer.inventory.TakePlayerInventory40(), Main.LocalPlayer), () => StorageTextID.QuickStack.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			AddButton((bagUI) => bagUI.Sort(), () => StorageTextID.Sort.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			
-			if (StorageManager.RegisteredStorages[StorageID].IsVacuumBag != false)
-				AddButton((bagUI) => bagUI.ToggleVacuum(), () => StorageTextID.ToggleVacuum.ToString().Lang(AndroMod.ModName, L_ID1.StorageText), (defaultColor) => Storage.ShouldVacuum ? VacuumPurple : defaultColor);
+			if (StorageManager.RegisteredStorages[storageID].IsVacuumBag != false)
+				AddButton((bagUI) => bagUI.ToggleVacuum(), () => StorageTextID.ToggleVacuum.ToString().Lang(AndroMod.ModName, L_ID1.StorageText), (defaultColor) => MyStorage.ShouldVacuum ? VacuumPurple : defaultColor);
 			
-			if (AndroMod.magicStorageEnabled)
-				AddButton((bagUI) => MagicStorageIntegration.DepositToMagicStorage(bagUI.Inventory.ToList()), () => StorageTextID.DepositAllMagicStorage.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			if (AndroMod.magicStorageEnabled) {
+				AddButton((bagUI) => MagicStorageIntegration.DepositToMagicStorage(bagUI.MyInventory.ToList()), () => StorageTextID.DepositAllMagicStorage.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+				AddButton((bagUI) => MyStorage.ShouldDepositToMagicStorage = !MyStorage.ShouldDepositToMagicStorage, () => StorageTextID.ToggleMagicStorageDeposit.ToString().Lang(AndroMod.ModName, L_ID1.StorageText), (defaultColor) => MyStorage.ShouldDepositToMagicStorage ? ShouldDepositGreen : NoDepositRed);
+			}
 		}
 		public void PostSetup() {
 			AddButton((bagUI) => bagUI.CloseBag(), () => StorageTextID.CloseBag.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
-			ButtonScale = Enumerable.Repeat(buttonScaleMinimum, AllButtonProperites.Count).ToArray();
+			ResetButtonScaleArray();
+		}
+		public static void StaticPostSetup() {
+			MasterUIManager.PreDrawUIStaticFunctions += UpdateAllBagButtonsInfo;
 		}
 		public void PostDrawInterface(SpriteBatch spriteBatch) {
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
-			if (!DisplayBagUI || !Main.playerInventory)
+			if (!Main.playerInventory) {
+				if (AndroMod.clientConfig.ClosingInventoryClosesBags)
+					CloseBag();
+
+				return;
+			}
+
+			if (!DisplayBagUI)
 				return;
 
 			#region Pre UI
@@ -182,7 +236,7 @@ namespace androLib.UI
 			int minPanelWidth = PanelBorder * 2;
 
 			//Button Texts
-			string[] buttonTexts = AllButtonProperites.Select(p => p.Text).ToArray();
+			string[] buttonTexts = DisplayedAllButtonProperites.Select(p => p.Text).ToArray();
 			Vector2[] buttonSizes = buttonTexts.Select(t => UITextData.GetBaseSize(t)).ToArray();
 			int longestButtonNameBaseWidth = (int)(buttonSizes[0].X * buttonScaleMinimum);
 			int longestButtonNameWidth = (int)(buttonSizes[0].X * ButtonScale[0]);
@@ -215,6 +269,11 @@ namespace androLib.UI
 			int searchBarWidth = Math.Max(searchBarMinWidth, searchBarTextData.Width + TextButtonPadding * 2);
 			minPanelWidth += searchBarWidth + Spacing;
 
+			//Collapse Button Data 1/2
+			TextData collapseButtonTextData = new(StorageTextID.Switch.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			int collapseButtonWidth = collapseButtonTextData.Width + TextButtonPadding * 2 + Spacing;
+			minPanelWidth += collapseButtonWidth;
+
 			//Panel Data 1/2
 			int panelBorderTopOffset = nameHeight + Spacing + SpacingSmall;
 
@@ -230,25 +289,51 @@ namespace androLib.UI
 			//ItemSlots and Resize panel
 			int itemSlotSpaceWidth = MasterUIManager.ItemSlotSize + Spacing;
 			int itemSlotSpaceHeight = MasterUIManager.ItemSlotSize + Spacing;
-			if (Storage.UIResizePanelY >= Storage.DefaultResizePanelIncrement / 2)
-				Storage.UIResizePanelY = BagUITop + nameHeight - Spacing + MasterUIManager.ItemSlotSize + itemSlotSpaceHeight * (Storage.UIResizePanelY / Storage.DefaultResizePanelIncrement - 1);
 
-			int heightFromResizePanel = Storage.UIResizePanelY - BagUITop + resizePanelHeightSpace;
-			int measuredPanelHeight = heightFromResizePanel < minPanelHeight ? minPanelHeight : heightFromResizePanel;
-			int itemSlotsHeight = measuredPanelHeight - panelBorderTopOffset - PanelBorder;
-			int itemSlotRowsDisplayed = (itemSlotsHeight - MasterUIManager.ItemSlotSize) / itemSlotSpaceHeight + 1;
+			bool checkForLargerDefault = false;
+			int heightFromResizePanel;
+			int measuredPanelHeight;
+			int itemSlotsHeight;
+			int itemSlotRowsDisplayed;
+			int checkCount = 0;
+			do {
+				checkCount++;
+				bool changed = false;
+				if (MyStorage.UIResizePanelY >= Storage.DefaultResizePanelIncrement / 2) {
+					MyStorage.UIResizePanelY = BagUITop + nameHeight - Spacing + MasterUIManager.ItemSlotSize + itemSlotSpaceHeight * (MyStorage.UIResizePanelY / Storage.DefaultResizePanelIncrement - 1);
+					changed = true;
+				}
 
-			if (Storage.UIResizePanelX >= Storage.DefaultResizePanelIncrement / 2) {
-				int columns = Storage.UIResizePanelX / Storage.DefaultResizePanelIncrement;
-				Storage.UIResizePanelX = BagUILeft + longestButtonNameBaseWidth + MasterUIManager.ItemSlotSize + itemSlotSpaceWidth * (columns - 1);
-				if (columns * itemSlotRowsDisplayed < inventory.Length)
-					Storage.UIResizePanelX += scrollBarWidthSpacing;
+				heightFromResizePanel = MyStorage.UIResizePanelY - BagUITop + resizePanelHeightSpace;
+				measuredPanelHeight = heightFromResizePanel < minPanelHeight ? minPanelHeight : heightFromResizePanel;
+				itemSlotsHeight = measuredPanelHeight - panelBorderTopOffset - PanelBorder;
+				itemSlotRowsDisplayed = (itemSlotsHeight - MasterUIManager.ItemSlotSize) / itemSlotSpaceHeight + 1;
+
+				if (MyStorage.UIResizePanelX >= Storage.DefaultResizePanelIncrement / 2) {
+					int columns = MyStorage.UIResizePanelX / Storage.DefaultResizePanelIncrement;
+					MyStorage.UIResizePanelX = BagUILeft + longestButtonNameBaseWidth + MasterUIManager.ItemSlotSize + itemSlotSpaceWidth * (columns - 1);
+					if (columns * itemSlotRowsDisplayed < inventory.Length)
+						MyStorage.UIResizePanelX += scrollBarWidthSpacing;
+
+					changed = true;
+				}
+
+				if (checkCount > 1)
+					break;
+
+				if (changed) {
+					if (MyStorage.UIResizePanelX == myResizeUIXBeforeDoubleClick && MyStorage.UIResizePanelY == myResizeUIYBeforeDoubleClick) {
+						checkForLargerDefault = true;
+						MyStorage.UIResizePanelY = Storage.LastUIResizePanelDefaultY;
+						MyStorage.UIResizePanelX = Storage.LastUIResizePanelDefaultX;
+					}
+				}
 			}
+			while (checkForLargerDefault);
 
-			int widthFromResizePanel = Storage.UIResizePanelX - BagUILeft + longestButtonNameWidth - longestButtonNameBaseWidth + resizePanelWidth + SpacingSmall;
+			int widthFromResizePanel = MyStorage.UIResizePanelX - BagUILeft + longestButtonNameWidth - longestButtonNameBaseWidth + resizePanelWidth + SpacingSmall;
 			int measuredPanelWidth = widthFromResizePanel < minPanelWidth ? minPanelWidth : widthFromResizePanel;
 			int itemSlotsAndScrollbarWidth = measuredPanelWidth - longestButtonNameWidth - PanelBorder * 2;
-			int itemSlotWidth = itemSlotsAndScrollbarWidth;
 			int itemSlotsWidth = itemSlotsAndScrollbarWidth;
 			int pannelInnerHeight = Math.Max(allButtonsHeight, nameHeight + MasterUIManager.ItemSlotSize);
 			int itemSlotColumns = (itemSlotsWidth - MasterUIManager.ItemSlotSize) / itemSlotSpaceWidth + 1;
@@ -262,19 +347,21 @@ namespace androLib.UI
 				minPanelWidth += scrollBarWidthSpacing;
 				measuredPanelWidth = widthFromResizePanel < minPanelWidth ? minPanelWidth : widthFromResizePanel;
 				itemSlotsAndScrollbarWidth = measuredPanelWidth - longestButtonNameWidth - PanelBorder * 2;
-				itemSlotWidth = itemSlotsAndScrollbarWidth - scrollBarWidthSpacing;
-				if (widthFromResizePanel < minPanelWidth - SpacingSmall) {
-					itemSlotColumns = (itemSlotsWidth - MasterUIManager.ItemSlotSize) / itemSlotSpaceWidth + 1;
-				}
-				else {
-					itemSlotColumns = (itemSlotsWidth - scrollBarWidthSpacing - MasterUIManager.ItemSlotSize) / itemSlotSpaceWidth + 1;
-				}
+				itemSlotsWidth = itemSlotsAndScrollbarWidth - scrollBarWidthSpacing;
+				itemSlotColumns = (itemSlotsWidth - MasterUIManager.ItemSlotSize) / itemSlotSpaceWidth + 1;
 			}
 
 			//Search Bar Data 2/2
-			int nameToSearchBarSpace = Math.Min(itemSlotWidth - searchBarWidth - nameWidth, Spacing * 10);
-			drawnUIData.searchBarData = new(SearchID, nameData.BottomRight.X + nameToSearchBarSpace, nameTop - TextButtonPadding, searchBarTextData, mouseColor, Math.Max(TextButtonPadding, (searchBarMinWidth - searchBarTextData.Width) / 2), 0, PanelColor, Storage.GetButtonHoverColor());
+			int searchBarTop = nameTop - TextButtonPadding;
+			int totalTopBarSpaceRemaining = itemSlotsWidth - searchBarWidth - nameWidth - collapseButtonWidth;
+			int nameToSearchBarSpace = Math.Min(totalTopBarSpaceRemaining, Spacing * 10);
+			drawnUIData.searchBarData = new(SearchID, nameData.BottomRight.X + nameToSearchBarSpace, searchBarTop, searchBarTextData, mouseColor, Math.Max(TextButtonPadding, (searchBarMinWidth - searchBarTextData.Width) / 2), 0, PanelColor, Storage.GetButtonHoverColor());
 			UIButtonData searchBarData = drawnUIData.searchBarData;
+
+			//Collapse Button Data 2/2
+			int searchBarToCollapseButtonSpace = Math.Min(totalTopBarSpaceRemaining - nameToSearchBarSpace + Spacing, Spacing * 6);
+			drawnUIData.collapseButtonData = new(Bag_UI_ID.BagCollapseButton, (int)searchBarData.BottomRight.X + searchBarToCollapseButtonSpace, searchBarTop, collapseButtonTextData, mouseColor, TextButtonPadding, 0, MyStorage.GetUIColor(), MyStorage.GetButtonHoverColor());
+			UIButtonData collapseButtonData = drawnUIData.collapseButtonData;
 
 			int itemSlotsLeft = nameLeft;
 
@@ -296,8 +383,8 @@ namespace androLib.UI
 			drawnUIData.textButtons = new();
 			List<UITextData> textButtons = drawnUIData.textButtons;
 			float buttonHeightMult = Math.Min(MinButtonHeightMult * (measuredPanelHeight - PanelBorder * 2) / allButtonsHeight, ButtonHeightMult);
-			for (int buttonIndex = 0; buttonIndex < AllButtonProperites.Count; buttonIndex++) {
-				ButtonProperties buttonProperties = AllButtonProperites[buttonIndex];
+			for (int buttonIndex = 0; buttonIndex < DisplayedAllButtonProperites.Count; buttonIndex++) {
+				ButtonProperties buttonProperties = DisplayedAllButtonProperites[buttonIndex];
 				string text = buttonTexts[buttonIndex];
 				float scale = ButtonScale[buttonIndex];
 				Color color = buttonProperties.ButtonColor?.Invoke(mouseColor) ?? mouseColor;
@@ -356,7 +443,7 @@ namespace androLib.UI
 					scrollPanelPosition = ((scrollPanelY - drawnUIData.scrollPanelMinY) * possiblePanelPositions).RoundDivide(scrollPanelRange);
 				}
 
-				scrollPanelPosition.Clamp(0, possiblePanelPositions);
+				scrollPanelPosition_ref.Clamp(0, possiblePanelPositions);
 				if (lastScrollPanelPosition != scrollPanelPosition)
 					SoundEngine.PlaySound(SoundID.MenuTick);
 			}
@@ -401,6 +488,9 @@ namespace androLib.UI
 			//Search Bar Draw
 			 searchBarData.Draw(spriteBatch);
 
+			//Collapse Button Draw
+			collapseButtonData.Draw(spriteBatch);
+
 			//Text Buttons Draw
 			for (int buttonIndex = 0; buttonIndex < textButtons.Count; buttonIndex++) {
 				UITextData textButton = textButtons[buttonIndex];
@@ -410,7 +500,7 @@ namespace androLib.UI
 			if (displayScrollbar) {
 				//Scroll Panel Data 2 / 2
 				if (MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel)) {
-					scrollPanelY.Clamp(drawnUIData.scrollPanelMinY, drawnUIData.scrollPanelMaxY);
+					scrollPanelY_ref.Clamp(drawnUIData.scrollPanelMinY, drawnUIData.scrollPanelMaxY);
 				}
 				else {
 					int scrollPanelRange = drawnUIData.scrollPanelMaxY - drawnUIData.scrollPanelMinY;
@@ -427,11 +517,17 @@ namespace androLib.UI
 			drawnUIData.resizePanelData = new(GetUI_ID(Bag_UI_ID.BagResizePannel), panel.BottomRight.X - resizePanelWidthSpace, panel.BottomRight.Y - resizePanelHeightSpace, resizePanelWidth, resizePanelHeight, mouseColor);
 			UIPanelData resizePanelData = drawnUIData.resizePanelData;
 			resizePanelData.Draw(spriteBatch);
+
+			if (displayAllBagButtons)
+				DrawBagButtonsPannel(spriteBatch);
 		}
 		public void UpdateInterface() {
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
 			if (!DisplayBagUI || !Main.playerInventory || drawnUIData == null)
 				return;
+
+			if (displayAllBagButtons)
+				UpdateAllBagButtons();
 
 			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(depositAllUIIndex)))) {
 				if (!Main.mouseItem.IsAir || Main.HoverItem.favorited || !CanShiftClickNonBagItemToBag(Main.HoverItem)) {
@@ -449,6 +545,7 @@ namespace androLib.UI
 			UIItemSlotData[] slotDatas = drawnUIData.slotData;
 			UIPanelData scrollPanelData = drawnUIData.scrollPanelData;
 			UIPanelData resizePanelData = drawnUIData.resizePanelData;
+			UIButtonData collapseButtonData = drawnUIData.collapseButtonData;
 			int inventoryIndexStart = drawnUIData.inventoryIndexStart;
 			int itemSlotsLeft = drawnUIData.itemSlotsLeft;
 			int itemSlotsTop = drawnUIData.itemSlotsTop;
@@ -555,6 +652,14 @@ namespace androLib.UI
 				}
 			}
 
+			//Collapse Button
+			if (collapseButtonData.MouseHovering()) {
+				if (MasterUIManager.LeftMouseClicked) {
+					ToggleCollapse();
+					SoundEngine.PlaySound(SoundID.MenuTick);
+				}
+			}
+
 			//Text Buttons Draw
 			int bagUIID = GetUI_ID(Bag_UI_ID.BagButtons);
 			for (int buttonIndex = 0; buttonIndex <  textButtons.Count; buttonIndex++) {
@@ -567,7 +672,7 @@ namespace androLib.UI
 						ButtonScale[allButtonPropertiesIndex] = buttonScaleMaximum;
 
 					if (MasterUIManager.LeftMouseClicked) {
-						AllButtonProperites[allButtonPropertiesIndex].OnClicked(this);
+						DisplayedAllButtonProperites[allButtonPropertiesIndex].OnClicked(allButtonPropertiesIndex < DisplayedAllButtonProperites.Count - 1 ? DisplayedBagUI : this);
 						SoundEngine.PlaySound(SoundID.MenuTick);
 					}
 				}
@@ -585,7 +690,7 @@ namespace androLib.UI
 					if (MasterUIManager.LeftMouseClicked) {
 						MasterUIManager.UIBeingHovered = Bag_UI_ID.BagScrollPanel;
 						scrollPanelY = Main.mouseY - scrollPanelHeight / 2;
-						scrollPanelY.Clamp(scrollPanelMinY, scrollPanelMaxY);
+						scrollPanelY_ref.Clamp(scrollPanelMinY, scrollPanelMaxY);
 						scrollPanelData.SetCenterY(scrollPanelY);
 
 						scrollPanelData.TryStartDraggingUI();
@@ -593,7 +698,7 @@ namespace androLib.UI
 				}
 
 				if (scrollPanelData.ShouldDragUI()) {
-					MasterUIManager.DragUI(out _, out scrollPanelY);
+					MasterUIManager.DragUI(out _, out scrollPanelY_ref);
 				}
 				else if (draggingScrollPanel) {
 					int scrollPanelRange = scrollPanelMaxY - scrollPanelMinY;
@@ -604,8 +709,10 @@ namespace androLib.UI
 			//Resize Panel Hover and Drag
 			if (resizePanelData.MouseHovering()) {
 				if (MasterUIManager.DoubleClick) {
-					Storage.UIResizePanelX = Storage.UIResizePanelDefaultX;
-					Storage.UIResizePanelY = Storage.UIResizePanelDefaultY;
+					myResizeUIXBeforeDoubleClick = MyStorage.UIResizePanelX;
+					myResizeUIYBeforeDoubleClick = MyStorage.UIResizePanelY;
+					MyStorage.UIResizePanelX = Storage.UIResizePanelDefaultX;
+					MyStorage.UIResizePanelY = Storage.UIResizePanelDefaultY;
 				}
 				else {
 					resizePanelData.TryStartDraggingUI();
@@ -613,30 +720,20 @@ namespace androLib.UI
 			}
 
 			if (resizePanelData.ShouldDragUI()) {
-				MasterUIManager.DragUI(out Storage.UIResizePanelX, out Storage.UIResizePanelY);
+				MasterUIManager.DragUI(out MyStorage.UIResizePanelX, out MyStorage.UIResizePanelY);
 			}
 
 			//Panel Hover and Drag
 			if (panel.MouseHovering()) {
-				if (MasterUIManager.DoubleClick) {
-					int x = Storage.UIResizePanelX - Storage.UILeft;
-					int y = Storage.UIResizePanelY - Storage.UITop;
-					Storage.UIResizePanelX = Storage.LastUIResizePanelX + Storage.UILeft;
-					Storage.UIResizePanelY = Storage.LastUIResizePanelY + Storage.UITop;
-					Storage.LastUIResizePanelX = x;
-					Storage.LastUIResizePanelY = y;
-				}
-				else {
-					panel.TryStartDraggingUI();
-				}
+				MainPanelClickInteractions();
 			}
 
 			if (panel.ShouldDragUI()) {
-				int left = Storage.UILeft;
-				int top = Storage.UITop;
-				MasterUIManager.DragUI(out Storage.UILeft, out Storage.UITop);
-				Storage.UIResizePanelX += Storage.UILeft - left;
-				Storage.UIResizePanelY += Storage.UITop - top;
+				int left = MyStorage.UILeft;
+				int top = MyStorage.UITop;
+				MasterUIManager.DragUI(out MyStorage.UILeft, out MyStorage.UITop);
+				MyStorage.UIResizePanelX += MyStorage.UILeft - left;
+				MyStorage.UIResizePanelY += MyStorage.UITop - top;
 			}
 
 			if (displayScrollbar) {
@@ -651,17 +748,104 @@ namespace androLib.UI
 			
 			selectedItemSlots.Clear();
 		}
+		private void MainPanelClickInteractions() {
+			UIPanelData panel = drawnUIData.panel;
+			if (MasterUIManager.DoubleClick) {
+				int x = MyStorage.UIResizePanelX - MyStorage.UILeft;
+				int y = MyStorage.UIResizePanelY - MyStorage.UITop;
+				MyStorage.UIResizePanelX = MyStorage.LastUIResizePanelX + MyStorage.UILeft;
+				MyStorage.UIResizePanelY = MyStorage.LastUIResizePanelY + MyStorage.UITop;
+				MyStorage.LastUIResizePanelX = x;
+				MyStorage.LastUIResizePanelY = y;
+			}
+			else {
+				panel.TryStartDraggingUI();
+			}
+		}
+		private DrawnSwitcherUIData drawnSwitcherUIData;
+		public class DrawnSwitcherUIData
+		{
+			public UIPanelData switcherPanel;
+			public List<UIItemButtonData> uIImageButtonDatas;
+		}
+		private void DrawBagButtonsPannel(SpriteBatch spriteBatch) {
+			UIPanelData panel = drawnUIData.panel;
+
+			drawnSwitcherUIData = new();
+
+			//Switcher Panel Data 1/2
+			int bagSwitcherWidth = panel.Width;
+			int buttonSize = MasterUIManager.ItemSlotSize;
+			int buttonSizeSpace = buttonSize + Spacing;
+			int buttonsPerRow = (bagSwitcherWidth - PanelBorder * 2 - buttonSize) / buttonSizeSpace + 1;
+			int rows = AllBagButtonInfos.Count.CeilingDivide(buttonsPerRow);
+			int bagSwitcherHeight = buttonSizeSpace * (rows - 1) + buttonSize;
+
+			//Image Button Data
+			drawnSwitcherUIData.uIImageButtonDatas = new(AllBagButtonInfos.Count);
+			List<UIItemButtonData> uIImageButtonDatas = drawnSwitcherUIData.uIImageButtonDatas;
+
+			int columnNum = 0;
+			int buttonsLeft = panel.TopLeft.X + PanelBorder;
+			int buttonsTop = panel.TopLeft.Y - bagSwitcherHeight - PanelBorder;
+			int buttonLeft = buttonsLeft;
+			int buttonTop = buttonsTop;
+			int storageID = StorageID;
+			for (int i = 0; i < AllBagButtonInfos.Count; i++) {
+				KeyValuePair<int, int> pair = AllBagButtonInfos[i];//bag Item type, Storage ID
+				uIImageButtonDatas.Add(new(Bag_UI_ID.BagSwitcherButtons + i, buttonLeft, buttonTop, pair.Key, () => MyStorage.SwitcherStorageID = pair.Value, storageID == pair.Value));
+				columnNum++;
+				if (columnNum == buttonsPerRow) {
+					buttonLeft = buttonsLeft;
+					buttonTop += buttonSizeSpace;
+					columnNum = 0;
+				}
+				else {
+					buttonLeft += buttonSizeSpace;
+				}
+			}
+			
+			//Switcher Panel Data 2/2
+			int bagSwitcherHeightBorder = bagSwitcherHeight + PanelBorder * 2;
+			drawnSwitcherUIData.switcherPanel = new(Bag_UI_ID.BagSwitcherPannel, panel.TopLeft.X, panel.TopLeft.Y - bagSwitcherHeightBorder, bagSwitcherWidth, bagSwitcherHeightBorder, panel.Color);
+			UIPanelData switcherPanel = drawnSwitcherUIData.switcherPanel;
+
+			//Switcher Panel Draw
+			switcherPanel.Draw(spriteBatch);
+
+			//Image Button Draw
+			for (int i = 0; i < uIImageButtonDatas.Count; i++) {
+				UIItemButtonData uIImageButtonData = uIImageButtonDatas[i];
+				uIImageButtonData.Draw(spriteBatch);
+			}
+		}
+		private void UpdateAllBagButtons() {
+			UIPanelData switcherPanel = drawnSwitcherUIData.switcherPanel;
+			List<UIItemButtonData> uIImageButtonDatas = drawnSwitcherUIData.uIImageButtonDatas;
+
+			for (int i = 0; i < uIImageButtonDatas.Count; i++) {
+				UIItemButtonData uIImageButtonData = uIImageButtonDatas[i];
+				if (uIImageButtonData.MouseHovering()) {
+					if (MasterUIManager.LeftMouseClicked) {
+						uIImageButtonData.OnClick();
+						SoundEngine.PlaySound(SoundID.MenuTick);
+					}
+				}
+			}
+
+			if (switcherPanel.MouseHovering()) {
+				MainPanelClickInteractions();
+			}
+		}
 		public void OpenBag() {
 			scrollPanelY = int.MinValue;
 			Main.playerInventory = true;
-			Storage.DisplayBagUI = true;
+			MyStorage.DisplayBagUI = true;
 			Main.LocalPlayer.chest = -1;
-			if (MagicStorageIntegration.MagicStorageIsOpen())
-				MagicStorageIntegration.TryClosingMagicStorage();
 		}
 		public void CloseBag(bool noSound = false) {
 			scrollPanelY = int.MinValue;
-			Storage.DisplayBagUI = false;
+			MyStorage.DisplayBagUI = false;
 			MasterUIManager.TryResetSearch(SearchID);
 			if (Main.LocalPlayer.chest == -1) {
 				if (!noSound)
@@ -670,7 +854,7 @@ namespace androLib.UI
 		}
 		
 		public void LootAll() {
-			Item[] inv = Inventory;
+			Item[] inv = MyInventory;
 			for (int i = 0; i < inv.Length; i++) {
 				Item item = inv[i];
 				if (item.type > ItemID.None && !item.favorited) {
@@ -681,11 +865,11 @@ namespace androLib.UI
 		
 		#region Single
 
-		public bool CanBeStored(Item item) => !item.NullOrAir() && Storage.ItemAllowedToBeStored(item);
-		public bool VacuumAllowed(Item item) => Storage.IsVacuumBag == true || Storage.IsVacuumBag == null && ContainsItem(item);
-		public bool ContainsItem(Item item) => Storage.ContainsSlow(item);
+		public bool CanBeStored(Item item) => !item.NullOrAir() && MyStorage.ItemAllowedToBeStored(item);
+		public bool VacuumAllowed(Item item) => MyStorage.IsVacuumBag == true || MyStorage.IsVacuumBag == null && ContainsItem(item);
+		public bool ContainsItem(Item item) => MyStorage.ContainsSlow(item);
 		public bool RoomInStorage(Item item) {
-			Item[] inv = Inventory;
+			Item[] inv = MyInventory;
 			int stack = item.stack;
 			for (int i = inv.Length - 1; i >= 0; i--) {
 				Item invItem = inv[i];
@@ -717,7 +901,7 @@ namespace androLib.UI
 			if (item.NullOrAir())
 				return false;
 
-			if (!Storage.ShouldVacuum)
+			if (!MyStorage.ShouldVacuum)
 				return false;
 
 			if (!CanBeStored(item))
@@ -727,9 +911,9 @@ namespace androLib.UI
 			if (!VacuumAllowed(item))
 				return false;
 
-			if (!ignoreNeedBagInInventory && !Storage.HasRequiredItemToUseStorageSlow(player))
+			if (!ignoreNeedBagInInventory && !MyStorage.HasRequiredItemToUseStorageSlow(player))
 				return false;
-			//return false;
+			
 			if (!RoomInStorage(item))
 				return false;
 
@@ -752,7 +936,7 @@ namespace androLib.UI
 				return true;
 
 			int index = 0;
-			Item[] inv = Inventory;
+			Item[] inv = MyInventory;
 			while (!inv[index].IsAir && index < inv.Length) {
 				index++;
 			}
@@ -768,7 +952,7 @@ namespace androLib.UI
 			return true;
 		}
 		public bool Restock(ref Item item, bool playSound = true) {
-			Item[] bagInventory = Inventory;
+			Item[] bagInventory = MyInventory;
 			for (int i = 0; i < bagInventory.Length; i++) {
 				Item bagItem = bagInventory[i];
 				if (!bagItem.NullOrAir() && bagItem.type == item.type && bagItem.stack < bagItem.maxStack) {
@@ -810,7 +994,7 @@ namespace androLib.UI
 			IEnumerable<Item> items = inv.Where(i => !i.NullOrAir() && !i.favorited && CanBeStored(i));
 			bool transferedAnyItem = Restock(items, false);
 			int index = 0;
-			Item[] bagInventory = Inventory;
+			Item[] bagInventory = MyInventory;
 			foreach (Item item in items) {
 				if (item.NullOrAir())
 					continue;
@@ -837,7 +1021,7 @@ namespace androLib.UI
 			return transferedAnyItem;
 		}
 		public bool Restock(IEnumerable<Item> inv, bool playSound = true) {
-			Item[] bagInventory = Inventory;
+			Item[] bagInventory = MyInventory;
 			bool transferedAnyItem = false;
 			SortedDictionary<int, List<int>> nonAirItemsInStorage = new();
 			for (int i = 0; i < bagInventory.Length; i++) {
@@ -893,7 +1077,7 @@ namespace androLib.UI
 		}
 		
 		private void Sort() {
-			MasterUIManager.SortItems(ref Storage.Items);
+			MasterUIManager.SortItems(ref MyStorage.Items);
 			Type itemSlotType = typeof(ItemSlot);
 			int[] inventoryGlowTime = (int[])itemSlotType.GetField("inventoryGlowTime", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
 			for (int i = 0; i < inventoryGlowTime.Length; i++) {
@@ -908,43 +1092,48 @@ namespace androLib.UI
 			}
 
 			//prevent glow on bags that select items.
-			if (selectedItemSlots.Count == 0) {
+			if (mySelectedItemSlots.Count == 0) {
 				glowTime = 300;
 				glowHue = 0.5f;
 			}
 		}
 		private void ToggleVacuum() {
-			Storage.ShouldVacuum = !Storage.ShouldVacuum;
+			MyStorage.ShouldVacuum = !MyStorage.ShouldVacuum;
 		}
 		public void AddSelectedItemSlots(IEnumerable<KeyValuePair<int, int>> selectedItemSlots) {
 			foreach (KeyValuePair<int, int> selectedItemSlot in selectedItemSlots) {
 				AddSelectedItemSlot(selectedItemSlot.Key, selectedItemSlot.Value);
 			}
 		}
-		public void AddSelectedItemSlot(int selectedItemSlot, int context) => selectedItemSlots.TryAdd(selectedItemSlot, context);
+		public void AddSelectedItemSlot(int selectedItemSlot, int context) => mySelectedItemSlots.TryAdd(selectedItemSlot, context);
 		private void UpdateSelectedItemSlots() {
 			Storage.SelectItemSlotFunc();
-			if (selectedItemSlots.Count == 1) {
-				Item selectedItem = Inventory[selectedItemSlots.First().Key];
+			if (mySelectedItemSlots.Count == 1) {
+				Item selectedItem = Inventory[mySelectedItemSlots.First().Key];
 				if (selectedItem.stack < 1)
 					selectedItem.favorited = false;
 			}
 		}
 		public bool TryAddToPlayerWhitelist(int type) {
-			if (Storage.TryAddToPlayerWhitelist(type)) {
-				StorageManager.AddToPlayerWhitelist(StorageID, type);
+			if (MyStorage.TryAddToPlayerWhitelist(type)) {
+				StorageManager.AddToPlayerWhitelist(storageID, type);
 				return true;
 			}
 
 			return false;
 		}
 		public bool TryAddToPlayerBlacklist(int type) {
-			if (Storage.TryAddToPlayerBlacklist(type)) {
-				StorageManager.AddToPlayerBlacklist(StorageID, type);
+			if (MyStorage.TryAddToPlayerBlacklist(type)) {
+				StorageManager.AddToPlayerBlacklist(storageID, type);
 				return true;
 			}
 
 			return false;
+		}
+		public void ToggleCollapse() {
+			displayAllBagButtons = !displayAllBagButtons;
+			displayAllBagButtonsCount += displayAllBagButtons ? 1 : -1;
+			ResetButtonScaleArray();
 		}
 	}
 }

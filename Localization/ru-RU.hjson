@@ -23,6 +23,11 @@ Mods: {
 						'''
 				}
 
+				ClosingInventoryClosesBags: {
+					Label: Закрытие инвентаря закрывает сумки
+					Tooltip: Если это правда, закрытие инвентаря игрока закроет все сумки.
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Принудительное обновление списка разрешенных
 					Tooltip:
@@ -104,6 +109,8 @@ Mods: {
 			QuickStack: Быстрый стек
 			Search: Поиск
 			Sort: Сортировать
+			Switch: Выключатель
+			ToggleMagicStorageDeposit: Toggle Депозит в хранилище Magic
 			ToggleVacuum: Переключить вакуум
 		}
 	}

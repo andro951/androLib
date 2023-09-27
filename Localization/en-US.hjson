@@ -23,6 +23,11 @@ Mods: {
 						'''
 				}
 
+				ClosingInventoryClosesBags: {
+					Label: Closing Inventory Closes Bags
+					Tooltip: If true, closing the players inventory will close all bags.
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Force Allowed List Update
 					Tooltip:
@@ -104,6 +109,8 @@ Mods: {
 			QuickStack: Quick Stack
 			Search: Search
 			Sort: Sort
+			Switch: Switch
+			ToggleMagicStorageDeposit: Toggle Magic Storage Deposit
 			ToggleVacuum: Toggle Vacuum
 		}
 	}

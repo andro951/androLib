@@ -62,7 +62,7 @@ namespace androLib
 		public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
 			itemConsumedCallback = null;
 			List<Item> items = new();
-			foreach (Storage storage in StorageManager.BagUIs.Select(b => b.Storage)) {
+			foreach (Storage storage in StorageManager.BagUIs.Select(b => b.MyStorage)) {
 				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out _)) {
 					for (int i = 0; i < storage.Items.Length; i++) {
 						ref Item item = ref storage.Items[i];
@@ -118,7 +118,7 @@ namespace androLib
 			if (Main.gameMenu)
 				return;
 
-			foreach (Storage storage in StorageManager.BagUIs.Select(ui => ui.Storage)) {
+			foreach (Storage storage in StorageManager.BagUIs.Select(ui => ui.MyStorage)) {
 				if (!storage.ShouldRefreshInfoAccs)
 					continue;
 

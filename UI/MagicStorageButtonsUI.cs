@@ -82,8 +82,8 @@ namespace androLib.UI
 			}
 		}
 		private static void DepositAllToMagicStorage() {
-			foreach (Storage storage in StorageManager.BagUIs.Select(b => b.Storage)) {
-				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out _)) {
+			foreach (Storage storage in StorageManager.BagUIs.Select(b => b.MyStorage)) {
+				if (storage.ShouldDepositToMagicStorage && storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out _)) {
 					MagicStorageIntegration.DepositToMagicStorage(storage.Items);
 				}
 			}

@@ -37,6 +37,9 @@ namespace androLib.Common.Configs
 		[DefaultValue(true)]
 		public bool RemoveItemsWhenBlacklisted;
 
+		[DefaultValue(false)]
+		public bool ClosingInventoryClosesBags;
+
 		//Logging Information
 		[JsonIgnore]
 		public const string LoggingInformationKey = "LoggingInformation";

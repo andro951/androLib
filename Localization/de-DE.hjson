@@ -23,6 +23,11 @@ Mods: {
 						'''
 				}
 
+				ClosingInventoryClosesBags: {
+					Label: Durch das Schließen des Inventars werden Taschen geschlossen
+					Tooltip: Wenn dies der Fall ist, werden beim Schließen des Inventars des Spielers alle Taschen geschlossen.
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Aktualisierung der Zulassungsliste erzwingen
 					Tooltip:
@@ -104,6 +109,8 @@ Mods: {
 			QuickStack: Schneller Stapel
 			Search: Suchen
 			Sort: Sortieren
+			Switch: Schalten
+			ToggleMagicStorageDeposit: Toggle Magisches Lagerdepot
 			ToggleVacuum: Vakuum umschalten
 		}
 	}

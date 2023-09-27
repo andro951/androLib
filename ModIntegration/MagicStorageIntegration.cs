@@ -14,6 +14,7 @@ using Terraria.ModLoader;
 using androLib.Common.Globals;
 using androLib.Common.Utility;
 using androLib.UI;
+using Terraria.Audio;
 
 namespace androLib.ModIntegration
 {
@@ -45,32 +46,43 @@ namespace androLib.ModIntegration
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static bool TryDepositToMagicStorage(IEnumerable<Item> items) {
-			IEnumerable<TEStorageCenter> centers = MagicStorage.Utility.GetNearbyCenters(Main.LocalPlayer);
+            IEnumerable<TEStorageCenter> centers;
+            bool isOpen = false;
+            if (Main.LocalPlayer.TryGetModPlayer(out MagicStorage.StoragePlayer storagePlayer) && MagicStorage.Utility.GetHeartFromAccess(storagePlayer.ViewingStorage()) is TEStorageHeart heart) {
+                centers = new List<TEStorageCenter>() { heart };
+				isOpen = true;
+			}
+            else {
+                centers = MagicStorage.Utility.GetNearbyCenters(Main.LocalPlayer);
+			}
+
 			if (!centers.Any())
 				return false;
 
             bool anyStored = false;
-            foreach (TEStorageCenter center in centers) {
+            List<Item> allItems = items.ToList();
+            List<Item> itemsCopy = items.Select(i => i.Clone()).ToList();
+			foreach (TEStorageCenter center in centers) {
 				TEStorageHeart storageHeart = center.GetHeart();
                 if (storageHeart == null)
 					continue;
 
-				storageHeart.TryDeposit(items.ToList());
-				//foreach (Item item in items) {
-    //                if (item.NullOrAir() || item.favorited)
-    //                    continue;
+				storageHeart.TryDeposit(allItems);
+                for (int i = 0; i < allItems.Count; i++) {
+                    Item item = allItems[i];
+                    Item copy = itemsCopy[i];
+                    if (item.stack < copy.stack || item.type != copy.stack) {
+                        if (isOpen) {
+                            SoundEngine.PlaySound(SoundID.Grab);
+                        }
+                        else {
+							Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, center.Position.ToWorldCoordinates(16, 16), copy, copy.stack - item.stack);
+						}
 
-				//	int oldType = item.type;
-				//	int oldStack = item.stack;
-
-				//	if (oldType != item.type || oldStack != item.stack) {
-				//		Chest.VisualizeChestTransfer(Main.LocalPlayer.Center, center.Position.ToWorldCoordinates(16, 16), ContentSamples.ItemsByType[oldType], oldStack - item.stack);
-    //                    anyStored = true;
-				//	}
-
-				//	if (item.stack <= 0)
-				//		item.TurnToAir();
-				//}
+                        if (item.stack <= 0)
+                            item.TurnToAir();
+					}
+                }
 			}
 
 			return anyStored;
@@ -91,7 +103,7 @@ namespace androLib.ModIntegration
         private void HandleOnTickEvents() {
             if (IsOpen()) {
                 if (Main.netMode < NetmodeID.Server)
-					StorageManager.CloseAllStorageUI();
+					StorageManager.OnOpenMagicStorageCloseAllStorageUI();
 
 				HandleMagicStorageOnTickEvents?.Invoke();
             }
