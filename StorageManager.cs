@@ -1003,6 +1003,9 @@ namespace androLib
 			BagUIEdits.AddOrCombine(storageID, edit);
 		}
 		public static void PostSetupResipes() {
+			if (Main.netMode == NetmodeID.Server)
+				return;
+
 			foreach (BagUI bagUI in BagUIs) {
 				bagUI.PreSetup();
 			}
