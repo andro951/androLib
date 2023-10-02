@@ -447,6 +447,9 @@ namespace androLib.UI
 				if (lastScrollPanelPosition != scrollPanelPosition)
 					SoundEngine.PlaySound(SoundID.MenuTick);
 			}
+			else {
+				scrollPanelPosition = 0;
+			}
 
 			//ItemSlots Draw
 			drawnUIData.slotData = new UIItemSlotData[inventory.Length];
@@ -529,7 +532,7 @@ namespace androLib.UI
 			if (displayAllBagButtons)
 				UpdateAllBagButtons();
 
-			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(depositAllUIIndex)))) {
+			if (ItemSlot.ShiftInUse && (MasterUIManager.NoUIBeingHovered && DisplayedBagUI.CanBeStored(Main.HoverItem) || MasterUIManager.HovingUIByID(GetUI_ID(depositAllUIIndex)))) {
 				if (!Main.mouseItem.IsAir || Main.HoverItem.favorited || !CanShiftClickNonBagItemToBag(Main.HoverItem)) {
 					Main.cursorOverride = -1;
 				}
@@ -589,7 +592,7 @@ namespace androLib.UI
 								bool unloaded = item.ModItem is UnloadedItem;
 								if (MasterUIManager.RightMouseClicked && !item.NullOrAir() && !item.favorited) {
 									int type = item.type;
-									bool allowed = CanBeStored(item);
+									bool allowed = DisplayedBagUI.CanBeStored(item);
 									if (unloaded || !allowed || TryAddToPlayerBlacklist(type)) {
 										if (!unloaded && allowed)
 											SoundEngine.PlaySound(SoundID.Research);
@@ -609,12 +612,12 @@ namespace androLib.UI
 							else {
 								bool doClickInteractions = Main.mouseItem.NullOrAir();
 								bool unloaded = Main.mouseItem.ModItem is UnloadedItem;
-								if (!doClickInteractions && MasterUIManager.LeftMouseClicked && (item.NullOrAir() || Main.mouseItem.type == item.type) && !CanBeStored(Main.mouseItem)) {
+								if (!doClickInteractions && MasterUIManager.LeftMouseClicked && (item.NullOrAir() || Main.mouseItem.type == item.type) && !DisplayedBagUI.CanBeStored(Main.mouseItem)) {
 									if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
 										SoundEngine.PlaySound(SoundID.ResearchComplete);
 								}
 
-								if (doClickInteractions || CanBeStored(Main.mouseItem) || Main.mouseItem.type == item.type || unloaded)
+								if (doClickInteractions || DisplayedBagUI.CanBeStored(Main.mouseItem) || Main.mouseItem.type == item.type || unloaded)
 									slotData.ClickInteractions(ref item);
 							}
 						}
@@ -925,18 +928,18 @@ namespace androLib.UI
 
 			return false;
 		}
-		public bool Deposit(ref Item item, bool playSound = true) {
+		public bool Deposit(ref Item item, bool playSound = true, bool displayedInventory = false) {
 			if (item.NullOrAir())
 				return false;
 
 			if (item.favorited)
 				return false;
 
-			if (Restock(ref item))
+			if (Restock(ref item, playSound, displayedInventory))
 				return true;
 
 			int index = 0;
-			Item[] inv = MyInventory;
+			Item[] inv = displayedInventory ? Inventory : MyInventory;
 			while (!inv[index].IsAir && index < inv.Length) {
 				index++;
 			}
@@ -951,8 +954,8 @@ namespace androLib.UI
 
 			return true;
 		}
-		public bool Restock(ref Item item, bool playSound = true) {
-			Item[] bagInventory = MyInventory;
+		public bool Restock(ref Item item, bool playSound = true, bool displayedInventory = false) {
+			Item[] bagInventory = displayedInventory ? Inventory : MyInventory;
 			for (int i = 0; i < bagInventory.Length; i++) {
 				Item bagItem = bagInventory[i];
 				if (!bagItem.NullOrAir() && bagItem.type == item.type && bagItem.stack < bagItem.maxStack) {
@@ -981,7 +984,7 @@ namespace androLib.UI
 		}
 		public bool TryShiftClickNonBagItemToBag(ref Item item) {
 			if (CanShiftClickNonBagItemToBag(item))
-				return Deposit(ref item);
+				return Deposit(ref item, displayedInventory: true);
 
 			return false;
 		}
@@ -1115,16 +1118,16 @@ namespace androLib.UI
 			}
 		}
 		public bool TryAddToPlayerWhitelist(int type) {
-			if (MyStorage.TryAddToPlayerWhitelist(type)) {
-				StorageManager.AddToPlayerWhitelist(storageID, type);
+			if (Storage.TryAddToPlayerWhitelist(type)) {
+				StorageManager.AddToPlayerWhitelist(StorageID, type);
 				return true;
 			}
 
 			return false;
 		}
 		public bool TryAddToPlayerBlacklist(int type) {
-			if (MyStorage.TryAddToPlayerBlacklist(type)) {
-				StorageManager.AddToPlayerBlacklist(storageID, type);
+			if (Storage.TryAddToPlayerBlacklist(type)) {
+				StorageManager.AddToPlayerBlacklist(StorageID, type);
 				return true;
 			}
 

@@ -125,6 +125,11 @@ namespace androLib
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
 			modFullName = DefaultModFullName();
+			UIResizePanelX = UIResizePanelDefaultX;
+			UIResizePanelY = UIResizePanelDefaultY;
+			LastUIResizePanelX = LastUIResizePanelDefaultX;
+			LastUIResizePanelY = LastUIResizePanelDefaultY;
+			SwitcherStorageID = StorageID;
 		}
 
 		/// <summary>

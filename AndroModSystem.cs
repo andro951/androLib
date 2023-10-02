@@ -75,6 +75,7 @@ namespace androLib
 		public const string StarsAboveAnyQueenBeeEssence = "AnyQueenBeeEssence";
 		public const string StarsAboveAnySkeletronEssence = "AnySkeletronEssence";
 		public const string CursedFlameOrIchor = "CursedFlameOrIchor";
+		public const string GoldOrPlatinumBar = "GoldOrPlatinumBar";
 		public override void AddRecipeGroups() {
 			RecipeGroup group = new RecipeGroup(() => AnyCommonGem.AddSpaces(), GemSets.CommonGems.ToArray());
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyCommonGem}", group);
@@ -230,6 +231,9 @@ namespace androLib
 
 			group = new RecipeGroup(() => CursedFlameOrIchor.AddSpaces(), new int[] { ItemID.CursedFlame, ItemID.Ichor });
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{CursedFlameOrIchor}", group);
+
+			group = new RecipeGroup(() => GoldOrPlatinumBar.AddSpaces(), new int[] { ItemID.GoldBar, ItemID.PlatinumBar });
+			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{GoldOrPlatinumBar}", group);
 		}
 	}
 }
