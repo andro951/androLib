@@ -4,6 +4,11 @@ Mods: {
 		AndroLibGameMessages: {
 			AddedToBlacklist: "{0} en la lista negra para {1}. Los elementos se pueden incluir en la lista blanca colocándolos en {1} con el mouse."
 			AddedToWhitelist: "{0} incluido en la lista blanca para {1}. Los elementos se pueden incluir en la lista negra haciendo clic derecho sobre ellos en {1} con la tecla Mayús presionada."
+			BossChecklistNotEnabled: El mod BossChecklist no está habilitado. Enchantments de armas usa BossChecklist para determinar qué jefes determinan las caídas de Power Booster de los jefes modificados. Dado que BossChecklist no está habilitado, todos los jefes modificados eliminarán el Power Booster normal.
+			FailedDetermineProgression: No se pudo determinar la progresión de Wall of Flesh y Plantera de BossChecklistData
+			MainUpdateCount: Main.GameUpdateCount: {0}
+			ReportErrorToAndro: Informe esto a andro951 (Encantamientos de armas) junto con una descripción de lo que estaba haciendo en ese momento.
+			UnableDetermineNPCDropsBossBag: No se puede determinar el npc que arroja esta bolsa de jefe:
 		}
 
 		Configs: {
@@ -28,6 +33,15 @@ Mods: {
 					Tooltip: Si es cierto, cerrar el inventario de jugadores cerrará todas las bolsas.
 				}
 
+				DisableAllErrorMessagesInChat: {
+					Label: Deshabilitar todos los mensajes de error en el chat
+					Tooltip:
+						'''
+						Evita que aparezcan mensajes en tu chat que te piden que
+						Informe esto a andro951 (Encantamientos de armas) junto con una descripción de lo que estaba haciendo en ese momento.
+						'''
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Forzar actualización de la lista permitida
 					Tooltip:
@@ -44,6 +58,24 @@ Mods: {
 						'''
 						Si es verdadero, todas las listas blancas y negras de jugadores se registrarán en client.log.
 						Si realiza cambios en las listas blanca/negra que cree que deberían ser cambios estándar para todos, imprímalos y envíeme su client.log. -andro951
+						'''
+				}
+
+				OnlyShowErrorMessagesInChatOnce: {
+					Label: Mostrar mensajes de error en el chat solo una vez
+					Tooltip:
+						'''
+						Los mensajes seguirán apareciendo en tu chat, pero solo una vez durante una sesión de juego.
+						(El mensaje de error debe ser exactamente el mismo que un mensaje anterior para evitarlo).
+						'''
+				}
+
+				PrintItemDrops: {
+					Label: Registrar una lista de fuentes de entrega de artículos
+					Tooltip:
+						'''
+						La lista se imprime en client.log cuando ingresa a un mundo.
+						La ubicación predeterminada de client.log es C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
 
@@ -70,6 +102,11 @@ Mods: {
 					Tooltip: La transparencia de todas las UI que dependen de androLib. 0 es invisible, 255 completamente saturado.
 				}
 
+				UseAlternateRarityColors: {
+					Label: Utilice colores y texturas de rareza alternativos
+					Tooltip: Los colores predeterminados son aptos para daltónicos. Las texturas alternativas tienen diferencias menores, pero se votó a favor de mantenerlas.
+				}
+
 				WhiteLists: {
 					Label: Listas blancas (¡administrarlas en el juego!)
 					Tooltip:
@@ -93,6 +130,13 @@ Mods: {
 					Tooltip: Editar esto evitará que la lista funcione. Es la clave utilizada para determinar a qué almacenamiento pertenece la lista.
 				}
 			}
+		}
+
+		GameModeNameIDs: {
+			Expert: Experto
+			Journey: Viaje
+			Master: Maestro
+			Normal: Normal
 		}
 
 		Items: {

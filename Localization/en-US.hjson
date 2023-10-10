@@ -4,6 +4,11 @@ Mods: {
 		AndroLibGameMessages: {
 			AddedToBlacklist: "{0} blacklisted for the {1}.  Items can be whitelisted by placing them into the {1} with the mouse."
 			AddedToWhitelist: "{0} whitelisted for the {1}.  Items can be blacklisted by right clicking on them in the {1} with the shift key held."
+			BossChecklistNotEnabled: BossChecklist mod is not enabled.  Weapon Enchantments uses BossChecklist to determine which bosses determine Power Booster drops from Modded bosses.  Since BossChecklist is not enabled, all Modded bosses will drop the regular Power Booster.
+			FailedDetermineProgression: Failed to determine the progression of Wall of Flesh and Plantera from BossChecklistData
+			MainUpdateCount: Main.GameUpdateCount: {0}
+			ReportErrorToAndro: Please report this to andro951(Weapon Enchantments) along with a description of what you were doing at the time.
+			UnableDetermineNPCDropsBossBag: Unable to determine the npc that drops this boss bag:
 		}
 
 		Configs: {
@@ -28,6 +33,15 @@ Mods: {
 					Tooltip: If true, closing the players inventory will close all bags.
 				}
 
+				DisableAllErrorMessagesInChat: {
+					Label: Disable All Error Messages In Chat
+					Tooltip:
+						'''
+						Prevents messages showing up in your chat that ask you to 
+						Please report this to andro951(Weapon Enchantments) along with a description of what you were doing at the time.
+						'''
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Force Allowed List Update
 					Tooltip:
@@ -44,6 +58,24 @@ Mods: {
 						'''
 						If true, all player white lists and black lists will be logged to the client.log.
 						If you make changes to the white/black lists that you think should be standard changes for everyone, please print them and send me your client.log. -andro951
+						'''
+				}
+
+				OnlyShowErrorMessagesInChatOnce: {
+					Label: Only show error messages in chat once
+					Tooltip:
+						'''
+						Messages will continue to show up in your chat, but only once during a game session.
+						(The error message must be the exact same as a previous message to be prevented.)
+						'''
+				}
+
+				PrintItemDrops: {
+					Label: Log a List of Item Drop sources
+					Tooltip:
+						'''
+						The list is printed to the client.log when you enter a world.
+						The client.log default location is C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
 
@@ -70,6 +102,11 @@ Mods: {
 					Tooltip: The transparency of all UIs that depend on androLib.  0 is invisible, 255 fully saturated.
 				}
 
+				UseAlternateRarityColors: {
+					Label: Use Alternate Rarity Colors and Textures
+					Tooltip: The default colors are color blind friendly.  The alternate textures have minor differences, but were voted to be kept.
+				}
+
 				WhiteLists: {
 					Label: White Lists (Manage in game instead!)
 					Tooltip:
@@ -93,6 +130,13 @@ Mods: {
 					Tooltip: Editing this will prevent the list from working.  It is the key used to determine which storage the list belongs to.
 				}
 			}
+		}
+
+		GameModeNameIDs: {
+			Expert: Expert
+			Journey: Journey
+			Master: Master
+			Normal: Normal
 		}
 
 		Items: {

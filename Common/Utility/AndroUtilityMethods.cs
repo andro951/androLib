@@ -10,6 +10,7 @@ using Terraria.ModLoader.IO;
 using Terraria.Localization;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using androLib.Common.Utility;
+using androLib.Items;
 
 namespace androLib.Common.Utility
 {
@@ -133,8 +134,64 @@ namespace androLib.Common.Utility
             }
 
             return newList.GetOneFromWeightedList(chance);
-        }
-        public static float Percent(this float value) => value * 100f;
+		}
+		public static int GetOneFromWeightedList(this IEnumerable<WeightedPair> options, float chance) {
+			if (options.Count() == 0)
+				return 0;
+
+			if (chance <= 0f)
+				return 0;
+
+			if (chance > 1f)
+				chance = 1f;
+
+			float randFloat = Main.rand.NextFloat();
+			if (randFloat <= chance) {
+				float total = 0f;
+				foreach (WeightedPair pair in options) {
+					total += pair.Weight;
+				}
+
+				total *= randFloat / chance;
+
+				foreach (WeightedPair pair in options) {
+					total -= pair.Weight;
+					if (total <= 0f)
+						return pair.ID;
+				}
+			}
+
+			return 0;
+		}
+		public static int GetOneFromWeightedList(this IEnumerable<DropData> options, float chance) {
+			if (options.Count() == 0)
+				return 0;
+
+			if (chance <= 0f)
+				return 0;
+
+			if (chance > 1f)
+				chance = 1f;
+
+			float randFloat = Main.rand.NextFloat();
+			if (randFloat <= chance) {
+				float total = 0f;
+				foreach (DropData pair in options) {
+					total += pair.Weight;
+				}
+
+				total *= randFloat / chance;
+
+				foreach (DropData pair in options) {
+					total -= pair.Weight;
+					if (total <= 0f)
+						return pair.ID;
+				}
+			}
+
+			return 0;
+		}
+		public static float Percent(this float value) => value * 100f;
         public static string PercentString(this float value) => $"{(value * 100).S()}%";
 		public static string Lang(this string s, string modName, string m) => s.Lang(modName, out string result, m) ? result : "";
 		public static bool Lang(this string s, string modName, out string result, string m) {
@@ -450,38 +507,6 @@ namespace androLib.Common.Utility
                     list1.Add(item2);
 			}
 		}
-        public static Type TypeAboveGrandParent(this object child, Type parent) => child.GetType().TypeAboveGrandParent(parent);
-        public static Type TypeAboveGrandParent(this Type child, Type parent) {
-            Type type = child;
-            bool foundListUniqueType = false;
-            while (!foundListUniqueType && type.BaseType != null) {
-                if (type.BaseType == parent) {
-                    foundListUniqueType = true;
-				}
-				else {
-                    type = type.BaseType;
-				}
-			}
-
-            return type;
-		}
-        public static int ChildNumber(this object child, Type parent) => child.GetType().ChildNumber(parent);
-        public static int ChildNumber(this Type child, Type parent) {
-            Type type = child;
-            int i = 0;
-			while (type.BaseType != null) {
-                if (type.BaseType == parent) {
-                    return i;
-				}
-                else {
-                    type = type.BaseType;
-				}
-
-                i++;
-			}
-
-            return -1;
-		}
         public static bool ValidOwner(this Projectile projectile, out Player player) {
             player = null;
             if (projectile.owner >= 0 && projectile.owner < Main.player.Length) {
@@ -495,6 +520,19 @@ namespace androLib.Common.Utility
         public const int InventoryStorageCount = 40;
         public static Item[] TakePlayerInventory40(this Item[] inv) => inv.Skip(inv.Length >= InventoryHotbarCount ? InventoryHotbarCount : inv.Length)
             .Take(inv.Length >= InventoryHotbarCount + InventoryStorageCount ? InventoryStorageCount : inv.Length - InventoryHotbarCount).ToArray();
+
+        public static bool InheritsFrom(this ModType modType, Type parent) => modType.GetType().InheritsFrom(parent);
+        public static bool InheritsFrom(this Type type, Type parent) {
+            if (type.IsAbstract)
+                return false;
+
+            if (type == parent)
+                return false;
+
+            return type.IsAssignableTo(parent);
+        }
+        public static Type GetModItemCompairisonType(this Item item) => item?.ModItem != null ? item.ModItem.GetModItemCompairisonType() : null;
+        public static Type GetModItemCompairisonType(this ModItem modItem) => modItem is AndroModItem androModItem ? androModItem.GroupingType : modItem.GetType();
 
 		#endregion
 	}

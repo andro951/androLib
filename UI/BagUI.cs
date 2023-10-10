@@ -571,7 +571,7 @@ namespace androLib.UI
 			int itemSlotY = itemSlotsTop;
 			int slotNum = 0;
 			for (int inventoryIndex = inventoryIndexStart; inventoryIndex < inventory.Length && slotNum <  slotsToDisplay; inventoryIndex++) {
-				if (inventoryIndex >= inventory.Length)
+				if (inventoryIndex >= inventory.Length || inventoryIndex >= slotDatas.Length)
 					break;
 
 				ref Item item = ref inventory[inventoryIndex];
@@ -1002,7 +1002,7 @@ namespace androLib.UI
 				if (item.NullOrAir())
 					continue;
 
-				while (!bagInventory[index].IsAir && index < bagInventory.Length) {
+				while (index < bagInventory.Length && !bagInventory[index].IsAir) {
 					index++;
 				}
 

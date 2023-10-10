@@ -40,6 +40,10 @@ namespace androLib.Common.Configs
 		[DefaultValue(false)]
 		public bool ClosingInventoryClosesBags;
 
+		[DefaultValue(false)]
+		[ReloadRequired]
+		public bool UseAlternateRarityColors;
+
 		//Logging Information
 		[JsonIgnore]
 		public const string LoggingInformationKey = "LoggingInformation";
@@ -48,6 +52,47 @@ namespace androLib.Common.Configs
 		[DefaultValue(false)]
 		[ReloadRequired]
 		public bool PrintLocalizationLists;
+
+		[DefaultValue(false)]
+		[ReloadRequired]
+		public bool PrintItemDrops;
+
+		[DefaultValue(false)]
+		public bool DisableAllErrorMessagesInChat {
+			set {
+				if (value) {
+					OnlyShowErrorMessagesInChatOnce = false;
+				}
+				else {
+					LogMethods.LoggedChatMessagesIDs.Clear();
+				}
+
+				_disableAllErrorMessagesInChat = value;
+			}
+
+			get => _disableAllErrorMessagesInChat;
+		}
+
+		[JsonIgnore]
+		private bool _disableAllErrorMessagesInChat;
+
+		[DefaultValue(true)]
+		public bool OnlyShowErrorMessagesInChatOnce {
+			set {
+				if (value) {
+					DisableAllErrorMessagesInChat = false;
+				}
+				else {
+					LogMethods.LoggedChatMessagesIDs.Clear();
+				}
+
+				_onlyShowErrorMessagesInChatOnce = value;
+			}
+
+			get => _onlyShowErrorMessagesInChatOnce;
+		}
+
+		private bool _onlyShowErrorMessagesInChatOnce;
 
 		[DefaultValue(false)]
 		[ReloadRequired]

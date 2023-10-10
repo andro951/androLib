@@ -4,6 +4,11 @@ Mods: {
 		AndroLibGameMessages: {
 			AddedToBlacklist: "{0} inserito nella lista nera per {1}. Gli elementi possono essere inseriti nella lista bianca inserendoli in {1} con il mouse."
 			AddedToWhitelist: "{0} inserito nella lista bianca per {1}. Gli elementi possono essere inseriti nella lista nera facendo clic con il tasto destro su di essi in {1} tenendo premuto il tasto Maiusc."
+			BossChecklistNotEnabled: La modalità BossChecklist non è abilitata. Gli incantesimi delle armi utilizzano la lista di controllo dei boss per determinare quali boss determinano il rilascio di potenziamenti di potere dai boss modificati. Poiché la BossChecklist non è abilitata, tutti i boss modificati lasceranno cadere il normale Power Booster.
+			FailedDetermineProgression: Impossibile determinare la progressione di Wall of Flesh e Plantera da BossChecklistData
+			MainUpdateCount: Main.GameUpdateCount: {0}
+			ReportErrorToAndro: Per favore segnalalo ad andro951 (Incantesimi per armi) insieme a una descrizione di ciò che stavi facendo in quel momento.
+			UnableDetermineNPCDropsBossBag: Impossibile determinare l'NPC che rilascia questa borsa del boss:
 		}
 
 		Configs: {
@@ -28,6 +33,15 @@ Mods: {
 					Tooltip: Se è vero, la chiusura dell'inventario del giocatore chiuderà tutte le borse.
 				}
 
+				DisableAllErrorMessagesInChat: {
+					Label: Disabilita tutti i messaggi di errore nella chat
+					Tooltip:
+						'''
+						Impedisce che nella chat vengano visualizzati messaggi che ti chiedono di farlo
+						Per favore segnalalo ad andro951 (Incantesimi per armi) insieme a una descrizione di ciò che stavi facendo in quel momento.
+						'''
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Forza l'aggiornamento dell'elenco consentiti
 					Tooltip:
@@ -44,6 +58,24 @@ Mods: {
 						'''
 						Se vero, tutte le liste bianche e nere dei giocatori verranno registrate nel client.log.
 						Se apporti modifiche alle liste bianche/nere che ritieni dovrebbero essere modifiche standard per tutti, stampale e inviami il tuo client.log. -andro951
+						'''
+				}
+
+				OnlyShowErrorMessagesInChatOnce: {
+					Label: Mostra i messaggi di errore nella chat solo una volta
+					Tooltip:
+						'''
+						I messaggi continueranno a essere visualizzati nella chat, ma solo una volta durante una sessione di gioco.
+						(Per essere evitato, il messaggio di errore deve essere identico al messaggio precedente.)
+						'''
+				}
+
+				PrintItemDrops: {
+					Label: Registra un elenco di fonti di rilascio di oggetti
+					Tooltip:
+						'''
+						L'elenco viene stampato nel client.log quando entri in un mondo.
+						Il percorso predefinito di client.log è C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
 
@@ -70,6 +102,11 @@ Mods: {
 					Tooltip: La trasparenza di tutte le interfacce utente che dipendono da androLib. 0 è invisibile, 255 completamente saturo.
 				}
 
+				UseAlternateRarityColors: {
+					Label: Usa colori e texture rarità alternativi
+					Tooltip: I colori predefiniti sono adatti ai daltonici. Le texture alternative presentano piccole differenze, ma si è deciso che venissero mantenute.
+				}
+
 				WhiteLists: {
 					Label: Liste bianche (gestiscile invece nel gioco!)
 					Tooltip:
@@ -93,6 +130,13 @@ Mods: {
 					Tooltip: La modifica di questo impedirà il funzionamento dell'elenco. È la chiave utilizzata per determinare a quale archivio appartiene l'elenco.
 				}
 			}
+		}
+
+		GameModeNameIDs: {
+			Expert: Esperto
+			Journey: Viaggio
+			Master: Maestro
+			Normal: Normale
 		}
 
 		Items: {

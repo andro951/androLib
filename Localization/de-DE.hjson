@@ -4,6 +4,11 @@ Mods: {
 		AndroLibGameMessages: {
 			AddedToBlacklist: „{0} wurde für die {1} auf die schwarze Liste gesetzt. Elemente können auf die weiße Liste gesetzt werden, indem Sie sie mit der Maus in die {1} platzieren.“
 			AddedToWhitelist: „{0} wurde für {1} auf die Whitelist gesetzt. Elemente können auf die Blacklist gesetzt werden, indem Sie bei gedrückter Umschalttaste mit der rechten Maustaste auf sie in {1} klicken.“
+			BossChecklistNotEnabled: Der BossChecklist-Mod ist nicht aktiviert. Weapon Enchantments verwendet BossChecklist, um zu bestimmen, welche Bosse Power-Booster-Drops von modifizierten Bossen bestimmen. Da BossChecklist nicht aktiviert ist, lassen alle modifizierten Bosse den regulären Power Booster fallen.
+			FailedDetermineProgression: Der Fortschritt von Wall of Flesh und Plantera konnte anhand von BossChecklistData nicht ermittelt werden
+			MainUpdateCount: „Main.GameUpdateCount: {0}“
+			ReportErrorToAndro: Bitte melden Sie dies andro951 (Weapon Enchantments) zusammen mit einer Beschreibung dessen, was Sie zu diesem Zeitpunkt getan haben.
+			UnableDetermineNPCDropsBossBag: Der NPC, der diese Boss-Tasche fallen lässt, kann nicht ermittelt werden:
 		}
 
 		Configs: {
@@ -28,6 +33,15 @@ Mods: {
 					Tooltip: Wenn dies der Fall ist, werden beim Schließen des Inventars des Spielers alle Taschen geschlossen.
 				}
 
+				DisableAllErrorMessagesInChat: {
+					Label: Deaktivieren Sie alle Fehlermeldungen im Chat
+					Tooltip:
+						'''
+						Verhindert, dass in Ihrem Chat Nachrichten angezeigt werden, in denen Sie dazu aufgefordert werden
+						Bitte melden Sie dies andro951 (Weapon Enchantments) zusammen mit einer Beschreibung dessen, was Sie zu diesem Zeitpunkt getan haben.
+						'''
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Aktualisierung der Zulassungsliste erzwingen
 					Tooltip:
@@ -44,6 +58,24 @@ Mods: {
 						'''
 						Bei „true“ werden alle Whitelists und Blacklists der Spieler im client.log protokolliert.
 						Wenn Sie Änderungen an den White/Black-Listen vornehmen, die Ihrer Meinung nach für alle Standardänderungen sein sollten, drucken Sie diese bitte aus und senden Sie mir Ihr client.log. -andro951
+						'''
+				}
+
+				OnlyShowErrorMessagesInChatOnce: {
+					Label: Fehlermeldungen im Chat nur einmal anzeigen
+					Tooltip:
+						'''
+						Nachrichten werden weiterhin in Ihrem Chat angezeigt, jedoch nur einmal während einer Spielsitzung.
+						(Die Fehlermeldung muss exakt mit einer vorherigen Meldung übereinstimmen, um verhindert zu werden.)
+						'''
+				}
+
+				PrintItemDrops: {
+					Label: Protokollieren Sie eine Liste der Item-Drop-Quellen
+					Tooltip:
+						'''
+						Die Liste wird im client.log gedruckt, wenn Sie eine Welt betreten.
+						Der Standardspeicherort von client.log ist C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
 
@@ -70,6 +102,11 @@ Mods: {
 					Tooltip: Die Transparenz aller Benutzeroberflächen, die von androLib abhängen. 0 ist unsichtbar, 255 vollständig gesättigt.
 				}
 
+				UseAlternateRarityColors: {
+					Label: Verwenden Sie alternative Raritätsfarben und -texturen
+					Tooltip: Die Standardfarben sind farbenblind. Die alternativen Texturen weisen geringfügige Unterschiede auf, es wurde jedoch für die Beibehaltung gestimmt.
+				}
+
 				WhiteLists: {
 					Label: Weiße Listen (Stattdessen im Spiel verwalten!)
 					Tooltip:
@@ -93,6 +130,13 @@ Mods: {
 					Tooltip: Wenn Sie dies bearbeiten, funktioniert die Liste nicht mehr. Dies ist der Schlüssel, der verwendet wird, um zu bestimmen, zu welchem Speicher die Liste gehört.
 				}
 			}
+		}
+
+		GameModeNameIDs: {
+			Expert: Experte
+			Journey: Reise
+			Master: Meister
+			Normal: Normal
 		}
 
 		Items: {

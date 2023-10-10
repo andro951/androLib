@@ -26,35 +26,38 @@ namespace androLib
 		public const string magicStorageName = "MagicStorage";
 		public static Mod magicStroageMod;
 		public static bool magicStorageEnabled = ModLoader.TryGetMod(magicStorageName, out magicStroageMod);
-		public static string calamityModName = "CalamityMod";
+		public const string calamityModName = "CalamityMod";
 		public static Mod calamityMod;
 		public static bool calamityEnabled = ModLoader.TryGetMod(calamityModName, out calamityMod);
-		public static string thoriumModName = "ThoriumMod";
+		public const string thoriumModName = "ThoriumMod";
 		public static Mod thoriumMod;
 		public static bool thoriumEnabled = ModLoader.TryGetMod(thoriumModName, out thoriumMod);
-		public static string starsAboveModName = "StarsAbove";
+		public const string starsAboveModName = "StarsAbove";
 		public static Mod starsAboveMod;
 		public static bool starsAboveEnabled = ModLoader.TryGetMod(starsAboveModName, out starsAboveMod);
-		public static string fargosModName = "Fargowiltas";
+		public const string fargosModName = "Fargowiltas";
 		public static Mod fargosMod;
 		public static bool fargosEnabled = ModLoader.TryGetMod(fargosModName, out fargosMod);
-		public static string fargosSoulsModName = "FargowiltasSouls";
+		public const string fargosSoulsModName = "FargowiltasSouls";
 		public static Mod fargosSoulsMod;
 		public static bool fargosSoulsEnabled = ModLoader.TryGetMod(fargosSoulsModName, out fargosSoulsMod);
-		public static string amuletOfManyMinionsName = "AmuletOfManyMinions";
+		public const string amuletOfManyMinionsName = "AmuletOfManyMinions";
 		public static bool amuletOfManyMinionsEnabled = ModLoader.TryGetMod(amuletOfManyMinionsName, out Mod _);
-		public static string vacuumBagsName = "VacuumBags";
+		public const string vacuumBagsName = "VacuumBags";
 		public static Mod vacuumBagsMod;
 		public static bool vacuumBagsEnabled = ModLoader.TryGetMod(vacuumBagsName, out vacuumBagsMod);
-		public static string weaponEnchantmentsName = "WeaponEnchantments";
+		public const string weaponEnchantmentsName = "WeaponEnchantments";
 		public static Mod weaponEnchantmentsMod;
 		public static bool weaponEnchantmentsLoaded = ModLoader.TryGetMod(weaponEnchantmentsName, out weaponEnchantmentsMod);
-		public static string spookyModName = "Spooky";
+		public const string spookyModName = "Spooky";
 		public static Mod spookyMod;
 		public static bool spookyModEnabled = ModLoader.TryGetMod(spookyModName, out spookyMod);
-		public static string secretsOfTheShadowsName = "SOTS";
+		public const string secretsOfTheShadowsName = "SOTS";
 		public static Mod secretsOfTheShadowsMod;
 		public static bool secretsOfTheShadowsEnabled = ModLoader.TryGetMod(secretsOfTheShadowsName, out secretsOfTheShadowsMod);
+		public static bool bossChecklistEnabled = ModLoader.TryGetMod("BossChecklist", out Mod _);
+		public static Mod wikiThis;
+		public static bool wikiThisEnabled = ModLoader.TryGetMod("Wikithis", out wikiThis);
 		private enum CallID {
 			None = -1,
 

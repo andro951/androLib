@@ -4,6 +4,11 @@ Mods: {
 		AndroLibGameMessages: {
 			AddedToBlacklist: “{0} 已被列入 {1} 的黑名单。可以通过用鼠标将项目放入 {1} 来将其列入白名单。”
 			AddedToWhitelist: “{0} 已列入 {1} 白名单。按住 Shift 键右键单击 {1} 中的项目可将其列入黑名单。”
+			BossChecklistNotEnabled: BossChecklist 模组未启用。 武器附魔使用 BossChecklist 来确定哪些 老板 决定来自 改装老板 的能量助推器掉落。 由于 BossChecklist 未启用，所有 改装老板 都会掉落常规能量助推器。
+			FailedDetermineProgression: 无法从 BossChecklistData 确定血肉墙和世纪之花的进度
+			MainUpdateCount: “Main.GameUpdateCount：{0}”
+			ReportErrorToAndro: 请将此事报告给andro951（武器附魔）并描述您当时所做的事情。
+			UnableDetermineNPCDropsBossBag: 无法确定掉落此Boss包的npc：
 		}
 
 		Configs: {
@@ -28,6 +33,15 @@ Mods: {
 					Tooltip: 如果为真，关闭玩家库存将关闭所有包。
 				}
 
+				DisableAllErrorMessagesInChat: {
+					Label: 禁用聊天中的所有错误消息
+					Tooltip:
+						'''
+						防止在您的聊天中显示要求您这样做的消息
+						请将此事报告给andro951（武器附魔）并描述您当时所做的事情。
+						'''
+				}
+
 				ForceAllowedListUpdate: {
 					Label: 强制更新允许列表
 					Tooltip:
@@ -44,6 +58,24 @@ Mods: {
 						'''
 						如果为 true，所有玩家白名单和黑名单都将记录到 client.log 中。
 						如果您对白/黑名单进行了更改，并且您认为这些更改应该是每个人的标准更改，请打印它们并向我发送您的 client.log。 -andro951
+						'''
+				}
+
+				OnlyShowErrorMessagesInChatOnce: {
+					Label: 仅在聊天中显示一次错误消息
+					Tooltip:
+						'''
+						消息将继续显示在您的聊天中，但仅在游戏会话期间显示一次。
+						（错误消息必须与之前要阻止的消息完全相同。）
+						'''
+				}
+
+				PrintItemDrops: {
+					Label: 记录物品掉落源列表
+					Tooltip:
+						'''
+						当您进入世界时，该列表将打印到 client.log 中。
+						client.log 默认位置为 C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
 
@@ -70,6 +102,11 @@ Mods: {
 					Tooltip: 所有依赖于androLib的UI的透明度。 0 不可见，255 完全饱和。
 				}
 
+				UseAlternateRarityColors: {
+					Label: 使用替代稀有颜色和纹理
+					Tooltip: 默认颜色适合色盲。 替代纹理有细微差别，但被投票保留。
+				}
+
 				WhiteLists: {
 					Label: 白名单（改为在游戏中管理！）
 					Tooltip:
@@ -93,6 +130,13 @@ Mods: {
 					Tooltip: 编辑此内容将导致列表无法工作。 它是用于确定列表属于哪个存储的键。
 				}
 			}
+		}
+
+		GameModeNameIDs: {
+			Expert: 专家
+			Journey: 旅行
+			Master: 掌握
+			Normal: 普通的
 		}
 
 		Items: {

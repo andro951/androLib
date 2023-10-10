@@ -4,6 +4,11 @@ Mods: {
 		AndroLibGameMessages: {
 			AddedToBlacklist: "{0} sur liste noire pour le {1}. Les éléments peuvent être ajoutés à la liste blanche en les plaçant dans le {1} avec la souris."
 			AddedToWhitelist: "{0} sur liste blanche pour le {1}. Les éléments peuvent être mis sur liste noire en faisant un clic droit dessus dans le {1} avec la touche Maj enfoncée."
+			BossChecklistNotEnabled: Le mod BossChecklist n’est pas activé. Weapon Enchantments utilise BossChecklist pour déterminer quels boss déterminent les baisses de Power Booster des boss Modded. Étant donné que BossChecklist n'est pas activé, tous les boss Modded abandonneront le Power Booster habituel.
+			FailedDetermineProgression: Impossible de déterminer la progression de Wall of Flesh et Plantera à partir de BossChecklistData
+			MainUpdateCount: Main.GameUpdateCount : {0}
+			ReportErrorToAndro: Veuillez signaler cela à andro951 (Enchantements d'armes) avec une description de ce que vous faisiez à ce moment-là.
+			UnableDetermineNPCDropsBossBag: Impossible de déterminer le PNJ qui lâche ce sac de boss :
 		}
 
 		Configs: {
@@ -28,6 +33,15 @@ Mods: {
 					Tooltip: Si c'est vrai, la fermeture de l'inventaire du joueur fermera tous les sacs.
 				}
 
+				DisableAllErrorMessagesInChat: {
+					Label: Désactiver tous les messages d'erreur dans le chat
+					Tooltip:
+						'''
+						Empêche l'apparition de messages dans votre chat vous demandant de le faire
+						Veuillez signaler cela à andro951 (Enchantements d'armes) avec une description de ce que vous faisiez à ce moment-là.
+						'''
+				}
+
 				ForceAllowedListUpdate: {
 					Label: Forcer la mise à jour de la liste autorisée
 					Tooltip:
@@ -44,6 +58,24 @@ Mods: {
 						'''
 						Si c'est vrai, toutes les listes blanches et noires des joueurs seront enregistrées dans le client.log.
 						Si vous apportez des modifications aux listes blanches/noires qui, selon vous, devraient être des modifications standard pour tout le monde, veuillez les imprimer et m'envoyer votre client.log. -andro951
+						'''
+				}
+
+				OnlyShowErrorMessagesInChatOnce: {
+					Label: Afficher les messages d'erreur dans le chat une seule fois
+					Tooltip:
+						'''
+						Les messages continueront à apparaître dans votre chat, mais une seule fois au cours d'une session de jeu.
+						(Le message d'erreur doit être exactement le même qu'un message précédent pour être évité.)
+						'''
+				}
+
+				PrintItemDrops: {
+					Label: Enregistrez une liste des sources de dépôt d'articles
+					Tooltip:
+						'''
+						La liste est imprimée dans le client.log lorsque vous entrez dans un monde.
+						L'emplacement par défaut de client.log est C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
 
@@ -70,6 +102,11 @@ Mods: {
 					Tooltip: La transparence de toutes les interfaces utilisateur qui dépendent d'androLib. 0 est invisible, 255 entièrement saturé.
 				}
 
+				UseAlternateRarityColors: {
+					Label: Utiliser d'autres couleurs et textures rares
+					Tooltip: Les couleurs par défaut conviennent aux daltoniens. Les textures alternatives présentent des différences mineures, mais leur maintien a été voté.
+				}
+
 				WhiteLists: {
 					Label: Listes blanches (à gérer plutôt dans le jeu !)
 					Tooltip:
@@ -93,6 +130,13 @@ Mods: {
 					Tooltip: Modifier ceci empêchera la liste de fonctionner. C'est la clé utilisée pour déterminer à quel stockage appartient la liste.
 				}
 			}
+		}
+
+		GameModeNameIDs: {
+			Expert: Expert
+			Journey: Voyage
+			Master: Maître
+			Normal: Normale
 		}
 
 		Items: {

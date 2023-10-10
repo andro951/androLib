@@ -25,7 +25,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text.RegularExpressions;
 using System.Reflection.Emit;
-using androLib.Common.Utility;
 using androLib.Localization;
 
 namespace androLib.Common.Utility
@@ -34,16 +33,20 @@ namespace androLib.Common.Utility
         public static bool printListOfContributors = false;
         public static bool printLocalization => AndroMod.clientConfig.PrintLocalizationLists && !Debugger.IsAttached;
         public static readonly bool zzzLocalizationForTesting = false;
-        public static bool printLocalizationKeysAndValues => AndroMod.clientConfig.PrintLocalizationLists && Debugger.IsAttached;
+		public static readonly bool printNPCIDSwitch = false;
+        public static readonly bool printItemIDSwitch = false;
+		public static bool printLocalizationKeysAndValues => AndroMod.clientConfig.PrintLocalizationLists && Debugger.IsAttached;
         private static int localizationValuesCharacterCount = 0;
-        //public static readonly bool printWiki = AndroMod.serverConfig.PrintWikiInfo;
+		public static bool printItemDrops => AndroMod.clientConfig.PrintItemDrops;
+		public static SortedDictionary<int, List<List<DropData>>> npcItemDrops = new();
 
-        //Only used to print the full list of contributors.
-        public static Dictionary<string, string> androLibContributorLinks = new Dictionary<string, string>() {
-            //{ "Zorutan", "https://twitter.com/ZorutanMesuta" }
+		//Only used to print the full list of contributors.
+		public static Dictionary<string, string> contributorLinks = new Dictionary<string, string>() {
+            { "Zorutan", "https://twitter.com/ZorutanMesuta" },
+            { "anodomani", "https://instagram.com/anodomani?utm_source=qr&igshid=MzNlNGNkZWQ4Mg%3D%3D" }
         };
 
-        public static SortedDictionary<string, Contributors> contributorsData = new SortedDictionary<string, Contributors>();
+		public static SortedDictionary<string, Contributors> contributorsData = new SortedDictionary<string, Contributors>();
         public static List<string> namesAddedToContributorDictionary = new List<string>();
         private static string localization = "";
         private static string localizationValues = "";
@@ -70,8 +73,10 @@ namespace androLib.Common.Utility
 
             PrintAllLocalization();
 
-            //Wiki.PrintWiki();
-        }
+			PrintNPCIDSwitch();
+
+            PrintItemIDSwitch();
+		}
         public static void UpdateContributorsList<T>(T modTypeWithTexture, string sharedName = null) {
             if (!printListOfContributors)
                 return;
@@ -479,8 +484,8 @@ namespace androLib.Common.Utility
             string artistsMessage = "";
             foreach (string artistName in artistCredits.Keys) {
                 artistsMessage += $"\n{artistName}: ";
-                if (androLibContributorLinks.ContainsKey(artistName))
-                    artistsMessage += androLibContributorLinks[artistName];
+                if (contributorLinks.ContainsKey(artistName))
+                    artistsMessage += contributorLinks[artistName];
 
                 artistsMessage += "\n\n";
                 foreach (string texture in artistCredits[artistName]) {
@@ -492,7 +497,39 @@ namespace androLib.Common.Utility
 
             namesAddedToContributorDictionary.Clear();
             contributorsData.Clear();
-        }
+		}
+		private static void PrintNPCIDSwitch() {
+			if (!printNPCIDSwitch)
+				return;
+
+			string text = "";
+			text += "\n\nswitch() {\n";
+			for (short i = NPCID.NegativeIDCount + 1; i < NPCID.Count; i++) {
+				text += $"\tcase NPCID.{NPCID.Search.GetName(i)}://{i} {ContentSamples.NpcsByNetId[i].FullName}\n" +
+						$"\t\treturn \"\";\n";
+			}
+
+			text += "\tdefault:\n" +
+				"\t\treturn \"\";\n" +
+				"}\n";
+			text.LogSimple();
+		}
+        private static void PrintItemIDSwitch() {
+            if (!printItemIDSwitch)
+                return;
+
+			string text = "";
+			text += "\n\nswitch() {\n";
+			for (short i = ItemID.None; i < ItemID.Count; i++) {
+				text += $"\tcase ItemID.{ItemID.Search.GetName(i)}://{i} {i.CSI().Name}\n" +
+						$"\t\treturn \"\";\n";
+			}
+
+			text += "\tdefault:\n" +
+				"\t\treturn \"\";\n" +
+				"}\n";
+			text.LogSimple();
+		}
 	}
 
 	public struct Contributors {

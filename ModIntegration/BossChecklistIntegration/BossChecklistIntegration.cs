@@ -9,8 +9,9 @@ using androLib.Common.Utility;
 
 namespace androLib.ModIntegration
 {
-	public static class BossChecklistIntegration
-	{ 
+	public static class BossChecklistIntegration {
+		public static bool ShouldSetupBossPowerBoosterDrops => !UsedBossChecklistForBossPowerBoosterDrops && BossInfos != null;
+		public static bool UsedBossChecklistForBossPowerBoosterDrops = false;
 		private static readonly Version BossChecklistAPIVersion = new Version(1, 1); // Do not change this yourself.
 		private static SortedDictionary<string, BossChecklistBossInfo> bossInfos = null;
 		public static SortedDictionary<string, BossChecklistBossInfo> BossInfos {

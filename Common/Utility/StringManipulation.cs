@@ -379,6 +379,7 @@ namespace androLib.Common.Utility
                         }
                     }
             }
+
             return s;
         }
 
@@ -430,12 +431,12 @@ namespace androLib.Common.Utility
             List<string> original = list.Select(t => t.ToString()).ToList();
             List<string> edited = new();
             List<string> matches = new();
-            
+
             //"original".LogSimple();
-            //foreach(string s in original) {
+            //foreach (string s in original) {
             //    s.LogSimple();
-			//}
-            
+            //}
+
             string rS = list[0].ToString();
             string result = "";
             int listCount = list.Count;
@@ -456,7 +457,7 @@ namespace androLib.Common.Utility
                         matchString += c;
                 }
                 else if (matchString != "") {
-                    i--;
+                    i -= matchString.Length;
                     matches.Add(matchString);
                     matchString = "";
                 }
@@ -490,12 +491,12 @@ namespace androLib.Common.Utility
             if (matchString != "") {
                 matches.Add(matchString);
             }
-            
+
             //"\nmatches".LogSimple();
-            //foreach(string s in matches) {
+            //foreach (string s in matches) {
             //    s.LogSimple();
-			//}
-            
+            //}
+
             int count = matches.Count;
             for (int i = 0; i < count; i++) {
                 string s = matches[i];
@@ -514,9 +515,10 @@ namespace androLib.Common.Utility
                 if (!match)
                     result += s;
 			}
-            
-            //"/nresult".LogSimple();
+
+            //"\nresult".LogSimple();
             //result.LogSimple();
+            //bool startsWith = result.StartsWith("nch");
 
             return result;
 		}

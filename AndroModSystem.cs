@@ -1,10 +1,12 @@
 ﻿using androLib.Common.Globals;
 using androLib.Common.Utility;
+using androLib.Common.Utility.LogSystem;
 using androLib.UI;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,11 +78,109 @@ namespace androLib
 		public const string StarsAboveAnySkeletronEssence = "AnySkeletronEssence";
 		public const string CursedFlameOrIchor = "CursedFlameOrIchor";
 		public const string GoldOrPlatinumBar = "GoldOrPlatinumBar";
+		public struct ChanceMultiplierInfo {
+			public int Min {
+				get {
+					if (min == int.MaxValue)
+						SetupMinMax();
+
+					return min;
+				}
+			}
+			private int min = int.MaxValue;
+			public int Max {
+				get {
+					if (max == int.MinValue)
+						SetupMinMax();
+
+					return max;
+				}
+			}
+			private int max = int.MinValue;
+			private void SetupMinMax() {
+				IEnumerable<ModItem> modItems = mod.GetContent<ModItem>();
+				Wiki.GetMinMax(modItems, out min, out max);
+			}
+			private Mod mod;
+			public Func<float> NPCMultiplier;
+			public Func<float> BossMultiplier;
+			public Func<float> ChestMultiplier;
+			public Func<float> CrateMultiplier;
+			public ChanceMultiplierInfo(Mod mod, Func<float> npcMultiplier = null, Func<float> bossMultiplier = null, Func<float> chestMultiplier = null, Func<float> crateMultiplier = null) {
+				this.mod = mod;
+				NPCMultiplier = npcMultiplier;
+				BossMultiplier = bossMultiplier;
+				ChestMultiplier = chestMultiplier;
+				CrateMultiplier = crateMultiplier;
+			}
+		}
+		public static void RegisterChestSpawnChanceMultiplier(Mod mod, Func<float> npcMultiplier = null, Func<float> bossMultiplier = null, Func<float> chestMultiplier = null, Func<float> crateMultiplier = null) {
+			ChestSpawnChanceMultipliers.Add(new ChanceMultiplierInfo(mod, npcMultiplier, bossMultiplier, chestMultiplier, crateMultiplier));
+		}
+		private static List<ChanceMultiplierInfo> ChestSpawnChanceMultipliers = new();
+		public static bool TryGetNPCSpawnChanceMultiplier(int itemType, out float mult) {
+			foreach (ChanceMultiplierInfo info in ChestSpawnChanceMultipliers) {
+				if (info.NPCMultiplier != null && info.Min <= itemType && info.Max >= itemType) {
+					mult = info.NPCMultiplier();
+					return true;
+				}
+			}
+
+			mult = 1f;
+			return false;
+		}
+		public static bool TryGetBossSpawnChanceMultiplier(int itemType, out float mult) {
+			foreach (ChanceMultiplierInfo info in ChestSpawnChanceMultipliers) {
+				if (info.BossMultiplier != null && info.Min <= itemType && info.Max >= itemType) {
+					mult = info.BossMultiplier();
+					return true;
+				}
+			}
+
+			mult = 1f;
+			return false;
+		}
+		public static bool TryGetChestSpawnChanceMultiplier(int itemType, out float mult) {
+			foreach (ChanceMultiplierInfo info in ChestSpawnChanceMultipliers) {
+				if (info.ChestMultiplier != null && info.Min <= itemType && info.Max >= itemType) {
+					mult = info.ChestMultiplier();
+					return true;
+				}
+			}
+
+			mult = 1f;
+			return false;
+		}
+		public static bool TryGetCrateSpawnChanceMultiplier(int itemType, out float mult) {
+			foreach (ChanceMultiplierInfo info in ChestSpawnChanceMultipliers) {
+				if (info.CrateMultiplier != null && info.Min <= itemType && info.Max >= itemType) {
+					mult = info.CrateMultiplier();
+					return true;
+				}
+			}
+
+			mult = 1f;
+			return false;
+		}
 		public override void AddRecipeGroups() {
-			RecipeGroup group = new RecipeGroup(() => AnyCommonGem.AddSpaces(), GemSets.CommonGems.ToArray());
+			int[] commanGems = GemSets.CommonGems.ToArray();
+			int indexOfTopax = Array.IndexOf(commanGems, ItemID.Topaz);
+			if (indexOfTopax > 0) {
+				commanGems[indexOfTopax] = commanGems[0];
+				commanGems[0] = ItemID.Topaz;
+			}
+			
+			RecipeGroup group = new RecipeGroup(() => AnyCommonGem.AddSpaces(), commanGems);
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyCommonGem}", group);
 
-			group = new RecipeGroup(() => AnyRareGem.AddSpaces(), GemSets.RareGems.ToArray());
+			int[] rareGems = GemSets.RareGems.ToArray();
+			int indexOfAmber = Array.IndexOf(rareGems, ItemID.Amber);
+			if (indexOfAmber > 0) {
+				rareGems[indexOfAmber] = rareGems[0];
+				rareGems[0] = ItemID.Amber;
+			}
+
+			group = new RecipeGroup(() => AnyRareGem.AddSpaces(), rareGems);
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyRareGem}", group);
 
 			group = new RecipeGroup(() => Workbenches.AddSpaces(), new int[] {
@@ -234,6 +334,170 @@ namespace androLib
 
 			group = new RecipeGroup(() => GoldOrPlatinumBar.AddSpaces(), new int[] { ItemID.GoldBar, ItemID.PlatinumBar });
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{GoldOrPlatinumBar}", group);
+		}
+		public static SortedDictionary<ChestID, List<DropData>> chestDrops = new();
+		public override void PostWorldGen() {
+			for (int chestIndex = 0; chestIndex < 1000; chestIndex++) {
+				Chest chest = Main.chest[chestIndex];
+				if (chest == null)
+					continue;
+
+				int itemsPlaced = 0;
+
+				ChestID chestID = GetChestIDFromChest(chest);
+				GetChestLoot(chestID, out List<DropData> options, out float chance);
+
+				if (chance <= 0f)
+					continue;
+
+				if (options == null)
+					continue;
+
+				IEnumerable<DropData> weightedDropData = options.Where(d => d.Chance <= 0f);
+				IEnumerable<DropData> chanceDropData = options.Where(d => d.Chance > 0f);
+				foreach (DropData dropData in chanceDropData) {
+					float randFloat = Main.rand.NextFloat();
+					float dropChance = dropData.Chance;
+					if (TryGetChestSpawnChanceMultiplier(dropData.ID, out float mult))
+						dropChance *= mult;
+
+					if (randFloat > dropChance)
+						continue;
+
+					for (int j = 0; j < 40; j++) {
+						if (chest.item[j].type != ItemID.None)
+							continue;
+
+						int type = dropData.ID;
+						for (int k = j; k >= 0; k--) {
+							if (chest.item[k].type == type && chest.item[k].stack < chest.item[k].maxStack) {
+								chest.item[k].stack++;
+								break;
+							}
+						}
+
+						chest.item[j] = new Item(type);
+						break;
+					}
+				}
+
+				for (int j = 0; j < 40 && itemsPlaced < chance; j++) {
+					if (chest.item[j].type != ItemID.None)
+						continue;
+
+					int type = weightedDropData.GetOneFromWeightedList(chance);
+
+					if (type > 0) {
+						bool found = false;
+						for (int k = j; k >= 0; k--) {
+							if (chest.item[k].type == type && chest.item[k].stack < chest.item[k].maxStack) {
+								chest.item[k].stack++;
+								found = true;
+								j--;
+								break;
+							}
+						}
+
+						if (!found)
+							chest.item[j] = new Item(type);
+					}
+
+					itemsPlaced++;
+				}
+			}
+		}
+		public static ChestID GetChestIDFromChest(Chest chest) {
+			Tile tile = Main.tile[chest.x, chest.y];
+			ushort tileType = tile.TileType;
+			short tileFrameX = tile.TileFrameX;
+			// If you look at the sprite for Chests by extracting Tiles_21.xnb, you'll see that the 12th chest is the Ice Chest.
+			// Since we are counting from 0, this is where 11 comes from. 36 comes from the width of each tile including padding.
+			switch (tileType) {
+				case TileID.Containers:
+				case TileID.FakeContainers:
+					return (ChestID)(tileFrameX / 36);
+				case TileID.Containers2:
+				case TileID.FakeContainers2:
+					return (ChestID)(tileFrameX / 36 + 100);
+				default:
+					return ChestID.None;
+			}
+		}
+		public static void GetChestLoot(ChestID chestID, out List<DropData> itemTypes, out float chance) {
+			chance = 0f;
+			itemTypes = chestDrops.ContainsKey(chestID) ? chestDrops[chestID] : null;
+			if (itemTypes == null)
+				return;
+
+			foreach (DropData dropData in itemTypes) {
+				int itemType = dropData.ID;
+				if (TryGetChestSpawnChanceMultiplier(itemType, out float mult)) {
+					chance = mult;
+					break;
+				}
+			}
+
+			if (itemTypes.Where(d => d.Chance <= 0f).Count() == 1)
+				chance *= itemTypes[0].Weight;
+
+			switch (chestID) {
+				case ChestID.Chest_Normal:
+					chance *= 0.7f;
+					break;
+				case ChestID.Gold:
+					break;
+				case ChestID.Gold_Locked:
+					break;
+				case ChestID.Shadow:
+				case ChestID.Shadow_Locked:
+					chance *= 2f;
+					break;
+				case ChestID.RichMahogany:
+					break;
+				case ChestID.Ivy:
+					break;
+				case ChestID.Frozen:
+					break;
+				case ChestID.LivingWood:
+					break;
+				case ChestID.Skyware:
+					break;
+				case ChestID.WebCovered:
+					break;
+				case ChestID.Lihzahrd:
+					chance *= 2f;
+					break;
+				case ChestID.Water:
+					break;
+				case ChestID.Jungle_Dungeon:
+					chance = 1f;
+					break;
+				case ChestID.Corruption_Dungeon:
+					chance = 1f;
+					break;
+				case ChestID.Crimson_Dungeon:
+					chance = 1f;
+					break;
+				case ChestID.Hallowed_Dungeon:
+					chance = 1f;
+					break;
+				case ChestID.Ice_Dungeon:
+					chance = 1f;
+					break;
+				case ChestID.Mushroom:
+					break;
+				case ChestID.Granite:
+					break;
+				case ChestID.Marble:
+					break;
+				case ChestID.Gold_DeadMans:
+					break;
+				case ChestID.SandStone:
+					break;
+				case ChestID.Desert_Dungeon:
+					chance = 1f;
+					break;
+			}
 		}
 	}
 }

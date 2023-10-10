@@ -64,9 +64,17 @@ namespace androLib.Localization
 										{ L_ID3.Label.ToString(), nameof(AndroClientConfig.UITransparency).AddSpaces() },
 									{ L_ID3.Tooltip.ToString(), "The transparency of all UIs that depend on androLib.  0 is invisible, 255 fully saturated." }
 								}) },
+								{ nameof(AndroClientConfig.UseAlternateRarityColors), new(dict: new() {
+									{ L_ID3.Label.ToString(), "Use Alternate Rarity Colors and Textures" },
+									{ L_ID3.Tooltip.ToString(), "The default colors are color blind friendly.  The alternate textures have minor differences, but were voted to be kept." }
+								}) },
 								{ nameof(AndroClientConfig.PrintLocalizationLists), new(dict: new() {
 										{ L_ID3.Label.ToString(), "Log all translation lists" },
 									{ L_ID3.Tooltip.ToString(), "The lists are printed to the client.log when you enter a world.\nThe client.log default location is C:\\Steam\\SteamApps\\common\\tModLoader\\tModLoader-Logs" }
+								}) },
+								{ nameof(AndroClientConfig.PrintItemDrops), new(dict: new() {
+									{ L_ID3.Label.ToString(), "Log a List of Item Drop sources" },
+									{ L_ID3.Tooltip.ToString(), "The list is printed to the client.log when you enter a world.\nThe client.log default location is C:\\Steam\\SteamApps\\common\\tModLoader\\tModLoader-Logs" }
 								}) },
 								{ nameof(AndroClientConfig.LogAllPlayerWhiteAndBlackLists), new(dict: new() {
 									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.LogAllPlayerWhiteAndBlackLists).AddSpaces() },
@@ -81,6 +89,16 @@ namespace androLib.Localization
 								{ nameof(AndroClientConfig.ClosingInventoryClosesBags), new(dict: new() {
 									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ClosingInventoryClosesBags).AddSpaces() },
 									{ L_ID3.Tooltip.ToString(), "If true, closing the players inventory will close all bags." }
+								}) },
+								{ nameof(AndroClientConfig.DisableAllErrorMessagesInChat), new(dict: new() {
+									{ L_ID3.Label.ToString(), "Disable All Error Messages In Chat" },
+									{ L_ID3.Tooltip.ToString(), "Prevents messages showing up in your chat that ask you to \n" +
+														"Please report this to andro951(Weapon Enchantments) along with a description of what you were doing at the time." }
+								}) },
+								{ nameof(AndroClientConfig.OnlyShowErrorMessagesInChatOnce), new(dict: new() {
+									{ L_ID3.Label.ToString(), "Only show error messages in chat once" },
+									{ L_ID3.Tooltip.ToString(), "Messages will continue to show up in your chat, but only once during a game session.\n" +
+														"(The error message must be the exact same as a previous message to be prevented.)" }
 								}) },
 								{ nameof(AndroClientConfig.ForceAllowedListUpdate), new(dict: new() {
 									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ForceAllowedListUpdate).AddSpaces() },
@@ -123,7 +141,19 @@ namespace androLib.Localization
 						{ L_ID1.AndroLibGameMessages.ToString(), new(
 							dict: new() {
 								{ AndroLibGameMessages.AddedToWhitelist.ToString(), "{0} whitelisted for the {1}.  Items can be blacklisted by right clicking on them in the {1} with the shift key held." },
-								{ AndroLibGameMessages.AddedToBlacklist.ToString(), "{0} blacklisted for the {1}.  Items can be whitelisted by placing them into the {1} with the mouse." }
+								{ AndroLibGameMessages.AddedToBlacklist.ToString(), "{0} blacklisted for the {1}.  Items can be whitelisted by placing them into the {1} with the mouse." },
+								{ AndroLibGameMessages.BossChecklistNotEnabled.ToString(), "BossChecklist mod is not enabled.  Weapon Enchantments uses BossChecklist to determine which bosses determine Power Booster drops from Modded bosses.  Since BossChecklist is not enabled, all Modded bosses will drop the regular Power Booster." },
+								{ AndroLibGameMessages.FailedDetermineProgression.ToString(), "Failed to determine the progression of Wall of Flesh and Plantera from BossChecklistData" },
+								{ AndroLibGameMessages.UnableDetermineNPCDropsBossBag.ToString(), "Unable to determine the npc that drops this boss bag:" },
+								{ AndroLibGameMessages.MainUpdateCount.ToString(), "Main.GameUpdateCount: {0}" },
+								{ AndroLibGameMessages.ReportErrorToAndro.ToString(), "Please report this to andro951(Weapon Enchantments) along with a description of what you were doing at the time." },
+						}) },
+						{ L_ID1.GameModeNameIDs.ToString(), new(
+							values: new() {
+								//Filled Automatically
+							},
+							dict: new() {
+
 						}) },
 					};
 
@@ -143,6 +173,12 @@ namespace androLib.Localization
 					foreach (string magicStorageButtonsText in Enum.GetNames(typeof(MagicStorageButtonsTextID))) {
 						if (!allData[MagicStorageButtonsTextKey].Dict.ContainsKey(magicStorageButtonsText))
 							allData[MagicStorageButtonsTextKey].Values.Add(magicStorageButtonsText);
+					}
+
+					string GameModeNameIDsKey = L_ID1.GameModeNameIDs.ToString();
+					foreach (string gameModeNameIDKey in Enum.GetNames(typeof(GameModeNameID))) {
+						if (!allData[GameModeNameIDsKey].Dict.ContainsKey(gameModeNameIDKey))
+							allData[GameModeNameIDsKey].Values.Add(gameModeNameIDKey);
 					}
 				}
 
@@ -182,19 +218,19 @@ namespace androLib.Localization
 		public static Dictionary<CultureName, List<string>> SameAsEnglish = new() {
 			{ CultureName.German,
 				new() {
-					
+					"Normal",
 				}
 			},
 			{
 				CultureName.Spanish,
 				new() {
-					
+					"Normal",
 				}
 			},
 			{
 				CultureName.French,
 				new() {
-					
+					"Expert"
 				}
 			},
 			{
@@ -212,7 +248,7 @@ namespace androLib.Localization
 			{
 				CultureName.Portuguese,
 				new() {
-					
+					"Normal"
 				}
 			},
 			{

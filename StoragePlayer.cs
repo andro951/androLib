@@ -76,6 +76,10 @@ namespace androLib
 		}
 
 		public override bool ShiftClickSlot(Item[] inventory, int context, int slot) {
+			//shop
+			if (context == 15 || Main.npcShop != 0)
+				return false;
+
 			ref Item item = ref inventory[slot];
 			if (context == 29) {
 				item = item.Clone();
