@@ -724,7 +724,6 @@ namespace androLib.UI
 		public int ID;
 		int ItemType;
 		public Action OnClick;
-		public float Scale;
 		public static Color NotSelectedColor => new Color(80, 80, 80, ConfigValues.UIAlpha);
 		bool Selected;
 		public static int DefaultSize => ItemSlotSize;
