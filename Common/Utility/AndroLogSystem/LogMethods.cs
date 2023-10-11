@@ -86,7 +86,7 @@ namespace androLib.Common.Utility
 			}
 		}
 
-		public static void LogRest(this ILCursor c, int goBack = 0) {
+		public static void LogILRest(this ILCursor c, int goBack = 0) {
 			int index = c.Index;
             c.Index = index - goBack;
 			while (c.Next != null) {
@@ -140,6 +140,13 @@ namespace androLib.Common.Utility
 			}
 
 			s.Log();
+		}
+
+		public static void LogSimpleNT(this string s) {
+			if (Main.netMode < NetmodeID.Server && !Main.gameMenu)
+				Main.NewText(s);
+
+			s.LogSimple();
 		}
 	}
 }

@@ -34,30 +34,36 @@ namespace androLib.Common
 			ChainedRules = new List<IItemDropRuleChainAttempt>();
 		}
 
-		public bool CanDrop(DropAttemptInfo info) => true;
+		public virtual bool CanDrop(DropAttemptInfo info) => true;
 
-		public ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info) {
-			ItemDropAttemptResult result;
+		public virtual ItemDropAttemptResult TryDroppingItem(DropAttemptInfo info) {
+			ItemDropAttemptResult result = new();
 			float randFloat = Main.rand.NextFloat();
 			if (randFloat <= dropChance) {
 				CommonCode.DropItem(info, itemID, 1);
-				result = default(ItemDropAttemptResult);
 				result.State = ItemDropAttemptResultState.Success;
 
 				return result;
 			}
 
-			result = default(ItemDropAttemptResult);
 			result.State = ItemDropAttemptResultState.FailedRandomRoll;
 
 			return result;
 		}
 
-		public void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo) {
+		public virtual void ReportDroprates(List<DropRateInfo> drops, DropRateInfoChainFeed ratesInfo) {
 			float chance = dropChance * ratesInfo.parentDroprateChance;
-			drops.Add(new DropRateInfo(itemID, 1, 1, chance));
+			DropRateInfo dropRateInfo = new DropRateInfo(itemID, 1, 1, chance);
+			if (Conditions != null) {
+				foreach (IItemDropRuleCondition condition in Conditions) {
+					dropRateInfo.AddCondition(condition);
+				}
+			}
 
+			drops.Add(dropRateInfo);
 			Chains.ReportDroprates(ChainedRules, chance, drops, ratesInfo);
 		}
+
+		protected virtual IEnumerable<IItemDropRuleCondition> Conditions => null;
 	}
 }

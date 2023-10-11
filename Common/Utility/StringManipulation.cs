@@ -121,7 +121,29 @@ namespace androLib.Common.Utility
         public static string S(this IEnumerable<string> strings, string nameAndType = "", int tabs = 2, bool isArgument = false) => $"{(isArgument ? "," : "")}\n{tabs.Tabs()}{nameAndType} {"{"}\n{tabs.Tabs(1)}{strings.JoinList($",\n{tabs.Tabs(1)}")}\n{tabs.Tabs()}{"}"}{(isArgument ? "" : ";")}";
         public delegate string ToStringDelegate<T>(T t);
         public static string S<T>(this IEnumerable<T> list, ToStringDelegate<T> toString, string nameAndType = "", int tabs = 2) => list.Select(i => toString(i)).S(nameAndType, tabs);
-        public static string NPCListString(this IEnumerable<int> list, string name = null, bool isArgument = false, int tabs = 2) =>
+		public static string EnumerableToStringList(this IEnumerable<string> list, string label = null) {
+			string text = label != null ? $"{label}: " : "";
+			return $"{text}{list.JoinList()}";
+		}
+		public static string EnumerableToStringList<T>(this IEnumerable<T> list, string label = null, Func<T, string> toString = null) {
+			if (toString == null)
+				toString = (T item) => item.ToString();
+
+			return EnumerableToStringList(list.Select(t => toString(t)), label);
+		}
+		public static string EnumerableToStringBlock(this IEnumerable<string> list, string label = null, int tabs = 2, bool brackets = true) {
+			string text = $"{(label != null ? $"{label}: " : "")}{(brackets ? "{" : "")}\n";
+			string tabsString = tabs.Tabs();
+			string body = list.Select(s => $"{tabsString}{s}").JoinList(",\n");
+			return $"{text}{body}{(brackets ? "\n}" : "")}\n";
+		}
+		public static string EnumerableToStringBlock<T>(this IEnumerable<T> list, string label = null, Func<T, string> toString = null, int tabs = 2, bool brackets = true) {
+			if (toString == null)
+				toString = (T item) => item.ToString();
+
+			return EnumerableToStringBlock(list.Select(t => toString(t)), label, tabs, brackets);
+		}
+		public static string NPCListString(this IEnumerable<int> list, string name = null, bool isArgument = false, int tabs = 2) =>
 			$"{list.Where(i => i < NPCID.Count).Select(i => $"{i.GetNPCIDName()}").S($"{(isArgument ? $"{name}Types:" : $"SortedSet<int> {name}Types =")} new SortedSet<int>()", tabs, isArgument)}" +
 			$"{list.Where(i => i >= NPCID.Count).Select(i => $"{i.GetNPCNameString()}").OrderBy(i => i).S($"{(isArgument ? $"{name}Names:" : $"SortedSet<string> {name}Types =")} new SortedSet<string>()", tabs, isArgument)}";
 		public static string NPCDictionaryStrings<T>(this IEnumerable<KeyValuePair<int, T>> dict, string name, ToStringDelegate<T> toString, string typeStringOverride = null, int tabs = 2) =>
