@@ -401,7 +401,16 @@ namespace androLib.Common.Utility
 				dictionary.Add(key, newValue);
 			}
 		}
-        public static void SetValue<TKey, T>(this IDictionary<TKey, T> dictionary, TKey key, T value) {
+        public static void AddOrSet<TKey, T>(this IDictionary<TKey, T> dictionary, TKey key, T value) {
+			if (dictionary.ContainsKey(key)) {
+                dictionary[key] = value;
+			}
+			else {
+				dictionary.Add(key, value);
+			}
+		}
+
+		public static void SetValue<TKey, T>(this IDictionary<TKey, T> dictionary, TKey key, T value) {
             if (dictionary.ContainsKey(key)) {
                 dictionary[key] = value;
             }
