@@ -192,7 +192,7 @@ namespace androLib.Common.Utility
 			return 0;
 		}
 		public static float Percent(this float value) => value * 100f;
-        public static string PercentString(this float value) => $"{(value * 100).S()}%";
+        public static string PercentString(this float value, int decimals = 0) => $"{(value * 100).S(decimals + 2)}%";
 		public static string Lang(this string s, string modName, string m) => s.Lang(modName, out string result, m) ? result : "";
 		public static bool Lang(this string s, string modName, out string result, string m) {
 			string key = $"Mods.{modName}.{m}.{s}";
@@ -490,6 +490,7 @@ namespace androLib.Common.Utility
 		//    value = (value + statModifier.Base) * statModifier.Additive * statModifier.Multiplicative + statModifier.Flat;
 		//}
 		public static bool NullOrAir(this Item item) => item?.IsAir ?? true;
+        public static bool NullOrNotActive(this Player player) => !player?.active ?? true;
         public static SortedList<TKey, TValue> CombineSortedLists<TKey, TValue>(this SortedList<TKey, TValue> list1, SortedList<TKey, TValue> list2) {
             SortedList <TKey, TValue> newList = new SortedList <TKey, TValue>();
             foreach (KeyValuePair<TKey, TValue> pair in list1) {
@@ -542,6 +543,50 @@ namespace androLib.Common.Utility
         }
         public static Type GetModItemCompairisonType(this Item item) => item?.ModItem != null ? item.ModItem.GetModItemCompairisonType() : null;
         public static Type GetModItemCompairisonType(this ModItem modItem) => modItem is AndroModItem androModItem ? androModItem.GroupingType : modItem.GetType();
+		public static bool TryDepositToChest(int chest, int itemType, int stack) {
+			Item item = new(itemType, stack);
+			Item[] inv = Main.chest[chest].item;
+			return Deposit(inv, ref item);
+		}
+		public static bool Deposit(Item[] inv, ref Item item) {
+			if (item.NullOrAir())
+				return false;
+
+			if (item.favorited)
+				return false;
+
+			if (Restock(inv, ref item))
+				return true;
+
+			int index = 0;
+			while (index < inv.Length && !inv[index].IsAir) {
+				index++;
+			}
+
+			if (index == inv.Length)
+				return false;
+
+			inv[index] = item.Clone();
+			item.TurnToAir();
+
+			return true;
+		}
+		public static bool Restock(Item[] inv, ref Item item) {
+			for (int i = 0; i < inv.Length; i++) {
+				Item bagItem = inv[i];
+				if (!bagItem.NullOrAir() && bagItem.type == item.type && bagItem.stack < bagItem.maxStack) {
+					if (ItemLoader.TryStackItems(bagItem, item, out _)) {
+						if (item.stack < 1) {
+							item.TurnToAir();
+
+							return true;
+						}
+					}
+				}
+			}
+
+			return false;
+		}
 
 		#endregion
 	}

@@ -298,7 +298,7 @@ namespace androLib.Common.Globals
 			}
 		}
 		public delegate bool ChanceMultiplier(int itemType, out float mult);
-		private static bool DefaultChanceMultiplier(int itemType, out float mult) {
+		public static bool DefaultChanceMultiplier(int itemType, out float mult) {
 			mult = 1f;
 			return true;
 		}

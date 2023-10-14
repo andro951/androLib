@@ -940,7 +940,7 @@ namespace androLib.UI
 
 			int index = 0;
 			Item[] inv = displayedInventory ? Inventory : MyInventory;
-			while (!inv[index].IsAir && index < inv.Length) {
+			while (index < inv.Length && !inv[index].IsAir) {
 				index++;
 			}
 

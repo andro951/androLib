@@ -15,6 +15,8 @@ using androLib.Localization;
 using androLib.ModIntegration;
 using System.Reflection;
 using System.Linq;
+using MonoMod.Cil;
+using Mono.Cecil.Cil;
 
 namespace androLib
 {
@@ -58,6 +60,8 @@ namespace androLib
 		public static bool bossChecklistEnabled = ModLoader.TryGetMod("BossChecklist", out Mod _);
 		public static Mod wikiThis;
 		public static bool wikiThisEnabled = ModLoader.TryGetMod("Wikithis", out wikiThis);
+
+		public static int VanillaRecipeCount = -1;
 		private enum CallID {
 			None = -1,
 
@@ -248,6 +252,7 @@ namespace androLib
 		}
 		List<Hook> hooks = new();
 		public override void Load() {
+			VanillaRecipeCount = Recipe.numRecipes;
 			hooks.Add(new(ModLoaderModifyItemLootMethodInfo, ModifyItemLootDetour));
 			foreach (Hook hook in hooks) {
 				hook.Apply();
@@ -257,10 +262,55 @@ namespace androLib
 			On_ChestUI.Restock += On_ChestUI_Restock;
 			On_Player.QuickStackAllChests += On_Player_QuickStackAllChests;
 			On_Chest.AskForChestToEatItem += On_Chest_AskForChestToEatItem;
+			IL_ItemSlot.RightClick_ItemArray_int_int += IL_ItemSlot_RightClick_ItemArray_int_int;
+			IL_SceneMetrics.ScanAndExportToMain += IL_SceneMetrics_ScanAndExportToMain;
 
 			MagicStorageButtonsUI.RegisterWithMasterUIManager();
 			AndroLocalizationData.RegisterSDataPackage();
 		}
+
+		private void IL_ItemSlot_RightClick_ItemArray_int_int(MonoMod.Cil.ILContext il) {
+			//IL_0053: brfalse.s IL_0089
+
+			//// if (Main.mouseRightRelease)
+			//IL_0055: ldsfld bool Terraria.Main::mouseRightRelease
+			//IL_005a: brfalse.s IL_0088
+
+			var c = new ILCursor(il);
+
+			if (!c.TryGotoNext(MoveType.After,
+				i => i.MatchBrfalse(out _),
+				i => i.MatchLdsfld(typeof(Main), nameof(Main.mouseRightRelease))
+				)) {
+				throw new Exception("Failed to find instructions IL_ItemSlot_RightClick_ItemArray_int_int");
+			}
+
+			c.EmitLdarg(0);
+			c.EmitLdarg(2);
+			c.EmitDelegate((bool mouseRightReleased, Item[] inv, int slot) => {
+				Item item = inv[slot];
+				if (item.NullOrAir() || !ItemSets.Sets.ContinuousRightClickItems.Contains(item.type))
+					return mouseRightReleased;
+
+				if (Main.stackSplit > 1)
+					return false;
+
+				int num = Main.superFastStack + 1;
+				Player player = Main.LocalPlayer;
+				bool anyRules = Main.ItemDropsDB.GetRulesForItemID(inv[slot].type).Any();
+				for (int i = 0; i < num; i++) {
+					if (anyRules)
+						StaticMethodInfos.ItemSlot_TryOpenContainer(inv[slot], player);
+					else
+						ItemLoader.RightClick(inv[slot], player);
+
+					ItemSlot.RefreshStackSplitCooldown();
+				}
+
+				return false;
+			});
+		}
+
 		public override void Unload() {
 			BossChecklistIntegration.UnloadBossChecklistIntegration();
 		}
@@ -327,6 +377,92 @@ namespace androLib
 				return;
 
 			orig(item, itemLoot);
+		}
+		public static Action<SceneMetrics, SceneMetricsScanSettings> ScenemetrictBeforeAnyCheck = null;
+
+		/// <summary>
+		/// The input int and output int are the tile type at the location.
+		/// </summary>
+		public static List<Func<int, SceneMetrics, SceneMetricsScanSettings, int>> ScenemetricsOnNearbyEffects = new();
+		public static Action<SceneMetrics, SceneMetricsScanSettings> ScenemetrictAfterTileCheck = null;
+		private void IL_SceneMetrics_ScanAndExportToMain(ILContext il) {
+			var c = new ILCursor(il);
+
+			//IL_0035: ldarga.s settings
+			//IL_0037: ldflda valuetype[System.Runtime]System.Nullable`1 < valuetype[FNA]Microsoft.Xna.Framework.Vector2 > Terraria.SceneMetricsScanSettings::BiomeScanCenterPositionInWorld
+			//IL_003c: call instance !0 valuetype[System.Runtime]System.Nullable`1 < valuetype[FNA]Microsoft.Xna.Framework.Vector2 >::get_Value()
+			//IL_0041: call valuetype[FNA]Microsoft.Xna.Framework.Point Terraria.Utils::ToTileCoordinates(valuetype[FNA]Microsoft.Xna.Framework.Vector2)
+			//IL_0046: stloc.3
+
+			if (!c.TryGotoNext(MoveType.Before,
+				i => i.MatchLdarga(1),
+				i => i.MatchLdflda<SceneMetricsScanSettings>("BiomeScanCenterPositionInWorld"),
+				i => i.MatchCall(out _),
+				i => i.MatchCall(out _),
+				i => i.MatchStloc(3)
+			)) { throw new Exception("Failed to find instructions IL_SceneMetrics_ScanAndExportToMain 1/4"); }
+
+
+			c.Emit(OpCodes.Ldarga, 0);
+			c.Emit(OpCodes.Ldarg, 1);
+			c.EmitDelegate((ref SceneMetrics sceneMetrics, SceneMetricsScanSettings settings) => {
+				ScenemetrictBeforeAnyCheck?.Invoke(sceneMetrics, settings);
+				//BannerBag.PreScanAndExportToMain();
+				//PortableStation.PreScanAndExportToMain();
+			});
+
+			//IL_0322: ldloc.s 5
+			//IL_0324: ldloc.s 6
+			//IL_0326: ldloca.s 7
+			//IL_0328: call instance uint16 & Terraria.Tile::get_type()
+			//IL_032d: ldind.u2
+			//IL_032e: ldc.i4.0
+			//IL_032f: call void Terraria.ModLoader.TileLoader::NearbyEffects(int32, int32, int32, bool)
+
+			if (!c.TryGotoNext(MoveType.Before,
+			i => i.MatchLdloc(5),
+				i => i.MatchLdloc(6),
+				i => i.MatchLdloca(7),
+				i => i.MatchCall(out _),
+				i => i.MatchLdindU2(),
+				i => i.MatchLdcI4(0)
+			)) { throw new Exception("Failed to find instructions IL_SceneMetrics_ScanAndExportToMain 2/4"); }
+
+			if (!c.TryGotoNext(MoveType.Before,
+				i => i.MatchLdcI4(0)
+			)) { throw new Exception("Failed to find instructions IL_SceneMetrics_ScanAndExportToMain 3/4"); }
+
+			//c.EmitDelegate((int type) => { return type; });
+
+			c.Emit(OpCodes.Ldarga, 0);
+			c.Emit(OpCodes.Ldarg, 1);
+
+			c.EmitDelegate((int num, ref SceneMetrics sceneMetrics, SceneMetricsScanSettings settings) => {
+				foreach (Func<int, SceneMetrics, SceneMetricsScanSettings, int> func in ScenemetricsOnNearbyEffects) {
+					num = func(num, sceneMetrics, settings);
+				}
+
+				return num;
+			});
+
+			//c.EmitDelegate(GlobalBagTile.NearbyEffects);
+
+			//IL_0677: ldarg.0
+			//IL_0678: call instance void Terraria.SceneMetrics::ExportTileCountsToMain()
+
+			if (!c.TryGotoNext(MoveType.Before,
+				i => i.MatchLdarg(0),
+				i => i.MatchCall<SceneMetrics>("ExportTileCountsToMain")
+			)) { throw new Exception("Failed to find instructions IL_SceneMetrics_ScanAndExportToMain 4/4"); }
+
+			c.Emit(OpCodes.Ldarga, 0);
+			c.Emit(OpCodes.Ldarg, 1);
+
+			c.EmitDelegate((ref SceneMetrics sceneMetrics, SceneMetricsScanSettings settings) => {
+				ScenemetrictAfterTileCheck?.Invoke(sceneMetrics, settings);
+				//BannerBag.PostScanAndExportToMain(ref sceneMetrics);
+				//PortableStation.PostScanAndExportToMain(ref sceneMetrics);
+			});
 		}
 	}
 }

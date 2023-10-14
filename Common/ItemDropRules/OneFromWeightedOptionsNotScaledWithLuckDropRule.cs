@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Terraria.GameContent.ItemDropRules;
 using androLib.Common.Utility;
 using static androLib.Common.Globals.AndroGlobalNPC;
+using androLib.Common.Globals;
 
 namespace androLib.Common
 {
@@ -20,6 +21,9 @@ namespace androLib.Common
 		}
 
 		public OneFromWeightedOptionsNotScaledWithLuckDropRule(float chance, IEnumerable<DropData> options, ChanceMultiplier chanceMultiplier) {
+			if (chanceMultiplier == null)
+				chanceMultiplier = DefaultChanceMultiplier;
+
 			dropChance = chance;
 			dropsList = new();
 			float totalWeight = 0f;

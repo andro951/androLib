@@ -58,6 +58,8 @@ namespace androLib.Common.Utility
         private static JDataManager jDataManager;
         private static SortedDictionary<string, ModLocalizationSDataPackage> modLocalizationSDataPackages = new();
         private static ModLocalizationSDataPackage ActivePackage;
+        private static Folder localizationFolder;
+        private const string localizationFolderPath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger";
 		public static void RegisterModLocalizationSDataPackage(ModLocalizationSDataPackage package) {
             string name = package.ModName;
             if (modLocalizationSDataPackages.ContainsKey(name)) {
@@ -124,7 +126,9 @@ namespace androLib.Common.Utility
             if (!printLocalization && !printLocalizationKeysAndValues)
                 return;
 
-            foreach (ModLocalizationSDataPackage package in modLocalizationSDataPackages.Values) {
+			localizationFolder = new Folder(localizationFolderPath);
+
+			foreach (ModLocalizationSDataPackage package in modLocalizationSDataPackages.Values) {
                 ActivePackage = package;
 				jDataManager = new();
                 Mod mod = ActivePackage.Mod;
@@ -331,12 +335,10 @@ namespace androLib.Common.Utility
                 if (printLocalizationKeysAndValues) {
                     string cultureName = ((CultureName)culture).ToLanguageName();
                     localizationKeys = localizationKeys.ReplaceLineEndings();
-                    string keyFilePath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger\{ActivePackage.ModName}\Keys\{cultureName}.txt";
-                    File.WriteAllText(keyFilePath, localizationKeys);
+                    localizationFolder.WriteTXT(@$"{ActivePackage.ModName}\Keys", cultureName, localizationKeys);
                     localizationKeys = "";
 
-                    string valueFilePath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger\{ActivePackage.ModName}\In\{cultureName}.txt";
-                    File.WriteAllText(valueFilePath, localizationValues);
+                    localizationFolder.WriteTXT($@"{ActivePackage.ModName}\In", cultureName, localizationValues);
                     localizationValues = "";
                 }
             }

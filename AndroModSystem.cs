@@ -67,17 +67,6 @@ namespace androLib
 
 			SoundManager.Update();
 		}
-		public const string AnyCommonGem = "AnyCommonGem";
-		public const string AnyRareGem = "AnyRareGem";
-		public const string AnyAlignedSoul = "AnyAlignedSoul";
-		public const string Workbenches = "Workbenches";
-		public const string StarsAboveAnyKingSlimeEssence = "AnyKingSlimeEssence";
-		public const string StarsAboveAnyEyeOfCthulhuEssence = "AnyEyeOfCthulhuEssence";
-		public const string StarsAboveAnyEaterOfWorldsOrBrainOfCthulhuEssence = "AnyEaterOfWorldsOrBrainOfCthulhuEssence";
-		public const string StarsAboveAnyQueenBeeEssence = "AnyQueenBeeEssence";
-		public const string StarsAboveAnySkeletronEssence = "AnySkeletronEssence";
-		public const string CursedFlameOrIchor = "CursedFlameOrIchor";
-		public const string GoldOrPlatinumBar = "GoldOrPlatinumBar";
 		public struct ChanceMultiplierInfo {
 			public int Min {
 				get {
@@ -162,6 +151,18 @@ namespace androLib
 			mult = 1f;
 			return false;
 		}
+
+		public const string AnyCommonGem = "AnyCommonGem";
+		public const string AnyRareGem = "AnyRareGem";
+		public const string AnyAlignedSoul = "AnyAlignedSoul";
+		public const string Workbenches = "Workbenches";
+		public const string StarsAboveAnyKingSlimeEssence = "AnyKingSlimeEssence";
+		public const string StarsAboveAnyEyeOfCthulhuEssence = "AnyEyeOfCthulhuEssence";
+		public const string StarsAboveAnyEaterOfWorldsOrBrainOfCthulhuEssence = "AnyEaterOfWorldsOrBrainOfCthulhuEssence";
+		public const string StarsAboveAnyQueenBeeEssence = "AnyQueenBeeEssence";
+		public const string StarsAboveAnySkeletronEssence = "AnySkeletronEssence";
+		public const string CursedFlameOrIchor = "CursedFlameOrIchor";
+		public const string GoldOrPlatinumBar = "GoldOrPlatinumBar";
 		public override void AddRecipeGroups() {
 			int[] commanGems = GemSets.CommonGems.ToArray();
 			int indexOfTopax = Array.IndexOf(commanGems, ItemID.Topaz);

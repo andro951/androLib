@@ -43,8 +43,28 @@ namespace androLib.Common.Utility
 		}
 		public Folder(string name) : base(name, null) {
 			Name = name;
-			MyDirectoryInfo = new DirectoryInfo(ActualPath);
+			string path = ActualPath;
+			CheckCreate(path);
+			MyDirectoryInfo = new DirectoryInfo(path);
 			GetFiles();
+		}
+
+		public static void CheckCreate(string path) {
+			if (!Directory.Exists(path)) {
+				Directory.CreateDirectory(path);
+			}
+		}
+
+		public void CheckCreateTXT(string subfolderString, string fileName) {//TODO: change this to List<string> subfolders and add the folders and new file to this file.
+			string path = @$"{ActualPath}\{subfolderString}";
+			CheckCreate(path);
+			TXT.CheckCreate(path, fileName, true);
+		}
+
+		public void WriteTXT(string subfolderString, string fileName, string text) {//Could be better integrated with TXT instead of manually creating the path.
+			CheckCreateTXT(subfolderString, fileName);
+			string path = @$"{ActualPath}\{subfolderString}\{fileName}.txt";
+			File.WriteAllText(path, text);
 		}
 
 		private Folder(DirectoryInfo directoryInfo, Folder parent) : base(directoryInfo.Name, parent) {

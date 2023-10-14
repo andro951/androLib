@@ -28,7 +28,7 @@ namespace androLib.Items
 		public virtual bool IsEquivenantForCondensingWikiCraftingRecipes(ModItem other) => other.Type == Type;
 		public virtual Type GroupingType => GetType().BaseType;
 		public override void SetStaticDefaults() {
-			if (Tooltip != LocalizedText.Empty)
+			if (LocalizationTooltip != null)
 				AddLocalizationTooltipFunc(this, LocalizationTooltip, LocalizationDisplayName);
 
 			if (this is IHasDropRates hasDropRates) {
