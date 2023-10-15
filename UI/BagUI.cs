@@ -929,46 +929,23 @@ namespace androLib.UI
 			return false;
 		}
 		public bool Deposit(ref Item item, bool playSound = true, bool displayedInventory = false) {
-			if (item.NullOrAir())
-				return false;
-
-			if (item.favorited)
-				return false;
-
-			if (Restock(ref item, playSound, displayedInventory))
-				return true;
-
-			int index = 0;
 			Item[] inv = displayedInventory ? Inventory : MyInventory;
-			while (index < inv.Length && !inv[index].IsAir) {
-				index++;
+			if (inv.Deposit(ref item, out int _)) {
+				if (playSound)
+					SoundEngine.PlaySound(SoundID.Grab);
+
+				return true;
 			}
 
-			if (index == inv.Length)
-				return false;
-
-			inv[index] = item.Clone();
-			item.TurnToAir();
-			if (playSound)
-				SoundEngine.PlaySound(SoundID.Grab);
-
-			return true;
+			return false;
 		}
 		public bool Restock(ref Item item, bool playSound = true, bool displayedInventory = false) {
 			Item[] bagInventory = displayedInventory ? Inventory : MyInventory;
-			for (int i = 0; i < bagInventory.Length; i++) {
-				Item bagItem = bagInventory[i];
-				if (!bagItem.NullOrAir() && bagItem.type == item.type && bagItem.stack < bagItem.maxStack) {
-					if (ItemLoader.TryStackItems(bagItem, item, out _)) {
-						if (item.stack < 1) {
-							item.TurnToAir();
-							if (playSound)
-								SoundEngine.PlaySound(SoundID.Grab);
+			if (bagInventory.Restock(ref item, out int _)) {
+				if (playSound)
+					SoundEngine.PlaySound(SoundID.Grab);
 
-							return true;
-						}
-					}
-				}
+				return true;
 			}
 
 			return false;
@@ -1009,7 +986,11 @@ namespace androLib.UI
 				if (index >= bagInventory.Length)
 					break;
 
-				bagInventory[index] = item.Clone();
+				ref Item bagInventoryItem = ref bagInventory[index];
+				bagInventoryItem = item.Clone();
+				if (bagInventoryItem.stack == bagInventoryItem.maxStack)
+					bagInventory.DoCoins(index);
+
 				item.TurnToAir();
 				transferedAnyItem = true;
 			}
@@ -1051,6 +1032,7 @@ namespace androLib.UI
 			}
 
 			if (playSound && transferedAnyItem) {
+				bagInventory.DoCoins();
 				SoundEngine.PlaySound(SoundID.Grab);
 				Recipe.FindRecipes(true);
 			}
