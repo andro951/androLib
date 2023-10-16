@@ -9,6 +9,7 @@ namespace androLib.Common.Utility
 {
 	public class Folder : MyFile
 	{
+		public static string LogsFolder => $"{Path.GetFullPath(Directory.GetCurrentDirectory())}\\tModLoader-Logs";
 		DirectoryInfo MyDirectoryInfo;
 		public List<MyFile> files = new();
 		private List<TXT> txtFiles = null;

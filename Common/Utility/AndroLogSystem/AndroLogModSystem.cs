@@ -58,7 +58,15 @@ namespace androLib.Common.Utility
         private static JDataManager jDataManager;
         private static SortedDictionary<string, ModLocalizationSDataPackage> modLocalizationSDataPackages = new();
         private static ModLocalizationSDataPackage ActivePackage;
-        private static Folder localizationFolder;
+        private static Folder LocalizationFolder {
+            get {
+                if (localizationFolder == null)
+                    localizationFolder = new Folder(Environment.UserName == "Isaac" && Environment.MachineName == "ISAAC-PC" ? localizationFolderPath : @$"{Folder.LogsFolder}\andros Mods Localization");
+
+                return localizationFolder;
+            }
+        }
+        private static Folder localizationFolder = null;
         private const string localizationFolderPath = @$"C:\Users\Isaac\Desktop\TerrariaDev\Localization Merger";
 		public static void RegisterModLocalizationSDataPackage(ModLocalizationSDataPackage package) {
             string name = package.ModName;
@@ -125,8 +133,6 @@ namespace androLib.Common.Utility
         private static void PrintAllLocalization() {
             if (!printLocalization && !printLocalizationKeysAndValues)
                 return;
-
-			localizationFolder = new Folder(localizationFolderPath);
 
 			foreach (ModLocalizationSDataPackage package in modLocalizationSDataPackages.Values) {
                 ActivePackage = package;
@@ -335,10 +341,10 @@ namespace androLib.Common.Utility
                 if (printLocalizationKeysAndValues) {
                     string cultureName = ((CultureName)culture).ToLanguageName();
                     localizationKeys = localizationKeys.ReplaceLineEndings();
-                    localizationFolder.WriteTXT(@$"{ActivePackage.ModName}\Keys", cultureName, localizationKeys);
+                    LocalizationFolder.WriteTXT(@$"{ActivePackage.ModName}\Keys", cultureName, localizationKeys);
                     localizationKeys = "";
 
-                    localizationFolder.WriteTXT($@"{ActivePackage.ModName}\In", cultureName, localizationValues);
+                    LocalizationFolder.WriteTXT($@"{ActivePackage.ModName}\In", cultureName, localizationValues);
                     localizationValues = "";
                 }
             }

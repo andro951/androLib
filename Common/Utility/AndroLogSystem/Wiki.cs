@@ -31,7 +31,7 @@ namespace androLib.Common.Utility.LogSystem
         public static Dictionary<int, Dictionary<CrateID, float>> crateDrops;
         protected static int min;
         protected static int max;
-        public static DirectoryInfo logsDirectory = new ($"{Path.GetFullPath(Directory.GetCurrentDirectory())}\\tModLoader-Logs");
+        public static DirectoryInfo logsDirectory = new(Folder.LogsFolder);
 
 		public static string nowString = DateTime.Now.ToString().Replace("/", "_").Replace(":", "_");
         public static Folder wikiFolder = null;
