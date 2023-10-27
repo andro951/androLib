@@ -78,6 +78,7 @@ namespace androLib
 
 		private uint nextBagItemCheckTime = 0;
 		private bool found = false;
+		private SortedSet<int> specificBagTypesFound = new();
 
 		#endregion
 
@@ -350,11 +351,12 @@ namespace androLib
 		/// Use GetItemFromHasRequiredItemToUseStorageIndex() to get the item savely.</param>
 		/// <returns></returns>
 		public bool HasRequiredItemToUseStorage(Player player, out int bagFoundInID, out int index, int specifiedBagType = -1) {
-			bool found = true;
-			if (foundBagType == -1)
-				found = false;
+			bool foundResult = true;
+			bool useSpecifiedBagType = specifiedBagType != -1;
+			if (foundBagType == -1 || useSpecifiedBagType && foundBagType != specifiedBagType)
+				foundResult = false;
 
-			if (found) {
+			if (foundResult) {
 				Item lastBagLocationItem = GetItemFromHasRequiredItemToUseStorageIndex(player, myLastBagLocation, myLastIndexInTheBag);
 				if (foundBagType == lastBagLocationItem?.type) {
 					bool inPlayerInventory = myLastIndexInTheBag > RequiredItemNotFound;
@@ -366,6 +368,7 @@ namespace androLib
 				}
 			}
 
+			//Only look once per tick
 			if (nextBagCheck > Main.GameUpdateCount) {
 				bagFoundInID = -1;
 				index = RequiredItemNotFound;
@@ -422,22 +425,28 @@ namespace androLib
 				//Check adj tiles for this bag.
 				int createTile = ContentSamples.ItemsByType[bagItemType].createTile;
 				if (createTile > -1 && player.adjTile[createTile]) {
-					myLastBagLocation = -1;
-					myLastIndexInTheBag = RequiredItemNotFound;
+					if (!useSpecifiedBagType || !found) {
+						myLastBagLocation = -1;
+						myLastIndexInTheBag = RequiredItemNotFound;
+					}
+					
 					return true;
 				}
 			}
 
-			myLastBagLocation = -1;
-			myLastIndexInTheBag = RequiredItemNotFound;
+			if (!useSpecifiedBagType) {
+				myLastBagLocation = -1;
+				myLastIndexInTheBag = RequiredItemNotFound;
+			}
 
 			return false;
 		}
+		private uint GetDelay(bool found) => found ? 30u : 10u;//It can wait a little longer to stop having a bag.
 		public bool HasRequiredItemToUseStorageSlow(Player player) {
-			if (Main.GameUpdateCount < nextBagItemCheckTime)
+			if (Main.GameUpdateCount < nextBagItemCheckTime && Main.GameUpdateCount != nextBagItemCheckTime - GetDelay(found))
 				return found;
 
-			nextBagItemCheckTime = Main.GameUpdateCount + (found ? 30u : 10u);//It can wait a little longer to stop having a bag.
+			nextBagItemCheckTime = Main.GameUpdateCount + GetDelay(found);
 			found = HasRequiredItemToUseStorage(player, out _, out _);
 			return found;
 		}
@@ -445,14 +454,38 @@ namespace androLib
 		/// Don't forget to check the type of the found item if using this method since it only checks every 10-30 ticks if that amount if time is important.
 		/// </summary>
 		public bool HasRequiredItemToUseStorageSlow(Player player, out int bagFoundInID, out int index, int specifiedBagType = -1) {
+			if (specifiedBagType != -1) {
+				bool check = Main.GameUpdateCount < nextBagItemCheckTime || found && specifiedBagType != foundBagType && Main.GameUpdateCount == nextBagItemCheckTime - GetDelay(found) + 1;
+				if (!check) {
+					bagFoundInID = myLastBagLocation;
+					index = myLastIndexInTheBag;
+					return specificBagTypesFound.Contains(specifiedBagType); ;
+				}
+
+				specificBagTypesFound.Remove(specifiedBagType);
+
+				nextBagItemCheckTime = Main.GameUpdateCount + GetDelay(found);
+				bool foundExact = HasRequiredItemToUseStorage(player, out bagFoundInID, out index, specifiedBagType);
+				if (foundExact)
+					specificBagTypesFound.Add(specifiedBagType);
+
+				if (foundExact || specifiedBagType == foundBagType)
+					found = foundExact;
+
+				return specificBagTypesFound.Contains(specifiedBagType);
+			}
+
 			if (Main.GameUpdateCount < nextBagItemCheckTime) {
 				bagFoundInID = myLastBagLocation;
 				index = myLastIndexInTheBag;
 				return found;
 			}
 
-			nextBagItemCheckTime = Main.GameUpdateCount + (found ? 30u : 10u);//It can wait a little longer to stop having a bag.
+			specificBagTypesFound.Clear();
+
+			nextBagItemCheckTime = Main.GameUpdateCount + GetDelay(found);
 			found = HasRequiredItemToUseStorage(player, out bagFoundInID, out index, specifiedBagType);
+
 			return found;
 		}
 		public void RegisterItemTypeGetter(Func<int> itemTypeGetter) {
