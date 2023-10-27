@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria;
 using static androLib.Common.Utility.PathFinderSharedFunctions;
 
 namespace androLib.Common.Utility {
@@ -33,7 +35,7 @@ namespace androLib.Common.Utility {
 			PathGrid[centerX, centerY] = 0;
 
 			bool hasPath = FindPath(centerX, centerY, 0);
-			//if (Debugger.IsAttached) PrintPathGrid();
+			//if (Debugger.IsAttached && !hasPath) PrintPathGrid();
 
 			PathGrid = null;
 			countsAsPath = null;
@@ -144,6 +146,7 @@ namespace androLib.Common.Utility {
 				//Mark the grid with the distance required to get to this point on this path.
 				PathGrid[x2, y2] = distance;
 
+				int directionIDForFunc = directionID;
 				directionsToCheck.Add(() => {
 					if (!countsAsPath(realX, realY))
 						return false;
@@ -151,13 +154,13 @@ namespace androLib.Common.Utility {
 					//Usually, the searches should only go out in 2 directions, an x direction and a y direction.
 					//However, there are some situations where backtracking is the only option, so only skip the backtrack path if the
 					//	backTrackX, backTrackY position isn't the starting point and doesn't count as a path.
-					if (previousOpposite == directionID) {
+					if (previousOpposite == directionIDForFunc) {
 						GetPreviousDirection(x + xStart, y + yStart, fromDirection, previousFrom, out int backTrackX, out int backTrackY);
 						if (backTrackX == centerX && backTrackY == centerY || countsAsPath(backTrackX, backTrackY))
 							return false;
 					}
 
-					return FindPath(x2, y2, distance, directionID, fromDirection == directionID ? previousFrom : fromDirection);
+					return FindPath(x2, y2, distance, directionIDForFunc, fromDirection == directionIDForFunc ? previousFrom : fromDirection);
 				});
 			}
 

@@ -75,6 +75,11 @@ namespace androLib.Common.Utility {
 			//up		2:  0, -1
 			//left		3: -1,  0
 		}
+		public static void GetDirection(int directionID, int x, int y, out int i, out int j) {
+			GetDirection(directionID, out i, out j);
+			i += x;
+			j += y;
+		}
 
 		public static int GetOppositeDirection(int directionID) => directionID >= 0 ? (directionID + 2) % 4 : -1;
 	}
