@@ -243,12 +243,135 @@ namespace androLib.Common.Utility
 
 			return result;
 		}
+		public static int Round(this float f) {
+			int result = (int)f;
+			if (f - result >= 0.5f)
+				result++;
+
+			return result;
+		}
 		public static int Abs(this int v) => v < 0 ? -v : v;
 		public static int Distance(this Point point1, Point point2) {
 			int x = point1.X - point2.X;
 			int y = point1.Y - point2.Y;
 			return (int)Math.Sqrt(x * x + y * y);
 		}
+
+		#endregion
+
+		#region Distributions
+
+		//Floats----------------------------------------------------------------------------------------------------------------------------------------
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == middle.  Approaches 0 as value approaches infinity.
+		/// Middle aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistribuitonDecreasingLinear(this float value, float middle) => LogisticDistributionDecreasing(value / middle);
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == middle.  Approaches 1 as value approaches infinity.
+		/// Middle aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistribuitonIncreasingLinear(this float value, float middle) => LogisticDistributionIncreasing(value / middle);
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == middle.  Approaches 0 as value approaches infinity.
+		/// High aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionDecreasingRoot(this float value, float middle, float root = 2f) => LogisticDistributionDecreasingExponential(value, middle, 1f / root);
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == middle.  Approaches 1 as value approaches infinity.
+		/// High aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionIncreasingRoot(this float value, float middle, float root = 2f) => LogisticDistributionIncreasingExponential(value, middle, 1f / root);
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == middle.  Approaches 0 as value approaches infinity.
+		/// Low aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionDecreasingExponential(this float value, float middle, float exponent = 2f) => LogisticDistributionDecreasing((float)Math.Pow(value / middle, exponent));
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == middle.  Approaches 1 as value approaches infinity.
+		/// Low aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionIncreasingExponential(this float value, float middle, float exponent = 2f) => LogisticDistributionIncreasing((float)Math.Pow(value / middle, exponent));
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == 1.  Approaches 0 as value approaches infinity.
+		/// Div by zero if value == -1.
+		/// </summary>
+		public static float LogisticDistributionDecreasing(float value) => 1f / (1f + value);
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == 1.  Approaches 1 as value approaches infinity.
+		/// Div by zero if value == -1.
+		/// </summary>
+		public static float LogisticDistributionIncreasing(float value) => 1f - LogisticDistributionDecreasing(value);
+
+		//Integers----------------------------------------------------------------------------------------------------------------------------------------
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == middle.  Approaches 0 as value approaches infinity.
+		/// Middle aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistribuitonDecreasingLinear(this int value, float middle) => LogisticDistribuitonDecreasingLinear((float)value,  middle);
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == middle.  Approaches 1 as value approaches infinity.
+		/// Middle aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistribuitonIncreasingLinear(this int value, float middle) => LogisticDistribuitonIncreasingLinear((float)value, middle);
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == middle.  Approaches 0 as value approaches infinity.
+		/// High aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionDecreasingRoot(this int value, float middle, float root = 2f) => LogisticDistributionDecreasingExponential((float)value, middle, 1f / root);
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == middle.  Approaches 1 as value approaches infinity.
+		/// High aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionIncreasingRoot(this int value, float middle, float root = 2f) => LogisticDistributionIncreasingExponential((float)value, middle, 1f / root);
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == middle.  Approaches 0 as value approaches infinity.
+		/// Low aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionDecreasingExponential(this int value, float middle, float exponent = 2f) => LogisticDistributionDecreasingExponential((float)value, middle, exponent);
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == middle.  Approaches 1 as value approaches infinity.
+		/// Low aggressiveness
+		/// Div by zero if value / middle == -1.
+		/// </summary>
+		public static float LogisticDistributionIncreasingExponential(this int value, float middle, float exponent = 2f) => LogisticDistributionIncreasingExponential((float)value, middle, exponent);
+
+		/// <summary>
+		/// 1 when value is 0.  0.5 when value == 1.  Approaches 0 as value approaches infinity.
+		/// Div by zero if value == -1.
+		/// </summary>
+		public static float LogisticDistributionDecreasing(int value) => LogisticDistributionDecreasing((float)value);
+
+		/// <summary>
+		/// 0 when value is 0.  0.5 when value == 1.  Approaches 1 as value approaches infinity.
+		/// Div by zero if value == -1.
+		/// </summary>
+		public static float LogisticDistributionIncreasing(int value) => 1f - LogisticDistributionIncreasing((float)value);
 
 		#endregion
 	}

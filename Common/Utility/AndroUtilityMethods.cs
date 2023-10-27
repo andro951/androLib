@@ -404,12 +404,18 @@ namespace androLib.Common.Utility
 				dictionary.Add(key, newValue);
 			}
 		}
-        public static void AddOrSet<TKey, T>(this IDictionary<TKey, T> dictionary, TKey key, T value) {
+		/// <summary>
+		/// Check if the dictionary contains the value.  If it does, replace it, if not add it.
+		/// </summary>
+		/// <returns>True if added, false if set.</returns>
+        public static bool AddOrSet<TKey, T>(this IDictionary<TKey, T> dictionary, TKey key, T value) {
 			if (dictionary.ContainsKey(key)) {
                 dictionary[key] = value;
+				return false;
 			}
 			else {
 				dictionary.Add(key, value);
+				return true;
 			}
 		}
 
