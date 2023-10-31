@@ -97,6 +97,15 @@ Mods: {
 						'''
 				}
 
+				ReOpenBagSwitcherAutomatically: {
+					Label: Re Open Bag Switcher Automatically
+					Tooltip:
+						'''
+						Switching to a bag with the bag switcher then closing and reopening the bag will have the original bag 
+						open (bag switcher closed) instead of opening the previously switched to bag.
+						'''
+				}
+
 				UITransparency: {
 					Label: UI Transparency
 					Tooltip: The transparency of all UIs that depend on androLib.  0 is invisible, 255 fully saturated.

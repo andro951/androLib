@@ -97,6 +97,15 @@ Mods: {
 						'''
 				}
 
+				ReOpenBagSwitcherAutomatically: {
+					Label: Réouverture automatique du commutateur de sacs
+					Tooltip:
+						'''
+						Passer à un sac avec le sélecteur de sac puis fermer et rouvrir le sac aura le sac d'origine
+						ouvert (commutateur de sac fermé) au lieu d'ouvrir le sac précédemment commuté.
+						'''
+				}
+
 				UITransparency: {
 					Label: Transparence de l'interface utilisateur
 					Tooltip: La transparence de toutes les interfaces utilisateur qui dépendent d'androLib. 0 est invisible, 255 entièrement saturé.

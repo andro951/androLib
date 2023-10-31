@@ -854,6 +854,9 @@ namespace androLib.UI
 				if (!noSound)
 					SoundEngine.PlaySound(SoundID.Grab);
 			}
+
+			if (!AndroMod.clientConfig.ReOpenBagSwitcherAutomatically)
+				displayAllBagButtons = false;
 		}
 		
 		public void LootAll() {

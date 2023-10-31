@@ -97,6 +97,15 @@ Mods: {
 						'''
 				}
 
+				ReOpenBagSwitcherAutomatically: {
+					Label: Automatycznie otwórz ponownie przełącznik worków
+					Tooltip:
+						'''
+						Zmiana na torbę za pomocą przełącznika worków, a następnie zamknięcie i ponowne otwarcie torby spowoduje powrót do oryginalnej torby
+						otworzyć (wyłącznik worka zamknięty) zamiast otwierać wcześniej przełączony na worek.
+						'''
+				}
+
 				UITransparency: {
 					Label: Przejrzystość interfejsu użytkownika
 					Tooltip: Przejrzystość wszystkich interfejsów użytkownika zależnych od androLib. 0 jest niewidoczne, 255 w pełni nasycone.

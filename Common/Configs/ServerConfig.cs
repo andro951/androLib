@@ -31,6 +31,7 @@ namespace androLib.Common.Configs
 		[Range(0, (int)byte.MaxValue)]
 		public int UITransparency;
 
+		//Storage Settings
 		[JsonIgnore]
 		public const string StorageSettingsKey = "StorageSettings";
 		[Header($"$Mods.{AndroMod.ModName}.{L_ID_Tags.Configs}.{ClientConfigName}.{StorageSettingsKey}")]
@@ -39,6 +40,9 @@ namespace androLib.Common.Configs
 
 		[DefaultValue(false)]
 		public bool ClosingInventoryClosesBags;
+
+		[DefaultValue(false)]
+		public bool ReOpenBagSwitcherAutomatically;
 
 		[DefaultValue(false)]
 		[ReloadRequired]

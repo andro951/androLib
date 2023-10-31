@@ -97,6 +97,15 @@ Mods: {
 						'''
 				}
 
+				ReOpenBagSwitcherAutomatically: {
+					Label: Beutelwechsler automatisch wieder öffnen
+					Tooltip:
+						'''
+						Wenn Sie mit dem Beutelwechsler zu einer Tasche wechseln und die Tasche dann schließen und wieder öffnen, erhalten Sie die ursprüngliche Tasche
+						öffnen (Beutelumschalter geschlossen), anstatt den zuvor geschalteten Beutel zu öffnen.
+						'''
+				}
+
 				UITransparency: {
 					Label: UI-Transparenz
 					Tooltip: Die Transparenz aller Benutzeroberflächen, die von androLib abhängen. 0 ist unsichtbar, 255 vollständig gesättigt.

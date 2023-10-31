@@ -97,6 +97,15 @@ Mods: {
 						'''
 				}
 
+				ReOpenBagSwitcherAutomatically: {
+					Label: Reabrir o comutador de bolsa automaticamente
+					Tooltip:
+						'''
+						Mudar para uma bolsa com o alternador de bolsa e depois fechar e reabrir a bolsa terá a bolsa original
+						aberto (comutador de bolsa fechado) em vez de abrir o anteriormente comutado para bolsa.
+						'''
+				}
+
 				UITransparency: {
 					Label: Transparência da IU
 					Tooltip: A transparência de todas as UIs que dependem do androLib. 0 é invisível, 255 totalmente saturado.

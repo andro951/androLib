@@ -97,6 +97,15 @@ Mods: {
 						'''
 				}
 
+				ReOpenBagSwitcherAutomatically: {
+					Label: Volver a abrir el conmutador de bolsas automáticamente
+					Tooltip:
+						'''
+						Cambiar a una bolsa con el conmutador de bolsas, luego cerrar y volver a abrir la bolsa tendrá la bolsa original.
+						abierta (interruptor de bolsa cerrado) en lugar de abrir la bolsa previamente cambiada.
+						'''
+				}
+
 				UITransparency: {
 					Label: Transparencia de la interfaz de usuario
 					Tooltip: La transparencia de todas las UI que dependen de androLib. 0 es invisible, 255 completamente saturado.

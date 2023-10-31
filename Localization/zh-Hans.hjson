@@ -97,6 +97,15 @@ Mods: {
 						'''
 				}
 
+				ReOpenBagSwitcherAutomatically: {
+					Label: 自动重新打开袋子切换器
+					Tooltip:
+						'''
+						使用袋子切换器切换到袋子，然后关闭并重新打开袋子将得到原来的袋子
+						打开（袋子切换器关闭）而不是打开先前切换到的袋子。
+						'''
+				}
+
 				UITransparency: {
 					Label: 用户界面透明度
 					Tooltip: 所有依赖于androLib的UI的透明度。 0 不可见，255 完全饱和。

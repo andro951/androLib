@@ -90,6 +90,11 @@ namespace androLib.Localization
 									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ClosingInventoryClosesBags).AddSpaces() },
 									{ L_ID3.Tooltip.ToString(), "If true, closing the players inventory will close all bags." }
 								}) },
+								{ nameof(AndroClientConfig.ReOpenBagSwitcherAutomatically), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ReOpenBagSwitcherAutomatically).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "Switching to a bag with the bag switcher then closing and reopening the bag will have the original bag \n" +
+										"open (bag switcher closed) instead of opening the previously switched to bag." }
+								}) },
 								{ nameof(AndroClientConfig.DisableAllErrorMessagesInChat), new(dict: new() {
 									{ L_ID3.Label.ToString(), "Disable All Error Messages In Chat" },
 									{ L_ID3.Tooltip.ToString(), "Prevents messages showing up in your chat that ask you to \n" +
