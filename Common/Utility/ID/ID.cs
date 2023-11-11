@@ -2432,7 +2432,13 @@ namespace androLib.Common.Utility
 			ItemGroupAndOrderInGroup group = new ItemGroupAndOrderInGroup(item);
 			return group.Group == ItemGroup.BossSpawners;
 		}
-		public static bool IsRope(this Item item) => !item.NullOrAir() && (ItemID.Sets.SortingPriorityRopes[item.type] != -1 && item.type != ItemID.Vine || item.type == ItemID.VineRope);
+		private static SortedSet<int> RopeTiles = new() {
+			TileID.Rope,
+			TileID.VineRope,
+			TileID.SilkRope,
+			TileID.WebRope,
+		};
+		public static bool IsRope(this Item item) => !item.NullOrAir() && (ItemID.Sets.SortingPriorityRopes[item.type] != -1 && item.type != ItemID.Vine || item.type == ItemID.VineRope || RopeTiles.Contains(item.createTile));
 		public static bool IsTorch(this Item item) => !item.NullOrAir() && ItemID.Sets.Torches[item.type];
 		public static bool IsWaterTorch(this Item item) => !item.NullOrAir() && ItemID.Sets.WaterTorches[item.type];
 		public static bool IsGlowstick(this Item item) => !item.NullOrAir() && ItemID.Sets.Glowsticks[item.type];

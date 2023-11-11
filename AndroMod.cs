@@ -322,6 +322,10 @@ namespace androLib
 		private void On_Player_QuickStackAllChests(On_Player.orig_QuickStackAllChests orig, Player self) {
 			orig(self);
 
+			if (Main.netMode != NetmodeID.SinglePlayer)
+				return;
+
+			//Dupplicates the item in multiplayer because TryQuickStack will fail.
 			Item[] inv = self.inventory.TakePlayerInventory40();
 			for (int i = 0; i < inv.Length; i++) {
 				ref Item item = ref inv[i];
