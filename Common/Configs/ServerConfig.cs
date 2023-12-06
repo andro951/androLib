@@ -48,6 +48,9 @@ namespace androLib.Common.Configs
 		[ReloadRequired]
 		public bool UseAlternateRarityColors;
 
+		[ReloadRequired]
+		public List<StorageSizePair> StorageSizes = new();
+
 		//Logging Information
 		[JsonIgnore]
 		public const string LoggingInformationKey = "LoggingInformation";
@@ -138,6 +141,34 @@ namespace androLib.Common.Configs
 
 		public override string ToString() {
 			return modFullName;//TODO:
+		}
+	}
+
+	public class StorageSizePair {
+		[JsonIgnore]
+		public const int MaxStorageSize = 10000;
+		public string ModFullName => modFullName;
+		private string modFullName;
+		[ReloadRequired]
+		[Range(1, MaxStorageSize)]
+		public int StorageSize;
+
+		public StorageSizePair(string ModFullName, int storageSize) {
+			modFullName = ModFullName;
+			StorageSize = storageSize;
+		}
+
+		public override string ToString() {
+			if (modFullName == null)
+				return "";
+
+			int underscoreIndex = modFullName.IndexOf("_");
+			if (underscoreIndex == -1) {
+				return modFullName;
+			}
+			else {
+				return ModFullName.Substring(underscoreIndex + 1).AddSpaces();
+			}
 		}
 	}
 }

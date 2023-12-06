@@ -106,6 +106,11 @@ Mods: {
 						'''
 				}
 
+				StorageSizes: {
+					Label: Storage Sizes
+					Tooltip: Allows you to change the size of storages.  (The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.)
+				}
+
 				UITransparency: {
 					Label: UI Transparency
 					Tooltip: The transparency of all UIs that depend on androLib.  0 is invisible, 255 fully saturated.
@@ -137,6 +142,20 @@ Mods: {
 				ModFullName: {
 					Label: Mod Full Name
 					Tooltip: Editing this will prevent the list from working.  It is the key used to determine which storage the list belongs to.
+				}
+			}
+
+			StorageSizePair: {
+				Tooltip: Allows you to change the size of the storage.
+
+				ModFullName: {
+					Label: Mod Full Name
+					Tooltip: Editing this will prevent the size from working.  It is the key used to determine which storage the list belongs to.
+				}
+
+				StorageSize: {
+					Label: Storage Size
+					Tooltip: The size of the storage.  This is the number of items that can be stored in the storage.
 				}
 			}
 		}

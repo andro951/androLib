@@ -3,10 +3,10 @@ Mods: {
 	androLib: {
 		AndroLibGameMessages: {
 			AddedToBlacklist: "{0} na czarnej liście dla {1}. Elementy można umieścić na białej liście, umieszczając je na {1} za pomocą myszy."
-			AddedToWhitelist: „{0} na białej liście dla {1}. Elementy można umieścić na czarnej liście, klikając je prawym przyciskiem myszy w {1}, przytrzymując klawisz Shift.”
+			AddedToWhitelist: "{0} na białej liście dla {1}. Elementy można umieścić na czarnej liście, klikając je prawym przyciskiem myszy w {1}, przytrzymując klawisz Shift."
 			BossChecklistNotEnabled: Mod BossChecklist nie jest włączony. Zaklęcia broni korzystają z listy kontrolnej bossów, aby określić, którzy bossowie decydują o wypadaniu Boosterów mocy ze zmodyfikowanych bossów. Ponieważ lista kontrolna bossów nie jest włączona, wszyscy zmodyfikowani bossowie upuszczą zwykły wzmacniacz mocy.
 			FailedDetermineProgression: Nie udało się określić postępu Wall of Flesh i Plantera z BossChecklistData
-			MainUpdateCount: „Main.GameUpdateCount: {0}”
+			MainUpdateCount: Main.GameUpdateCount: {0}
 			ReportErrorToAndro: Zgłoś to do andro951 (Zaklęcia Broni) wraz z opisem tego, co robiłeś w tym czasie.
 			UnableDetermineNPCDropsBossBag: Nie można określić NPC, który upuści tę torbę z bossem:
 		}
@@ -106,6 +106,11 @@ Mods: {
 						'''
 				}
 
+				StorageSizes: {
+					Label: Rozmiary przechowywania
+					Tooltip: Umożliwia zmianę rozmiaru magazynów. (Twórca moda magazynu musi wybrać, czy jego magazyn będzie konfigurowalny, aby pojawił się na tej liście.)
+				}
+
 				UITransparency: {
 					Label: Przejrzystość interfejsu użytkownika
 					Tooltip: Przejrzystość wszystkich interfejsów użytkownika zależnych od androLib. 0 jest niewidoczne, 255 w pełni nasycone.
@@ -137,6 +142,20 @@ Mods: {
 				ModFullName: {
 					Label: Pełna nazwa moda
 					Tooltip: Edycja tego spowoduje, że lista nie będzie działać. Jest to klucz używany do określenia, do którego magazynu należy dana lista.
+				}
+			}
+
+			StorageSizePair: {
+				Tooltip: Umożliwia zmianę rozmiaru magazynu.
+
+				ModFullName: {
+					Label: Pełna nazwa moda
+					Tooltip: Edycja tego spowoduje, że rozmiar nie będzie działał. Jest to klucz używany do określenia magazynu, do którego należy lista.
+				}
+
+				StorageSize: {
+					Label: Rozmiar pamięci
+					Tooltip: Rozmiar magazynu. Jest to liczba przedmiotów, które można przechowywać w magazynie.
 				}
 			}
 		}

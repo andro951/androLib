@@ -2,11 +2,11 @@
 Mods: {
 	androLib: {
 		AndroLibGameMessages: {
-			AddedToBlacklist: “{0} 已被列入 {1} 的黑名单。可以通过用鼠标将项目放入 {1} 来将其列入白名单。”
-			AddedToWhitelist: “{0} 已列入 {1} 白名单。按住 Shift 键右键单击 {1} 中的项目可将其列入黑名单。”
+			AddedToBlacklist: "{0} 已被列入 {1} 的黑名单。可以通过用鼠标将项目放入 {1} 来将其列入白名单。"
+			AddedToWhitelist: "{0} 已列入 {1} 白名单。按住 Shift 键右键单击 {1} 中的项目可将其列入黑名单。"
 			BossChecklistNotEnabled: BossChecklist 模组未启用。 武器附魔使用 BossChecklist 来确定哪些 老板 决定来自 改装老板 的能量助推器掉落。 由于 BossChecklist 未启用，所有 改装老板 都会掉落常规能量助推器。
 			FailedDetermineProgression: 无法从 BossChecklistData 确定血肉墙和世纪之花的进度
-			MainUpdateCount: “Main.GameUpdateCount：{0}”
+			MainUpdateCount: Main.GameUpdateCount：{0}
 			ReportErrorToAndro: 请将此事报告给andro951（武器附魔）并描述您当时所做的事情。
 			UnableDetermineNPCDropsBossBag: 无法确定掉落此Boss包的npc：
 		}
@@ -106,6 +106,11 @@ Mods: {
 						'''
 				}
 
+				StorageSizes: {
+					Label: 存储大小
+					Tooltip: 允许您更改存储的大小。 （存储的 Mod 创建者必须选择其存储可配置，才能显示在此列表中。）
+				}
+
 				UITransparency: {
 					Label: 用户界面透明度
 					Tooltip: 所有依赖于androLib的UI的透明度。 0 不可见，255 完全饱和。
@@ -137,6 +142,20 @@ Mods: {
 				ModFullName: {
 					Label: 模组全名
 					Tooltip: 编辑此内容将导致列表无法工作。 它是用于确定列表属于哪个存储的键。
+				}
+			}
+
+			StorageSizePair: {
+				Tooltip: 允许您更改存储的大小。
+
+				ModFullName: {
+					Label: 模组全名
+					Tooltip: 编辑此内容将导致尺寸无法正常工作。 它是用于确定列表属于哪个存储的键。
+				}
+
+				StorageSize: {
+					Label: 存储大小
+					Tooltip: 存储的大小。 这是存储器中可以存储的物品数量。
 				}
 			}
 		}

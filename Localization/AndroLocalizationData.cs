@@ -68,6 +68,10 @@ namespace androLib.Localization
 									{ L_ID3.Label.ToString(), "Use Alternate Rarity Colors and Textures" },
 									{ L_ID3.Tooltip.ToString(), "The default colors are color blind friendly.  The alternate textures have minor differences, but were voted to be kept." }
 								}) },
+								{ nameof(AndroClientConfig.StorageSizes), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.StorageSizes).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "Allows you to change the size of storages.  (The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.)" }
+								}) },
 								{ nameof(AndroClientConfig.PrintLocalizationLists), new(dict: new() {
 										{ L_ID3.Label.ToString(), "Log all translation lists" },
 									{ L_ID3.Tooltip.ToString(), "The lists are printed to the client.log when you enter a world.\nThe client.log default location is C:\\Steam\\SteamApps\\common\\tModLoader\\tModLoader-Logs" }
@@ -141,6 +145,19 @@ namespace androLib.Localization
 							},
 							dict: new() {
 								{ L_ID3.Tooltip.ToString(), "Allows you to edit the whitelist/blacklist of the bags." },
+							}) },
+							{ nameof(StorageSizePair), new(children: new() {
+								{ nameof(StorageSizePair.ModFullName), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(StorageSizePair.ModFullName).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "Editing this will prevent the size from working.  It is the key used to determine which storage the list belongs to." }
+								}) },
+								{ nameof(StorageSizePair.StorageSize), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(StorageSizePair.StorageSize).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "The size of the storage.  This is the number of items that can be stored in the storage." }
+								}) }
+							},
+							dict: new() {
+								{ L_ID3.Tooltip.ToString(), "Allows you to change the size of the storage." }
 							}) },
 						}) },
 						{ L_ID1.AndroLibGameMessages.ToString(), new(

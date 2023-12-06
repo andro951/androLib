@@ -70,6 +70,7 @@ namespace androLib
 			//Register should be callid in your Mod.Load() method.  It needs to happen before ModPlayer.LoadData() is called.
 			//The return value is the id that you can use to access your storage in the other calls.
 			//StorageSize, StorageItemTypeGetter, UI_DefaultLeftLocationOnScreen, UI_DefaultTopLocationOnScreen are optional
+			//Setting StorageSize to a negative number will add a config option to the androLib Client Config to allow players to change the storage size. (default is the absolute value of number you provide)
 			//StorageItemTypeGetter can be null if you aren't making an item that can be opened from your inventory or you want to take care of it yourself.
 			//StorageItemTypeGetter should be a () => ModContent.ItemType<OreBag>(), where OreBag is your ModItem class.
 			Register = 0,

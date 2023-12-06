@@ -17,6 +17,7 @@ using System.Data.SqlTypes;
 using androLib.Common.Configs;
 using System.Reflection;
 using Terraria.ModLoader.Config;
+using androLib.Common.Globals;
 
 namespace androLib
 {
@@ -104,9 +105,10 @@ namespace androLib
 			StorageID = storageID;
 			Mod = mod;
 			VacuumStorageType = vacuumStorageType;
+			modFullName = DefaultModFullName();
 			ItemAllowedToBeStored = itemAllowedToBeStored;
 			NameLocalizationKey = nameLocalizationKey;
-			StorageSize = storageSize;
+			StorageSize = GetBagSize(storageSize);
 			IsVacuumBag = isVacuumBag;
 			GetUIColor = getUIColor;
 			GetScrollBarColor = getScrollBarColor;
@@ -125,7 +127,6 @@ namespace androLib
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
-			modFullName = DefaultModFullName();
 			UIResizePanelX = UIResizePanelDefaultX;
 			UIResizePanelY = UIResizePanelDefaultY;
 			LastUIResizePanelX = LastUIResizePanelDefaultX;
@@ -529,6 +530,28 @@ namespace androLib
 		}
 		public bool HasWhiteListGetter => !IsBlacklistGetter && HasWhiteOreBlacklistGetter;
 		public bool HasWhiteOreBlacklistGetter => GetAllowedList != null;
+		private int GetBagSize(int bagSize) {
+			if (bagSize >= 0)
+				return bagSize;
+
+			bagSize = -bagSize;
+
+			List<StorageSizePair> bagStorageSizePairs = AndroMod.clientConfig.StorageSizes;
+			if (bagStorageSizePairs == null)
+				return bagSize;
+
+			foreach (StorageSizePair bagStorageSizePair in bagStorageSizePairs) {
+				if (bagStorageSizePair.ModFullName != modFullName)
+					continue;
+
+				return bagStorageSizePair.StorageSize;
+			}
+
+			bagStorageSizePairs.Add(new StorageSizePair(modFullName, bagSize));
+			StorageManager.SaveClientAndroConfig();
+
+			return bagSize;
+		}
 		private uint nextContainsUpdate = 0;
 		public bool Contains(Item item, out int index) => Contains(item.type, out index);
 		public bool Contains(int itemType, out int index) {
@@ -925,8 +948,11 @@ namespace androLib
 		}
 		public static SortedSet<int> GetPlayerWhiteListSortedSet(int storageID) => TryGetPlayerWhitelist(storageID, out ItemList whiteList) ? new (whiteList.ItemDefinitions.Select(d => d.Type)) : new();
 		public static SortedSet<int> GetPlayerBlackListSortedSet(int storageID) => TryGetPlayerBlacklist(storageID, out ItemList blackList) ? new (blackList.ItemDefinitions.Select(d => d.Type)) : new();
-		private static void SaveClientAndroConfig() {
-			typeof(ConfigManager).GetMethod("Save", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { AndroMod.clientConfig });
+		public static void SaveClientConfig(ModConfig clientConfig) {
+			typeof(ConfigManager).GetMethod("Save", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { clientConfig });
+		}
+		public static void SaveClientAndroConfig() {
+			SaveClientConfig(AndroMod.clientConfig);
 		}
 		public static bool TryQuickStackItemToTile(ref Item item, Player player, int storageID) {
 			if (!ValidModID(storageID))

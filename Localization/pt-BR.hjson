@@ -106,6 +106,11 @@ Mods: {
 						'''
 				}
 
+				StorageSizes: {
+					Label: Tamanhos de armazenamento
+					Tooltip: Permite alterar o tamanho dos armazenamentos. (O criador do mod do armazenamento deve escolher que seu armazenamento seja configurável para que apareça nesta lista.)
+				}
+
 				UITransparency: {
 					Label: Transparência da IU
 					Tooltip: A transparência de todas as UIs que dependem do androLib. 0 é invisível, 255 totalmente saturado.
@@ -137,6 +142,20 @@ Mods: {
 				ModFullName: {
 					Label: Nome completo do mod
 					Tooltip: Editar isso impedirá que a lista funcione. É a chave usada para determinar a qual armazenamento a lista pertence.
+				}
+			}
+
+			StorageSizePair: {
+				Tooltip: Permite alterar o tamanho do armazenamento.
+
+				ModFullName: {
+					Label: Nome completo do mod
+					Tooltip: Editar isso impedirá que o tamanho funcione. É a chave usada para determinar a qual armazenamento a lista pertence.
+				}
+
+				StorageSize: {
+					Label: Tamanho de armazenamento
+					Tooltip: O tamanho do armazenamento. Este é o número de itens que podem ser armazenados no armazenamento.
 				}
 			}
 		}
