@@ -48,7 +48,6 @@ namespace androLib.Common.Configs
 		[ReloadRequired]
 		public bool UseAlternateRarityColors;
 
-		[ReloadRequired]
 		public List<StorageSizePair> StorageSizes = new();
 
 		//Logging Information
