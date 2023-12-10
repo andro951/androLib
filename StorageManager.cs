@@ -531,10 +531,12 @@ namespace androLib
 		public bool HasWhiteListGetter => !IsBlacklistGetter && HasWhiteOreBlacklistGetter;
 		public bool HasWhiteOreBlacklistGetter => GetAllowedList != null;
 		private int GetBagSize(int bagSize) {
-			if (bagSize >= 0)
+			if (bagSize >= 1)
 				return bagSize;
 
-			bagSize = -bagSize;
+			bagSize = Math.Abs(bagSize);
+			if (bagSize < 1)
+				bagSize = 1;
 
 			List<StorageSizePair> bagStorageSizePairs = AndroMod.clientConfig.StorageSizes;
 			if (bagStorageSizePairs == null)

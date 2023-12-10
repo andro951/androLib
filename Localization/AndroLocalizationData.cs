@@ -70,7 +70,9 @@ namespace androLib.Localization
 								}) },
 								{ nameof(AndroClientConfig.StorageSizes), new(dict: new() {
 									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.StorageSizes).AddSpaces() },
-									{ L_ID3.Tooltip.ToString(), "Allows you to change the size of storages.  (The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.)" }
+									{ L_ID3.Tooltip.ToString(), "Allows you to change the size of storages.  \n" +
+										"Changing any of the sizes requires you to manually reload mods for the change to take effect." +
+										"(The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.  Using the + button will not do anything.)" }
 								}) },
 								{ nameof(AndroClientConfig.PrintLocalizationLists), new(dict: new() {
 										{ L_ID3.Label.ToString(), "Log all translation lists" },
