@@ -19,8 +19,10 @@ namespace androLib.Common.Globals
 			if (!AppliesTo(item))
 				return;
 
-			item.stack++;
 			UseBag(item, player);
+		}
+		public override bool ConsumeItem(Item item, Player player) {
+			return false;
 		}
 		private static void UseBag(Item item, Player player) => UseBag(StorageManager.StorageItemTypes[item.type]);
 
