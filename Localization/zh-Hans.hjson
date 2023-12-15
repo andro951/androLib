@@ -108,7 +108,11 @@ Mods: {
 
 				StorageSizes: {
 					Label: 存储大小
-					Tooltip: 允许您更改存储的大小。 （存储的 Mod 创建者必须选择其存储可配置，才能显示在此列表中。）
+					Tooltip:
+						'''
+						Allows you to change the size of storages.  
+						Changing any of the sizes requires you to manually reload mods for the change to take effect.(The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.  Using the + button will not do anything.)
+						'''
 				}
 
 				UITransparency: {

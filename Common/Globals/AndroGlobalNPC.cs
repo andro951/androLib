@@ -171,7 +171,10 @@ namespace androLib.Common.Globals
 
 			GetLoot(loot, npc, hp, value, total, boss, bossBag);
 		}
+		protected static Action<ILoot, NPC, float, float, float, bool, bool> GetLootActions;
 		public virtual void GetLoot(ILoot loot, NPC npc, float hp, float value, float total, bool boss, bool bossBag = false) {
+			GetLootActions?.Invoke(loot, npc, hp, value, total, boss, bossBag);
+
 			if (total <= 0f)
 				return;
 
