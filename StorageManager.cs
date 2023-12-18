@@ -207,6 +207,8 @@ namespace androLib
 
 			if (tag.TryGet<int>($"{modFullName}{SwitcherStorageIDTag}", out int switcherStorageID)) {
 				SwitcherStorageID = switcherStorageID;
+				if (SwitcherStorageID < 0)
+					SwitcherStorageID = StorageID;
 			}
 			else {
 				SwitcherStorageID = StorageID;
