@@ -255,6 +255,7 @@ namespace androLib
 		public override void Load() {
 			VanillaRecipeCount = Recipe.numRecipes;
 			hooks.Add(new(ModLoaderModifyItemLootMethodInfo, ModifyItemLootDetour));
+			hooks.Add(new(ItemLoaderRightClickMethodInfo, ItemLoaderRightClickDetour));
 			foreach (Hook hook in hooks) {
 				hook.Apply();
 			}
@@ -382,6 +383,16 @@ namespace androLib
 				return;
 
 			orig(item, itemLoot);
+		}
+
+		private delegate void orig_RightClick(Item item, Player player);
+		private delegate void hook_RightClick(orig_RightClick orig, Item item, Player player);
+		private static readonly MethodInfo ItemLoaderRightClickMethodInfo = typeof(ItemLoader).GetMethod("RightClick");
+		public static Action<Item, Player> PostRightClickActions;
+		private void ItemLoaderRightClickDetour(orig_RightClick orig, Item item, Player player) {
+			orig(item, player);
+
+			PostRightClickActions?.Invoke(item, player);
 		}
 		public static Action<SceneMetrics, SceneMetricsScanSettings> ScenemetrictBeforeAnyCheck = null;
 

@@ -13,16 +13,24 @@ namespace androLib.Common.Globals
 {
 	public class VacuumBag : GlobalItem
 	{
+		public override void Load() {
+			AndroMod.PostRightClickActions += PostRightClick;
+		}
 		private bool AppliesTo(Item item) => StorageManager.StorageItemTypes.ContainsKey(item.type);
 		public override bool CanRightClick(Item item) => AppliesTo(item);
 		public override void RightClick(Item item, Player player) {
 			if (!AppliesTo(item))
 				return;
 
+			justRightClicked = true;
 			UseBag(item, player);
 		}
+		private static bool justRightClicked = false;
+		private void PostRightClick(Item item, Player player) {
+			justRightClicked = false;
+		}
 		public override bool ConsumeItem(Item item, Player player) {
-			return !AppliesTo(item);
+			return !AppliesTo(item) || !justRightClicked;
 		}
 		private static void UseBag(Item item, Player player) => UseBag(StorageManager.StorageItemTypes[item.type]);
 
