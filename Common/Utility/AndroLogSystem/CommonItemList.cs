@@ -13,7 +13,7 @@ namespace androLib.Common.Utility.LogSystem
     {
         public List<Item> CommonList { get; private set; }
         public List<Item> UniqueList { get; private set; }
-        public List<int> AcceptedRecipeGroupsUniqueLists { get; private set; } = new();
+        public SortedDictionary<int, int> AcceptedRecipeGroupsUniqueLists { get; private set; } = new();
         public List<Item> All => UniqueList != null ? CommonList.Concat(UniqueList).ToList() : CommonList;
         public int Count => (CommonList != null ? CommonList.Count : 0) + (UniqueList != null ? 1 : 0);
         public string CommonToAll {
@@ -163,7 +163,7 @@ namespace androLib.Common.Utility.LogSystem
 			for (int i = 0; i < CommonList.Count; i++) {
                 Item commonItem = CommonList[i];
                 if (uniquesFromCommon.Contains(commonItem.type)) {
-                    AcceptedRecipeGroupsUniqueLists.Add(acceptedGroupID);
+                    AcceptedRecipeGroupsUniqueLists.Add(acceptedGroupID, commonItem.stack);
                     CommonList.RemoveAt(i);
 
 					break;
@@ -288,11 +288,28 @@ namespace androLib.Common.Utility.LogSystem
 
             return true;
         }
+        public static bool SameAs(SortedDictionary<int, int> dict1, SortedDictionary<int, int> dict2) {
+            if (dict1 == null && dict2 == null)
+				return true;
+
+			if (dict1 == null || dict2 == null)
+				return false;
+
+			if (dict1.Count != dict2.Count)
+				return false;
+
+			foreach (KeyValuePair<int, int> kvp in dict1) {
+				if (!dict2.ContainsKey(kvp.Key))
+					return false;
+			}
+
+			return true;
+        }
 		public bool Contains(Item item) => CommonList.Select(i => i.type).Contains(item.type) || UniqueList != null && UniqueList.Select(i => i.type).Contains(item.type);
         public override string ToString() {
             string text = "";
             if (CommonList.Count > 0) {
-                foreach (string s in CommonList.Select(i => i.ToItemPNG(link: true))) {
+                foreach (string s in CommonList.Select(i => i.ToItemPNG(link: true, displayNum: true))) {
                     text += $"{s}<br/>";
                 }
             }
@@ -307,7 +324,7 @@ namespace androLib.Common.Utility.LogSystem
 						text += "and<br/>";
 
 					bool first = true;
-					foreach (string s in UniqueList.Select(i => i.ToItemPNG(link: true))) {
+					foreach (string s in UniqueList.Select(i => i.ToItemPNG(link: true, displayNum: true))) {
 						if (first) {
 							first = false;
 						}
@@ -325,7 +342,7 @@ namespace androLib.Common.Utility.LogSystem
 					text += "<br/>and<br/>";
 
                 bool firstList = true;
-                foreach (int acceptedGroupID in AcceptedRecipeGroupsUniqueLists) {
+                foreach (KeyValuePair<int, int> acceptedGroup in AcceptedRecipeGroupsUniqueLists) {
 					if (firstList) {
                         firstList = false;
                     }
@@ -333,16 +350,20 @@ namespace androLib.Common.Utility.LogSystem
                         text += "<br/>and<br/>";
                     }
 
-                    RecipeGroup recipeGroup = RecipeGroup.recipeGroups[acceptedGroupID];
+                    RecipeGroup recipeGroup = RecipeGroup.recipeGroups[acceptedGroup.Key];
                     HashSet<int> validItems = recipeGroup.ValidItems;
                     if (validItems.Count > 10) {
                         string theText = recipeGroup.GetText();
-						text += validItems.First().CSI().ToItemPNG(link: true, linkText: theText);
+						text += new Item(validItems.First(), acceptedGroup.Value).ToItemPNG(link: true, linkText: theText, displayNum: true);
                     }
                     else {
-						IEnumerable<Item> list = validItems.Select(t => new Item(t));
+                        List<Item> list = new();
+                        foreach (int validItem in validItems) {
+							list.Add(new Item(validItem, acceptedGroup.Value));
+						}
+
 						bool first = true;
-						foreach (string s in list.Select(i => i.ToItemPNG(link: true))) {
+						foreach (string s in list.Select(i => i.ToItemPNG(link: true, displayNum: true))) {
 							if (first) {
 								first = false;
 							}
