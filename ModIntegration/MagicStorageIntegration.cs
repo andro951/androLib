@@ -108,5 +108,11 @@ namespace androLib.ModIntegration
 				HandleMagicStorageOnTickEvents?.Invoke();
             }
         }
+
+		[MethodImpl(MethodImplOptions.NoInlining)]
+		public static void SetBiomeGlobe(Player player) {
+            if (player.TryGetModPlayer(out MagicStorage.Items.BiomePlayer biomePlayer))
+                biomePlayer.biomeGlobe = true;
+		}
 	}
 }
