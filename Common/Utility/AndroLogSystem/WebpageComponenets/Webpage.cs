@@ -13,6 +13,7 @@ namespace androLib.Common.Utility.LogSystem.WebpageComponenets
 {
     public class WebPage
     {
+        private static bool useNewAndChangedTags = false;
         public string HeaderName { private set; get; }
         private string MyDirectoryNoHeaderName => !IsMaster ? $"{Parent.MyDirectory}" : $"{Wiki.wikiPath}";
         private string MyDirectory => !IsMaster ? $"{Parent.MyDirectory}\\{HeaderName}" : $"{Wiki.wikiPath}\\{HeaderName}";
@@ -68,6 +69,9 @@ namespace androLib.Common.Utility.LogSystem.WebpageComponenets
 			IsParent = true;
 		}
         public string CheckDiffHeaderName() {
+            if (!useNewAndChangedTags)
+                return HeaderName;
+
             string headerName = HeaderName;
             if (Wiki.LastWikiDirectory != null) {
                 bool addToChangeSumary = false;

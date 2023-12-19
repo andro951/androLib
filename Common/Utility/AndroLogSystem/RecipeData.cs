@@ -38,7 +38,24 @@ namespace androLib.Common.Utility.LogSystem
 				requiredItem.AddUniqueListFromACommonItem(acceptedGroupID);
 			}
         }
-        private List<Item> GetAllOtherCraftedItems(Item item, List<Item> consumedItems) => consumedItems.SelectMany(c => GetOtherCraftedItems(item, c)).ToList();
+        protected virtual List<Item> GetAllOtherCraftedItems(Item item, List<Item> consumedItems) {
+            List<Item> list = new();
+            foreach (Item consumedItem in consumedItems) {
+                foreach (Item otherCraftedItem in GetOtherCraftedItems(item, consumedItem)) {
+                    for (int i = 0; i < list.Count; i++) {
+                        if (list[i].type == otherCraftedItem.type) {
+                            list[i].stack += otherCraftedItem.stack;
+							goto nextItem;
+						}
+                    }
+
+                    list.Add(otherCraftedItem);
+                    nextItem:;
+                }
+			}
+
+            return list;
+		}
         protected virtual List<Item> GetOtherCraftedItems(Item item, Item consumedItem) => new();
         public virtual bool TryAdd(RecipeData other) {
             if (!createItem.SameCommonItems(other.createItem))

@@ -110,8 +110,8 @@ Mods: {
 					Label: Speichergrößen
 					Tooltip:
 						'''
-						Allows you to change the size of storages.  
-						Changing any of the sizes requires you to manually reload mods for the change to take effect.(The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.  Using the + button will not do anything.)
+						Ermöglicht Ihnen, die Größe der Speicher zu ändern.
+						Wenn Sie eine der Größen ändern, müssen Sie die Mods manuell neu laden, damit die Änderung wirksam wird. (Der Mod-Ersteller des Speichers muss festlegen, dass sein Speicher konfigurierbar ist, damit er in dieser Liste angezeigt wird. Die Verwendung der Schaltfläche „+“ hat keine Auswirkung .)
 						'''
 				}
 

@@ -110,8 +110,8 @@ Mods: {
 					Label: Размеры хранилища
 					Tooltip:
 						'''
-						Allows you to change the size of storages.  
-						Changing any of the sizes requires you to manually reload mods for the change to take effect.(The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.  Using the + button will not do anything.)
+						Позволяет изменять размер хранилищ.
+						Изменение любого размера требует ручной перезагрузки модов, чтобы изменения вступили в силу. (Создатель мода хранилища должен выбрать возможность настройки своего хранилища, чтобы оно отображалось в этом списке. Использование кнопки + ничего не даст. .)
 						'''
 				}
 

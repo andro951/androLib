@@ -243,6 +243,7 @@ namespace androLib.Localization
 			{ CultureName.German,
 				new() {
 					"Normal",
+					"Main.GameUpdateCount: {0}",
 				}
 			},
 			{
@@ -267,7 +268,7 @@ namespace androLib.Localization
 			{
 				CultureName.Polish,
 				new() {
-					
+					"Main.GameUpdateCount: {0}",
 				}
 			},
 			{

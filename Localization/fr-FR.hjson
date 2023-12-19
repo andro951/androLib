@@ -110,8 +110,8 @@ Mods: {
 					Label: Tailles de stockage
 					Tooltip:
 						'''
-						Allows you to change the size of storages.  
-						Changing any of the sizes requires you to manually reload mods for the change to take effect.(The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.  Using the + button will not do anything.)
+						Vous permet de modifier la taille des stockages.
+						La modification de l'une des tailles nécessite que vous rechargez manuellement les mods pour que la modification prenne effet. (Le créateur du mod du stockage doit choisir que son stockage soit configurable pour qu'il apparaisse dans cette liste. L'utilisation du bouton + ne fera rien. .)
 						'''
 				}
 
