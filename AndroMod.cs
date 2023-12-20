@@ -170,12 +170,12 @@ namespace androLib
 					if (args.Length >= topIndex + 1 && args[topIndex] is int UI_DefaultTopLocationOnScreenArg)
 						UI_DefaultTopLocationOnScreen = UI_DefaultTopLocationOnScreenArg;
 
-					int getAllowedListIndex = topIndex + 1;
-					Func<SortedSet<int>> GetAllowedList = null;
-					if (args.Length >= getAllowedListIndex + 1 && args[getAllowedListIndex] is Func<SortedSet<int>> GetAllowedListArg)
-						GetAllowedList = GetAllowedListArg;
+					int updateAllowedListIndex = topIndex + 1;
+					Action<int, bool> UpdateAllowedList = null;
+					if (args.Length >= updateAllowedListIndex + 1 && args[updateAllowedListIndex] is Action<int, bool> UpdateAllowedListArg)
+						UpdateAllowedList = UpdateAllowedListArg;
 
-					int isBlacklistGetterIndex = getAllowedListIndex + 1;
+					int isBlacklistGetterIndex = updateAllowedListIndex + 1;
 					bool IsBlacklistGetter = false;
 					if (args.Length >= isBlacklistGetterIndex + 1 && args[isBlacklistGetterIndex] is bool IsBlacklistGetterArg)
 						IsBlacklistGetter = IsBlacklistGetterArg;
@@ -193,7 +193,7 @@ namespace androLib
 						StorageItemTypeGetter,
 						UI_DefaultLeftLocationOnScreen, 
 						UI_DefaultTopLocationOnScreen,
-						GetAllowedList,
+						UpdateAllowedList,
 						IsBlacklistGetter
 					);
 

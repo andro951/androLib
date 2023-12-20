@@ -61,6 +61,9 @@ namespace androLib
 		}
 		public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
 			itemConsumedCallback = null;
+			if (AndroMod.clientConfig.StopProvidingItemsInBagsForCrafting)
+				return null;
+
 			List<Item> items = new();
 			foreach (Storage storage in StorageManager.BagUIs.Select(b => b.MyStorage)) {
 				if (storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out _)) {

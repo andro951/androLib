@@ -1,4 +1,4 @@
-#
+#Contributors: @Soluna#1422, @Olixx12#5354  (All others Google Translated.  Needs review)
 Mods: {
 	androLib: {
 		AndroLibGameMessages: {
@@ -6,11 +6,10 @@ Mods: {
 			AddedToWhitelist: "{0} sur liste blanche pour le {1}. Les éléments peuvent être mis sur liste noire en faisant un clic droit dessus dans le {1} avec la touche Maj enfoncée."
 			BossChecklistNotEnabled: Le mod BossChecklist n’est pas activé. Weapon Enchantments utilise BossChecklist pour déterminer quels boss déterminent les baisses de Power Booster des boss Modded. Étant donné que BossChecklist n'est pas activé, tous les boss Modded abandonneront le Power Booster habituel.
 			FailedDetermineProgression: Impossible de déterminer la progression de Wall of Flesh et Plantera à partir de BossChecklistData
-			MainUpdateCount: Main.GameUpdateCount : {0}
+			MainUpdateCount: "Main.GameUpdateCount : {0}"
 			ReportErrorToAndro: Veuillez signaler cela à andro951 (Enchantements d'armes) avec une description de ce que vous faisiez à ce moment-là.
 			UnableDetermineNPCDropsBossBag: Impossible de déterminer le PNJ qui lâche ce sac de boss :
 		}
-
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Configuration client
@@ -18,164 +17,146 @@ Mods: {
 				ItemLists: Listes autorisées (doivent plutôt être modifiées dans le jeu !)
 				LoggingInformation: Informations de journalisation
 				StorageSettings: Paramètres de stockage
-
 				BlackLists: {
 					Label: Listes noires (à gérer plutôt dans le jeu !)
-					Tooltip:
+					Tooltip: 
 						'''
 						Les objets peuvent être mis sur liste noire dans le jeu en cliquant avec le bouton droit sur un objet dans un sac de rangement avec la touche Maj enfoncée.
 						Changer le nom complet du module empêchera cette liste de fonctionner et une nouvelle liste vide sera créée.
 						'''
 				}
-
 				ClosingInventoryClosesBags: {
 					Label: Clôture de l'inventaire Ferme les sacs
 					Tooltip: Si c'est vrai, la fermeture de l'inventaire du joueur fermera tous les sacs.
 				}
-
 				DisableAllErrorMessagesInChat: {
 					Label: Désactiver tous les messages d'erreur dans le chat
-					Tooltip:
+					Tooltip: 
 						'''
 						Empêche l'apparition de messages dans votre chat vous demandant de le faire
 						Veuillez signaler cela à andro951 (Enchantements d'armes) avec une description de ce que vous faisiez à ce moment-là.
 						'''
 				}
-
 				ForceAllowedListUpdate: {
 					Label: Forcer la mise à jour de la liste autorisée
-					Tooltip:
+					Tooltip: 
 						'''
 						Cela forcera la mise à jour des modifications apportées aux listes blanches et aux listes noires que vous avez effectuées en ajustant manuellement la configuration.
 						Ceci sera immédiatement désactivé une fois la mise à jour terminée. Ce n'est pas obligatoire si vous mettez à jour les listes blanches/noires dans le jeu.
 						Cela évite de devoir recharger lors du changement de liste.
 						'''
 				}
-
 				LogAllPlayerWhiteAndBlackLists: {
 					Label: Enregistrez toutes les listes blanches et noires de tous les joueurs
-					Tooltip:
+					Tooltip: 
 						'''
 						Si c'est vrai, toutes les listes blanches et noires des joueurs seront enregistrées dans le client.log.
 						Si vous apportez des modifications aux listes blanches/noires qui, selon vous, devraient être des modifications standard pour tout le monde, veuillez les imprimer et m'envoyer votre client.log. -andro951
 						'''
 				}
-
 				OnlyShowErrorMessagesInChatOnce: {
 					Label: Afficher les messages d'erreur dans le chat une seule fois
-					Tooltip:
+					Tooltip: 
 						'''
 						Les messages continueront à apparaître dans votre chat, mais une seule fois au cours d'une session de jeu.
 						(Le message d'erreur doit être exactement le même qu'un message précédent pour être évité.)
 						'''
 				}
-
 				PrintItemDrops: {
 					Label: Enregistrez une liste des sources de dépôt d'articles
-					Tooltip:
+					Tooltip: 
 						'''
 						La liste est imprimée dans le client.log lorsque vous entrez dans un monde.
 						L'emplacement par défaut de client.log est C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				PrintLocalizationLists: {
 					Label: Enregistrez toutes les listes de traduction
-					Tooltip:
+					Tooltip: 
 						'''
 						Les listes sont imprimées dans le client.log lorsque vous entrez dans un monde.
 						L'emplacement par défaut de client.log est C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				RemoveItemsWhenBlacklisted: {
 					Label: Supprimer les éléments lorsqu'ils sont sur la liste noire
-					Tooltip:
+					Tooltip: 
 						'''
 						Si c'est vrai, les éléments seront supprimés du stockage lorsqu'ils seront mis sur liste noire.
 						Les éléments peuvent être mis sur liste noire en cliquant dessus avec le bouton droit dans le stockage avec la touche Maj enfoncée.
 						'''
 				}
-
 				ReOpenBagSwitcherAutomatically: {
 					Label: Réouverture automatique du commutateur de sacs
-					Tooltip:
+					Tooltip: 
 						'''
 						Passer à un sac avec le sélecteur de sac puis fermer et rouvrir le sac aura le sac d'origine
 						ouvert (commutateur de sac fermé) au lieu d'ouvrir le sac précédemment commuté.
 						'''
 				}
-
+				StopProvidingItemsInBagsForCrafting: {
+					Label: Arrêtez de fournir des articles dans des sacs pour l'artisanat
+					Tooltip: Les objets dans des sacs sont généralement disponibles pour la fabrication comme s'ils étaient dans votre inventaire. Activez cette option pour ne plus les fournir pour la fabrication.
+				}
 				StorageSizes: {
 					Label: Tailles de stockage
-					Tooltip:
+					Tooltip: 
 						'''
 						Vous permet de modifier la taille des stockages.
 						La modification de l'une des tailles nécessite que vous rechargez manuellement les mods pour que la modification prenne effet. (Le créateur du mod du stockage doit choisir que son stockage soit configurable pour qu'il apparaisse dans cette liste. L'utilisation du bouton + ne fera rien. .)
 						'''
 				}
-
 				UITransparency: {
 					Label: Transparence de l'interface utilisateur
 					Tooltip: La transparence de toutes les interfaces utilisateur qui dépendent d'androLib. 0 est invisible, 255 entièrement saturé.
 				}
-
 				UseAlternateRarityColors: {
 					Label: Utiliser d'autres couleurs et textures rares
 					Tooltip: Les couleurs par défaut conviennent aux daltoniens. Les textures alternatives présentent des différences mineures, mais leur maintien a été voté.
 				}
-
 				WhiteLists: {
 					Label: Listes blanches (à gérer plutôt dans le jeu !)
-					Tooltip:
+					Tooltip: 
 						'''
 						Les objets peuvent être ajoutés à la liste blanche dans le jeu en les cliquant manuellement dans un sac de rangement avec votre souris.
 						Changer le nom complet du module empêchera cette liste de fonctionner et une nouvelle liste vide sera créée.
 						'''
 				}
 			}
-
 			ItemList: {
 				Tooltip: Permet d'éditer la liste blanche/liste noire des sacs.
-
 				ItemDefinitions: {
 					Label: Définitions des éléments
 					Tooltip: Éléments dans la liste. Cela remplacera mes listes blanche/noire.
 				}
-
 				ModFullName: {
 					Label: Nom complet du module
 					Tooltip: Modifier ceci empêchera la liste de fonctionner. C'est la clé utilisée pour déterminer à quel stockage appartient la liste.
 				}
 			}
-
 			StorageSizePair: {
 				Tooltip: Permet de modifier la taille du stockage.
-
 				ModFullName: {
 					Label: Nom complet du module
 					Tooltip: Modifier ceci empêchera la taille de fonctionner. C'est la clé utilisée pour déterminer à quel stockage appartient la liste.
 				}
-
 				StorageSize: {
 					Label: Taille de stockage
 					Tooltip: La taille du stockage. Il s'agit du nombre d'éléments pouvant être stockés dans le stockage.
 				}
 			}
 		}
-
 		GameModeNameIDs: {
 			Expert: Expert
 			Journey: Voyage
 			Master: Maître
 			Normal: Normale
 		}
-
 		Items: {
 		}
-
-		MagicStorageButtonsText.DepositAllFromVacuumBags: Déposez tout à partir de sacs sous vide
-
+		MagicStorageButtonsText: {
+			DepositAllFromVacuumBags: Déposez tout à partir de sacs sous vide
+		}
 		StorageText: {
 			ClearTrash: Effacer la corbeille
 			CloseBag: Fermer le sac

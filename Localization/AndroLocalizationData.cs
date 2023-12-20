@@ -68,6 +68,10 @@ namespace androLib.Localization
 									{ L_ID3.Label.ToString(), "Use Alternate Rarity Colors and Textures" },
 									{ L_ID3.Tooltip.ToString(), "The default colors are color blind friendly.  The alternate textures have minor differences, but were voted to be kept." }
 								}) },
+								{ nameof(AndroClientConfig.StopProvidingItemsInBagsForCrafting), new(dict: new() {
+									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.StopProvidingItemsInBagsForCrafting).AddSpaces() },
+									{ L_ID3.Tooltip.ToString(), "Items in bags are usually available for crafting as if they were in your inventory.  Enable this option to stop providing them for crafting." }
+								}) },
 								{ nameof(AndroClientConfig.StorageSizes), new(dict: new() {
 									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.StorageSizes).AddSpaces() },
 									{ L_ID3.Tooltip.ToString(), "Allows you to change the size of storages.  \n" +

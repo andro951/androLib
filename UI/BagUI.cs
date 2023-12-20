@@ -612,9 +612,11 @@ namespace androLib.UI
 							else {
 								bool doClickInteractions = Main.mouseItem.NullOrAir();
 								bool unloaded = Main.mouseItem.ModItem is UnloadedItem;
-								if (!doClickInteractions && MasterUIManager.LeftMouseClicked && (item.NullOrAir() || Main.mouseItem.type == item.type) && !DisplayedBagUI.CanBeStored(Main.mouseItem)) {
-									if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
-										SoundEngine.PlaySound(SoundID.ResearchComplete);
+                                if (MasterUIManager.LeftMouseClicked) {
+									if (!doClickInteractions && (item.NullOrAir() || Main.mouseItem.type == item.type) && (!DisplayedBagUI.CanBeStored(Main.mouseItem) || Storage.IsVacuumBag == null && Storage.CanVacuumItem != null && !Storage.CanVacuumItem(item))) {
+										if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
+											SoundEngine.PlaySound(SoundID.ResearchComplete);
+									}
 								}
 
 								if (doClickInteractions || DisplayedBagUI.CanBeStored(Main.mouseItem) || Main.mouseItem.type == item.type || unloaded)
@@ -872,7 +874,7 @@ namespace androLib.UI
 		#region Single
 
 		public bool CanBeStored(Item item) => !item.NullOrAir() && MyStorage.ItemAllowedToBeStored(item);
-		public bool VacuumAllowed(Item item) => MyStorage.IsVacuumBag == true || MyStorage.IsVacuumBag == null && ContainsItem(item);
+		public bool VacuumAllowed(Item item) => MyStorage.IsVacuumBag == true || MyStorage.IsVacuumBag == null && MyStorage.CanVacuumItem != null && MyStorage.CanVacuumItem(item);
 		public bool ContainsItem(Item item) => MyStorage.ContainsSlow(item);
 		public bool RoomInStorage(Item item) {
 			Item[] inv = MyInventory;

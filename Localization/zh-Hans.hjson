@@ -1,4 +1,4 @@
-#
+#1090549930 Kiritan - Github, @2578359679#1491, @An unilolusiality, and @huamx1#1050
 Mods: {
 	androLib: {
 		AndroLibGameMessages: {
@@ -6,11 +6,10 @@ Mods: {
 			AddedToWhitelist: "{0} 已列入 {1} 白名单。按住 Shift 键右键单击 {1} 中的项目可将其列入黑名单。"
 			BossChecklistNotEnabled: BossChecklist 模组未启用。 武器附魔使用 BossChecklist 来确定哪些 老板 决定来自 改装老板 的能量助推器掉落。 由于 BossChecklist 未启用，所有 改装老板 都会掉落常规能量助推器。
 			FailedDetermineProgression: 无法从 BossChecklistData 确定血肉墙和世纪之花的进度
-			MainUpdateCount: Main.GameUpdateCount：{0}
+			MainUpdateCount: "Main.GameUpdateCount：{0}"
 			ReportErrorToAndro: 请将此事报告给andro951（武器附魔）并描述您当时所做的事情。
 			UnableDetermineNPCDropsBossBag: 无法确定掉落此Boss包的npc：
 		}
-
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: 客户端配置
@@ -18,164 +17,146 @@ Mods: {
 				ItemLists: 允许列表（应该在游戏中修改！）
 				LoggingInformation: 记录信息
 				StorageSettings: 存储设置
-
 				BlackLists: {
 					Label: 黑名单（改为在游戏中管理！）
-					Tooltip:
+					Tooltip: 
 						'''
 						按住shift键右键单击储物袋中的物品，可以将物品列入游戏中的黑名单。
 						更改模组全名将阻止该列表工作，并且将创建一个新的空白列表。
 						'''
 				}
-
 				ClosingInventoryClosesBags: {
 					Label: 关闭库存关闭袋子
 					Tooltip: 如果为真，关闭玩家库存将关闭所有包。
 				}
-
 				DisableAllErrorMessagesInChat: {
 					Label: 禁用聊天中的所有错误消息
-					Tooltip:
+					Tooltip: 
 						'''
 						防止在您的聊天中显示要求您这样做的消息
 						请将此事报告给andro951（武器附魔）并描述您当时所做的事情。
 						'''
 				}
-
 				ForceAllowedListUpdate: {
 					Label: 强制更新允许列表
-					Tooltip:
+					Tooltip: 
 						'''
 						这将强制您通过手动调整要更新的配置对白名单和黑名单所做的更改。
 						更新完成后，此功能将立即关闭。 如果更新游戏中的白/黑名单则不需要。
 						这可以防止更改列表时需要重新加载。
 						'''
 				}
-
 				LogAllPlayerWhiteAndBlackLists: {
 					Label: 记录所有玩家白名单和黑名单
-					Tooltip:
+					Tooltip: 
 						'''
 						如果为 true，所有玩家白名单和黑名单都将记录到 client.log 中。
 						如果您对白/黑名单进行了更改，并且您认为这些更改应该是每个人的标准更改，请打印它们并向我发送您的 client.log。 -andro951
 						'''
 				}
-
 				OnlyShowErrorMessagesInChatOnce: {
 					Label: 仅在聊天中显示一次错误消息
-					Tooltip:
+					Tooltip: 
 						'''
 						消息将继续显示在您的聊天中，但仅在游戏会话期间显示一次。
 						（错误消息必须与之前要阻止的消息完全相同。）
 						'''
 				}
-
 				PrintItemDrops: {
 					Label: 记录物品掉落源列表
-					Tooltip:
+					Tooltip: 
 						'''
 						当您进入世界时，该列表将打印到 client.log 中。
 						client.log 默认位置为 C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				PrintLocalizationLists: {
 					Label: 记录所有翻译列表
-					Tooltip:
+					Tooltip: 
 						'''
 						当您进入世界时，这些列表将打印到 client.log 中。
 						client.log 默认位置为 C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				RemoveItemsWhenBlacklisted: {
 					Label: 列入黑名单时删除项目
-					Tooltip:
+					Tooltip: 
 						'''
 						如果为 true，则项目在列入黑名单时将从存储中删除。
 						按住shift键右键单击存储中的项目可以将其列入黑名单。
 						'''
 				}
-
 				ReOpenBagSwitcherAutomatically: {
 					Label: 自动重新打开袋子切换器
-					Tooltip:
+					Tooltip: 
 						'''
 						使用袋子切换器切换到袋子，然后关闭并重新打开袋子将得到原来的袋子
 						打开（袋子切换器关闭）而不是打开先前切换到的袋子。
 						'''
 				}
-
+				StopProvidingItemsInBagsForCrafting: {
+					Label: 停止提供袋子中的物品用于手工制作
+					Tooltip: 袋子里的物品通常可以用来制作，就像它们在你的库存中一样。 启用此选项可停止提供它们用于制作。
+				}
 				StorageSizes: {
 					Label: 存储大小
-					Tooltip:
+					Tooltip: 
 						'''
 						允许您更改存储的大小。
 						更改任何大小都需要您手动重新加载 mod 才能使更改生效。（存储的 mod 创建者必须选择其存储可配置，才能显示在此列表中。使用 + 按钮不会执行任何操作 .)
 						'''
 				}
-
 				UITransparency: {
 					Label: 用户界面透明度
 					Tooltip: 所有依赖于androLib的UI的透明度。 0 不可见，255 完全饱和。
 				}
-
 				UseAlternateRarityColors: {
 					Label: 使用替代稀有颜色和纹理
 					Tooltip: 默认颜色适合色盲。 替代纹理有细微差别，但被投票保留。
 				}
-
 				WhiteLists: {
 					Label: 白名单（改为在游戏中管理！）
-					Tooltip:
+					Tooltip: 
 						'''
 						通过用鼠标手动将物品单击到存储袋中，可以将物品列入游戏中的白名单。
 						更改模组全名将阻止该列表工作，并且将创建一个新的空白列表。
 						'''
 				}
 			}
-
 			ItemList: {
 				Tooltip: 允许您编辑包的白名单/黑名单。
-
 				ItemDefinitions: {
 					Label: 项目定义
 					Tooltip: 列表中的项目。 这将覆盖我的白/黑名单。
 				}
-
 				ModFullName: {
 					Label: 模组全名
 					Tooltip: 编辑此内容将导致列表无法工作。 它是用于确定列表属于哪个存储的键。
 				}
 			}
-
 			StorageSizePair: {
 				Tooltip: 允许您更改存储的大小。
-
 				ModFullName: {
 					Label: 模组全名
 					Tooltip: 编辑此内容将导致尺寸无法正常工作。 它是用于确定列表属于哪个存储的键。
 				}
-
 				StorageSize: {
 					Label: 存储大小
 					Tooltip: 存储的大小。 这是存储器中可以存储的物品数量。
 				}
 			}
 		}
-
 		GameModeNameIDs: {
 			Expert: 专家
 			Journey: 旅行
 			Master: 掌握
 			Normal: 普通的
 		}
-
 		Items: {
 		}
-
-		MagicStorageButtonsText.DepositAllFromVacuumBags: 全部存放在真空袋中
-
+		MagicStorageButtonsText: {
+			DepositAllFromVacuumBags: 全部存放在真空袋中
+		}
 		StorageText: {
 			ClearTrash: 清除垃圾
 			CloseBag: 关闭袋子

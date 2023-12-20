@@ -41,6 +41,7 @@ namespace androLib
 			}
 		}
 		private bool shouldVacuum = true;
+		public Func<Item, bool> CanVacuumItem = null;
 		private List<Func<int>> StorageItemTypeGetters { get; set; } = new();
 		public IEnumerable<int> StorageItemTypes => StorageItemTypeGetters.Select(g => g());
 		public Func<Color> GetUIColor { get; set; }
@@ -68,7 +69,7 @@ namespace androLib
 		private int myLastBagLocation = -1;
 		private int myLastIndexInTheBag = -1;
 		private int foundBagType = -1;
-		private Func<SortedSet<int>> GetAllowedList;
+		private Action<int, bool> UpdateAllowedList;
 		private bool IsBlacklistGetter;
 		uint nextBagCheck = 0;
 		private SortedDictionary<int, int> ItemsIHaveThisTick = new();
@@ -90,17 +91,18 @@ namespace androLib
 				Func<Item, bool> itemAllowedToBeStored, 
 				string nameLocalizationKey,
 				int storageSize, 
-				bool? isVacuumBag, 
+				bool? isVacuumBag,
 				Func<Color> getUIColor,
 				Func<Color> getScrollBarColor,
 				Func<Color> getButtonHoverColor,
 				List<Func<int>> storageItemTypeGetters,
 				int uiLeftDefault, 
 				int uiTopDefault,
-				Func<SortedSet<int>> getAllowedList,
+				Action<int, bool> updateAllowedList,
 				bool isBlackListGetter,
 				Action selectItemForUIOnly,
-				bool shouldRefreshInfoAccs
+				bool shouldRefreshInfoAccs,
+				Func<Item, bool> canVacuumItem
 			) {
 			StorageID = storageID;
 			Mod = mod;
@@ -121,10 +123,11 @@ namespace androLib
 			int columns = StorageSize < 80 ? 10 : 20;
 			LastUIResizePanelDefaultX = columns * DefaultResizePanelIncrement;
 			LastUIResizePanelDefaultY = StorageSize < 200 ? StorageSize.CeilingDivide(columns) * DefaultResizePanelIncrement : UIResizePanelDefaultX;
-			GetAllowedList = getAllowedList;
+			UpdateAllowedList = updateAllowedList;
 			IsBlacklistGetter = isBlackListGetter;
 			SelectItemForUIOnly = selectItemForUIOnly;
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
+			CanVacuumItem = canVacuumItem;
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
 			UIResizePanelX = UIResizePanelDefaultX;
@@ -271,10 +274,11 @@ namespace androLib
 				StorageItemTypeGetters,
 				UILeftDefault,
 				UITopDefault,
-				GetAllowedList,
+				UpdateAllowedList,
 				IsBlacklistGetter,
 				SelectItemForUIOnly,
-				ShouldRefreshInfoAccs
+				ShouldRefreshInfoAccs,
+				CanVacuumItem
 			);
 
 			clone.UILeft = UILeft;
@@ -506,13 +510,7 @@ namespace androLib
 			if (!HasWhiteOreBlacklistGetter)
 				return false;
 
-			SortedSet<int> allowedList = GetAllowedList();
-			if (IsBlacklistGetter) {
-				allowedList.Remove(type);
-			}
-			else {
-				allowedList.Add(type);
-			}
+			UpdateAllowedList(type, true);
 
 			return true;
 		}
@@ -520,18 +518,12 @@ namespace androLib
 			if (!HasWhiteOreBlacklistGetter)
 				return false;
 
-			SortedSet<int> allowedList = GetAllowedList();
-			if (IsBlacklistGetter) {
-				allowedList.Add(type);
-			}
-			else {
-				allowedList.Remove(type);
-			}
+			UpdateAllowedList(type, false);
 
 			return true;
 		}
 		public bool HasWhiteListGetter => !IsBlacklistGetter && HasWhiteOreBlacklistGetter;
-		public bool HasWhiteOreBlacklistGetter => GetAllowedList != null;
+		public bool HasWhiteOreBlacklistGetter => UpdateAllowedList != null;
 		private int GetBagSize(int bagSize) {
 			if (bagSize >= 1)
 				return bagSize;
@@ -982,10 +974,11 @@ namespace androLib
 				Func<int> storageItemTypeGetter,
 				int uiLeft,
 				int uiTop,
-				Func<SortedSet<int>> getAllowedList = null,
+				Action<int, bool> updateAllowedList = null,
 				bool isBlacklistGetter = false,
 				Action selectItemForUIOnly = null,
-				bool shouldRefreshInfoAccs = false
+				bool shouldRefreshInfoAccs = false,
+				Func<Item, bool> canVacuumItem = null
 			) {
 			if (Main.netMode == NetmodeID.Server)
 				return 0;
@@ -1008,10 +1001,11 @@ namespace androLib
 				new() { storageItemTypeGetter },
 				uiLeft, 
 				uiTop,
-				getAllowedList,
+				updateAllowedList,
 				isBlacklistGetter,
 				selectItemForUIOnly,
-				shouldRefreshInfoAccs
+				shouldRefreshInfoAccs,
+				canVacuumItem
 			);
 
 			RegisteredStorages.Add(storage);

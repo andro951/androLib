@@ -48,6 +48,9 @@ namespace androLib.Common.Configs
 		[ReloadRequired]
 		public bool UseAlternateRarityColors;
 
+		[DefaultValue(false)]
+		public bool StopProvidingItemsInBagsForCrafting;
+
 		public List<StorageSizePair> StorageSizes = new();
 
 		//Logging Information

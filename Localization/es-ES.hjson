@@ -1,4 +1,4 @@
-#
+#Contributors: @DaviReM#8740, @JoeDolca, @Haturok#8191, @Kokopai#2506  (All others Google Translated.  Needs review)
 Mods: {
 	androLib: {
 		AndroLibGameMessages: {
@@ -6,11 +6,10 @@ Mods: {
 			AddedToWhitelist: "{0} incluido en la lista blanca para {1}. Los elementos se pueden incluir en la lista negra haciendo clic derecho sobre ellos en {1} con la tecla Mayús presionada."
 			BossChecklistNotEnabled: El mod BossChecklist no está habilitado. Enchantments de armas usa BossChecklist para determinar qué jefes determinan las caídas de Power Booster de los jefes modificados. Dado que BossChecklist no está habilitado, todos los jefes modificados eliminarán el Power Booster normal.
 			FailedDetermineProgression: No se pudo determinar la progresión de Wall of Flesh y Plantera de BossChecklistData
-			MainUpdateCount: Main.GameUpdateCount: {0}
+			MainUpdateCount: "Main.GameUpdateCount: {0}"
 			ReportErrorToAndro: Informe esto a andro951 (Encantamientos de armas) junto con una descripción de lo que estaba haciendo en ese momento.
 			UnableDetermineNPCDropsBossBag: No se puede determinar el npc que arroja esta bolsa de jefe:
 		}
-
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Configuración del cliente
@@ -18,164 +17,146 @@ Mods: {
 				ItemLists: Listas permitidas (¡deberían modificarse en el juego!)
 				LoggingInformation: Información de registro
 				StorageSettings: Configuración de almacenamiento
-
 				BlackLists: {
 					Label: Listas negras (¡administrarlas en el juego!)
-					Tooltip:
+					Tooltip: 
 						'''
 						Los elementos se pueden incluir en la lista negra del juego haciendo clic derecho en un elemento en una bolsa de almacenamiento con la tecla Mayús presionada.
 						Cambiar el nombre completo del Mod evitará que esa lista funcione y se creará una nueva en blanco.
 						'''
 				}
-
 				ClosingInventoryClosesBags: {
 					Label: Cerrar inventario Cierra bolsas
 					Tooltip: Si es cierto, cerrar el inventario de jugadores cerrará todas las bolsas.
 				}
-
 				DisableAllErrorMessagesInChat: {
 					Label: Deshabilitar todos los mensajes de error en el chat
-					Tooltip:
+					Tooltip: 
 						'''
 						Evita que aparezcan mensajes en tu chat que te piden que
 						Informe esto a andro951 (Encantamientos de armas) junto con una descripción de lo que estaba haciendo en ese momento.
 						'''
 				}
-
 				ForceAllowedListUpdate: {
 					Label: Forzar actualización de la lista permitida
-					Tooltip:
+					Tooltip: 
 						'''
 						Esto forzará los cambios realizados en las listas blancas y negras que realizó ajustando manualmente la configuración para que se actualice.
 						Esto se desactivará inmediatamente cuando se complete la actualización. No es necesario si se actualizan las listas blanca/negra del juego.
 						Esto evita que sea necesario recargar al cambiar las listas.
 						'''
 				}
-
 				LogAllPlayerWhiteAndBlackLists: {
 					Label: Registrar todas las listas blancas y negras de jugadores
-					Tooltip:
+					Tooltip: 
 						'''
 						Si es verdadero, todas las listas blancas y negras de jugadores se registrarán en client.log.
 						Si realiza cambios en las listas blanca/negra que cree que deberían ser cambios estándar para todos, imprímalos y envíeme su client.log. -andro951
 						'''
 				}
-
 				OnlyShowErrorMessagesInChatOnce: {
 					Label: Mostrar mensajes de error en el chat solo una vez
-					Tooltip:
+					Tooltip: 
 						'''
 						Los mensajes seguirán apareciendo en tu chat, pero solo una vez durante una sesión de juego.
 						(El mensaje de error debe ser exactamente el mismo que un mensaje anterior para evitarlo).
 						'''
 				}
-
 				PrintItemDrops: {
 					Label: Registrar una lista de fuentes de entrega de artículos
-					Tooltip:
+					Tooltip: 
 						'''
 						La lista se imprime en client.log cuando ingresa a un mundo.
 						La ubicación predeterminada de client.log es C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				PrintLocalizationLists: {
 					Label: Registrar todas las listas de traducción
-					Tooltip:
+					Tooltip: 
 						'''
 						Las listas se imprimen en client.log cuando ingresa a un mundo.
 						La ubicación predeterminada de client.log es C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				RemoveItemsWhenBlacklisted: {
 					Label: Eliminar elementos cuando estén en la lista negra
-					Tooltip:
+					Tooltip: 
 						'''
 						Si es verdadero, los elementos se eliminarán del almacenamiento cuando estén en la lista negra.
 						Los elementos se pueden incluir en la lista negra haciendo clic derecho sobre ellos en el almacenamiento con la tecla Mayús presionada.
 						'''
 				}
-
 				ReOpenBagSwitcherAutomatically: {
 					Label: Volver a abrir el conmutador de bolsas automáticamente
-					Tooltip:
+					Tooltip: 
 						'''
 						Cambiar a una bolsa con el conmutador de bolsas, luego cerrar y volver a abrir la bolsa tendrá la bolsa original.
 						abierta (interruptor de bolsa cerrado) en lugar de abrir la bolsa previamente cambiada.
 						'''
 				}
-
+				StopProvidingItemsInBagsForCrafting: {
+					Label: Deje de proporcionar artículos en bolsas para manualidades
+					Tooltip: Los artículos en bolsas generalmente están disponibles para su elaboración como si estuvieran en su inventario. Habilite esta opción para dejar de proporcionarlos para la elaboración.
+				}
 				StorageSizes: {
 					Label: Tamaños de almacenamiento
-					Tooltip:
+					Tooltip: 
 						'''
 						Le permite cambiar el tamaño de los almacenamientos.
 						Cambiar cualquiera de los tamaños requiere que recargues manualmente los mods para que el cambio surta efecto. (El creador del mod del almacenamiento debe elegir que su almacenamiento sea configurable para que aparezca en esta lista. Usar el botón + no hará nada .)
 						'''
 				}
-
 				UITransparency: {
 					Label: Transparencia de la interfaz de usuario
 					Tooltip: La transparencia de todas las UI que dependen de androLib. 0 es invisible, 255 completamente saturado.
 				}
-
 				UseAlternateRarityColors: {
 					Label: Utilice colores y texturas de rareza alternativos
 					Tooltip: Los colores predeterminados son aptos para daltónicos. Las texturas alternativas tienen diferencias menores, pero se votó a favor de mantenerlas.
 				}
-
 				WhiteLists: {
 					Label: Listas blancas (¡administrarlas en el juego!)
-					Tooltip:
+					Tooltip: 
 						'''
 						Los elementos se pueden incluir en la lista blanca del juego haciendo clic manualmente en una bolsa de almacenamiento con el mouse.
 						Cambiar el nombre completo del Mod evitará que esa lista funcione y se creará una nueva en blanco.
 						'''
 				}
 			}
-
 			ItemList: {
 				Tooltip: Le permite editar la lista blanca/lista negra de las bolsas.
-
 				ItemDefinitions: {
 					Label: Definiciones de elementos
 					Tooltip: Elementos de la lista. Esto anulará mis listas blanca/negra.
 				}
-
 				ModFullName: {
 					Label: Nombre completo del mod
 					Tooltip: Editar esto evitará que la lista funcione. Es la clave utilizada para determinar a qué almacenamiento pertenece la lista.
 				}
 			}
-
 			StorageSizePair: {
 				Tooltip: Le permite cambiar el tamaño del almacenamiento.
-
 				ModFullName: {
 					Label: Nombre completo del mod
 					Tooltip: Editar esto evitará que el tamaño funcione. Es la clave utilizada para determinar a qué almacenamiento pertenece la lista.
 				}
-
 				StorageSize: {
 					Label: Tamaño de almacenamiento
 					Tooltip: El tamaño del almacenamiento. Esta es la cantidad de artículos que se pueden almacenar en el almacén.
 				}
 			}
 		}
-
 		GameModeNameIDs: {
 			Expert: Experto
 			Journey: Viaje
 			Master: Maestro
 			Normal: Normal
 		}
-
 		Items: {
 		}
-
-		MagicStorageButtonsText.DepositAllFromVacuumBags: Deposite todo desde bolsas de vacío
-
+		MagicStorageButtonsText: {
+			DepositAllFromVacuumBags: Deposite todo desde bolsas de vacío
+		}
 		StorageText: {
 			ClearTrash: Limpiar la papelera
 			CloseBag: Cerrar bolsa

@@ -1,4 +1,4 @@
-#
+#Contributors: @Shiro ᵘʷᵘ#6942, @Fischstäbchen#2603  (All others Google Translated.  Needs review)
 Mods: {
 	androLib: {
 		AndroLibGameMessages: {
@@ -6,11 +6,10 @@ Mods: {
 			AddedToWhitelist: "{0} wurde für {1} auf die Whitelist gesetzt. Elemente können auf die Blacklist gesetzt werden, indem Sie bei gedrückter Umschalttaste mit der rechten Maustaste auf sie in {1} klicken."
 			BossChecklistNotEnabled: Der BossChecklist-Mod ist nicht aktiviert. Weapon Enchantments verwendet BossChecklist, um zu bestimmen, welche Bosse Power-Booster-Drops von modifizierten Bossen bestimmen. Da BossChecklist nicht aktiviert ist, lassen alle modifizierten Bosse den regulären Power Booster fallen.
 			FailedDetermineProgression: Der Fortschritt von Wall of Flesh und Plantera konnte anhand von BossChecklistData nicht ermittelt werden
-			MainUpdateCount: Main.GameUpdateCount: {0}
+			MainUpdateCount: "Main.GameUpdateCount: {0}"
 			ReportErrorToAndro: Bitte melden Sie dies andro951 (Weapon Enchantments) zusammen mit einer Beschreibung dessen, was Sie zu diesem Zeitpunkt getan haben.
 			UnableDetermineNPCDropsBossBag: Der NPC, der diese Boss-Tasche fallen lässt, kann nicht ermittelt werden:
 		}
-
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Client-Konfiguration
@@ -18,164 +17,146 @@ Mods: {
 				ItemLists: Erlaubte Listen (Sollten stattdessen im Spiel geändert werden!)
 				LoggingInformation: Protokollierungsinformationen
 				StorageSettings: Speichereinstellungen
-
 				BlackLists: {
 					Label: Schwarze Listen (Stattdessen im Spiel verwalten!)
-					Tooltip:
+					Tooltip: 
 						'''
 						Gegenstände können im Spiel auf die schwarze Liste gesetzt werden, indem man bei gedrückter Umschalttaste mit der rechten Maustaste auf einen Gegenstand in einer Aufbewahrungstasche klickt.
 						Wenn Sie den vollständigen Mod-Namen ändern, funktioniert diese Liste nicht mehr und es wird eine neue, leere Liste erstellt.
 						'''
 				}
-
 				ClosingInventoryClosesBags: {
 					Label: Durch das Schließen des Inventars werden Taschen geschlossen
 					Tooltip: Wenn dies der Fall ist, werden beim Schließen des Inventars des Spielers alle Taschen geschlossen.
 				}
-
 				DisableAllErrorMessagesInChat: {
 					Label: Deaktivieren Sie alle Fehlermeldungen im Chat
-					Tooltip:
+					Tooltip: 
 						'''
 						Verhindert, dass in Ihrem Chat Nachrichten angezeigt werden, in denen Sie dazu aufgefordert werden
 						Bitte melden Sie dies andro951 (Weapon Enchantments) zusammen mit einer Beschreibung dessen, was Sie zu diesem Zeitpunkt getan haben.
 						'''
 				}
-
 				ForceAllowedListUpdate: {
 					Label: Aktualisierung der Zulassungsliste erzwingen
-					Tooltip:
+					Tooltip: 
 						'''
 						Dadurch werden Änderungen an den Whitelists und Blacklists erzwungen, die Sie durch manuelles Anpassen der zu aktualisierenden Konfiguration vorgenommen haben.
 						Dies wird sofort wieder deaktiviert, wenn das Update abgeschlossen ist. Dies ist nicht erforderlich, wenn die weißen/schwarzen Listen im Spiel aktualisiert werden.
 						Dadurch wird verhindert, dass beim Ändern der Listen ein Neuladen erforderlich ist.
 						'''
 				}
-
 				LogAllPlayerWhiteAndBlackLists: {
 					Label: Protokollieren Sie die weißen und schwarzen Listen aller Spieler
-					Tooltip:
+					Tooltip: 
 						'''
 						Bei „true“ werden alle Whitelists und Blacklists der Spieler im client.log protokolliert.
 						Wenn Sie Änderungen an den White/Black-Listen vornehmen, die Ihrer Meinung nach für alle Standardänderungen sein sollten, drucken Sie diese bitte aus und senden Sie mir Ihr client.log. -andro951
 						'''
 				}
-
 				OnlyShowErrorMessagesInChatOnce: {
 					Label: Fehlermeldungen im Chat nur einmal anzeigen
-					Tooltip:
+					Tooltip: 
 						'''
 						Nachrichten werden weiterhin in Ihrem Chat angezeigt, jedoch nur einmal während einer Spielsitzung.
 						(Die Fehlermeldung muss exakt mit einer vorherigen Meldung übereinstimmen, um verhindert zu werden.)
 						'''
 				}
-
 				PrintItemDrops: {
 					Label: Protokollieren Sie eine Liste der Item-Drop-Quellen
-					Tooltip:
+					Tooltip: 
 						'''
 						Die Liste wird im client.log gedruckt, wenn Sie eine Welt betreten.
 						Der Standardspeicherort von client.log ist C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				PrintLocalizationLists: {
 					Label: Protokollieren Sie alle Übersetzungslisten
-					Tooltip:
+					Tooltip: 
 						'''
 						Die Listen werden im client.log gedruckt, wenn Sie eine Welt betreten.
 						Der Standardspeicherort von client.log ist C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
-
 				RemoveItemsWhenBlacklisted: {
 					Label: Entfernen Sie Elemente, wenn sie auf der schwarzen Liste stehen
-					Tooltip:
+					Tooltip: 
 						'''
 						Wenn „true“, werden Elemente aus dem Speicher entfernt, wenn sie auf die schwarze Liste gesetzt werden.
 						Elemente können auf die schwarze Liste gesetzt werden, indem Sie mit der rechten Maustaste im Speicher darauf klicken und dabei die Umschalttaste gedrückt halten.
 						'''
 				}
-
 				ReOpenBagSwitcherAutomatically: {
 					Label: Beutelwechsler automatisch wieder öffnen
-					Tooltip:
+					Tooltip: 
 						'''
 						Wenn Sie mit dem Beutelwechsler zu einer Tasche wechseln und die Tasche dann schließen und wieder öffnen, erhalten Sie die ursprüngliche Tasche
 						öffnen (Beutelumschalter geschlossen), anstatt den zuvor geschalteten Beutel zu öffnen.
 						'''
 				}
-
+				StopProvidingItemsInBagsForCrafting: {
+					Label: Hören Sie auf, Gegenstände in Taschen zum Basteln bereitzustellen
+					Tooltip: Gegenstände in Taschen stehen normalerweise zum Herstellen zur Verfügung, als ob sie in Ihrem Inventar wären. Aktivieren Sie diese Option, um sie nicht mehr zum Herstellen bereitzustellen.
+				}
 				StorageSizes: {
 					Label: Speichergrößen
-					Tooltip:
+					Tooltip: 
 						'''
 						Ermöglicht Ihnen, die Größe der Speicher zu ändern.
 						Wenn Sie eine der Größen ändern, müssen Sie die Mods manuell neu laden, damit die Änderung wirksam wird. (Der Mod-Ersteller des Speichers muss festlegen, dass sein Speicher konfigurierbar ist, damit er in dieser Liste angezeigt wird. Die Verwendung der Schaltfläche „+“ hat keine Auswirkung .)
 						'''
 				}
-
 				UITransparency: {
 					Label: UI-Transparenz
 					Tooltip: Die Transparenz aller Benutzeroberflächen, die von androLib abhängen. 0 ist unsichtbar, 255 vollständig gesättigt.
 				}
-
 				UseAlternateRarityColors: {
 					Label: Verwenden Sie alternative Raritätsfarben und -texturen
 					Tooltip: Die Standardfarben sind farbenblind. Die alternativen Texturen weisen geringfügige Unterschiede auf, es wurde jedoch für die Beibehaltung gestimmt.
 				}
-
 				WhiteLists: {
 					Label: Weiße Listen (Stattdessen im Spiel verwalten!)
-					Tooltip:
+					Tooltip: 
 						'''
 						Gegenstände können im Spiel auf die Whitelist gesetzt werden, indem man sie manuell mit der Maus in eine Aufbewahrungstasche klickt.
 						Wenn Sie den vollständigen Mod-Namen ändern, funktioniert diese Liste nicht mehr und es wird eine neue, leere Liste erstellt.
 						'''
 				}
 			}
-
 			ItemList: {
 				Tooltip: Ermöglicht Ihnen, die Whitelist/Blacklist der Taschen zu bearbeiten.
-
 				ItemDefinitions: {
 					Label: Artikeldefinitionen
 					Tooltip: Elemente in der Liste. Dadurch werden meine weißen/schwarzen Listen überschrieben.
 				}
-
 				ModFullName: {
 					Label: Vollständiger Mod-Name
 					Tooltip: Wenn Sie dies bearbeiten, funktioniert die Liste nicht mehr. Dies ist der Schlüssel, der verwendet wird, um zu bestimmen, zu welchem Speicher die Liste gehört.
 				}
 			}
-
 			StorageSizePair: {
 				Tooltip: Ermöglicht Ihnen, die Größe des Speichers zu ändern.
-
 				ModFullName: {
 					Label: Vollständiger Mod-Name
 					Tooltip: Wenn Sie dies bearbeiten, funktioniert die Größe nicht mehr. Dies ist der Schlüssel, der verwendet wird, um zu bestimmen, zu welchem Speicher die Liste gehört.
 				}
-
 				StorageSize: {
 					Label: Speichergröße
 					Tooltip: Die Größe des Speichers. Dies ist die Anzahl der Artikel, die im Lager gelagert werden können.
 				}
 			}
 		}
-
 		GameModeNameIDs: {
 			Expert: Experte
 			Journey: Reise
 			Master: Meister
 			Normal: Normal
 		}
-
 		Items: {
 		}
-
-		MagicStorageButtonsText.DepositAllFromVacuumBags: Bewahren Sie alles aus Vakuumbeuteln auf
-
+		MagicStorageButtonsText: {
+			DepositAllFromVacuumBags: Bewahren Sie alles aus Vakuumbeuteln auf
+		}
 		StorageText: {
 			ClearTrash: Leeren Sie den Papierkorb
 			CloseBag: Beutel schließen
