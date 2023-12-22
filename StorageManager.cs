@@ -28,6 +28,7 @@ namespace androLib
 		public Func<Item, bool> ItemAllowedToBeStored { get; set; }
 		public string NameLocalizationKey { get; set; }
 		public int StorageSize { get; set; }
+		private int originalStorageSize;
 		public bool? IsVacuumBag { get; }
 		public bool ShouldVacuum {
 			get => shouldVacuum;
@@ -41,7 +42,7 @@ namespace androLib
 			}
 		}
 		private bool shouldVacuum = true;
-		public Func<Item, bool> CanVacuumItem = null;
+		public Func<Item, bool> CanVacuumItemWhenNotContained = null;
 		private List<Func<int>> StorageItemTypeGetters { get; set; } = new();
 		public IEnumerable<int> StorageItemTypes => StorageItemTypeGetters.Select(g => g());
 		public Func<Color> GetUIColor { get; set; }
@@ -110,7 +111,8 @@ namespace androLib
 			modFullName = DefaultModFullName();
 			ItemAllowedToBeStored = itemAllowedToBeStored;
 			NameLocalizationKey = nameLocalizationKey;
-			StorageSize = GetBagSize(storageSize);
+			originalStorageSize = storageSize;
+			StorageSize = GetBagSize(originalStorageSize);
 			IsVacuumBag = isVacuumBag;
 			GetUIColor = getUIColor;
 			GetScrollBarColor = getScrollBarColor;
@@ -127,7 +129,7 @@ namespace androLib
 			IsBlacklistGetter = isBlackListGetter;
 			SelectItemForUIOnly = selectItemForUIOnly;
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
-			CanVacuumItem = canVacuumItem;
+			CanVacuumItemWhenNotContained = canVacuumItem;
 			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
 			UIResizePanelX = UIResizePanelDefaultX;
@@ -173,20 +175,15 @@ namespace androLib
 			tag[$"{modFullName}{ShouldDepositToMagicStorageTag}"] = ShouldDepositToMagicStorage;
 		}
 		public void LoadData(TagCompound tag) {
-			int itemCount = StorageSize;
 			string modFullName = GetModFullName();
-			if (!tag.TryGet($"{modFullName}{ItemsTag}", out Item[] items))
-				items = Enumerable.Repeat(new Item(), itemCount).ToArray();
-
-			if (items.Length < itemCount)
-				items = items.Concat(Enumerable.Repeat(new Item(), itemCount - items.Length)).ToArray();
+			if (!tag.TryGet($"{modFullName}{ItemsTag}", out Items))
+				Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 
 			//Mod != null is checking if the bag is loaded the correct way instead of unloaded.
-			if (Mod != null && items.Length > itemCount)
-				TryShiftDownAndReduceToMaxSize(ref items, itemCount);
+			if (Mod != null && Items.Length > StorageSize)
+				TryUpdateItemsToCurrentStorageSize();
 
-			bool temp = !items.Where(i => !i.NullOrAir()).Any();
-			Items = items;
+			bool temp = !Items.Where(i => !i.NullOrAir()).Any();
 			
 			int uiLeft = tag.Get<int>($"{modFullName}{UILeftTag}");
 			int uiTop = tag.Get<int>($"{modFullName}{UITopTag}");
@@ -219,29 +216,37 @@ namespace androLib
 
 			ShouldDepositToMagicStorage = tag.Get<bool>($"{modFullName}{ShouldDepositToMagicStorageTag}");
 		}
-		private void TryShiftDownAndReduceToMaxSize(ref Item[] items, int itemCount) {
-			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
-			int nonAirItemCount = nonAirItems.Count();
-			if (nonAirItemCount >= itemCount) {
-				items = nonAirItems.ToArray();
+		private void TryUpdateItemsToCurrentStorageSize() {
+			if (Items.Length == StorageSize)
 				return;
-			}
-			else if (nonAirItemCount < 1) {
-				items = Enumerable.Repeat(new Item(), itemCount).ToArray();
+
+			if (Items.Length < StorageSize) {
+				Items = Items.Concat(Enumerable.Repeat(new Item(), StorageSize - Items.Length)).ToArray();
 				return;
 			}
 
-			int allowedOpenSlots = itemCount - nonAirItemCount;
+			IEnumerable<Item> nonAirItems = Items.Where(item => !item.NullOrAir());
+			int nonAirItemCount = nonAirItems.Count();
+			if (nonAirItemCount >= StorageSize) {
+				Items = nonAirItems.ToArray();
+				return;
+			}
+			else if (nonAirItemCount < 1) {
+				Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
+				return;
+			}
+
+			int allowedOpenSlots = StorageSize - nonAirItemCount;
 			int index = 0;
 			int airCount = 0;
-			while (airCount <= allowedOpenSlots && index <= itemCount) {
-				if (items[index].NullOrAir())
+			while (airCount <= allowedOpenSlots && index <= StorageSize) {
+				if (Items[index].NullOrAir())
 					airCount++;
 
 				index++;
 			}
 
-			items = items.Take(index - 1).Concat(nonAirItems.Reverse().Take(itemCount -(index - 1)).Reverse()).ToArray();
+			Items = Items.Take(index - 1).Concat(nonAirItems.Reverse().Take(StorageSize - (index - 1)).Reverse()).ToArray();
 		}
 		private bool TryGetNextOpenSlot(Item[] items, ref int nextOpenSlot, bool fromEnd = false) {
 			if (!fromEnd) {
@@ -266,7 +271,7 @@ namespace androLib
 				VacuumStorageType,
 				ItemAllowedToBeStored,
 				NameLocalizationKey,
-				StorageSize,
+				originalStorageSize,
 				IsVacuumBag,
 				GetUIColor,
 				GetScrollBarColor,
@@ -278,11 +283,12 @@ namespace androLib
 				IsBlacklistGetter,
 				SelectItemForUIOnly,
 				ShouldRefreshInfoAccs,
-				CanVacuumItem
+				CanVacuumItemWhenNotContained
 			);
 
 			clone.UILeft = UILeft;
 			clone.UITop = UITop;
+			clone.StorageSize = StorageSize;
 			clone.Items = new Item[StorageSize];
 			Array.Copy(Items, clone.Items, StorageSize);
 			clone.ShouldVacuum = ShouldVacuum;
@@ -548,6 +554,17 @@ namespace androLib
 
 			return bagSize;
 		}
+		public void ResetBagSizeFromConfig() {
+			if (originalStorageSize >= 0)
+				return;
+
+			int oldStorageSize = StorageSize;
+			StorageSize = GetBagSize(originalStorageSize);
+			if (oldStorageSize == StorageSize)
+				return;
+
+			TryUpdateItemsToCurrentStorageSize();
+		}
 		private uint nextContainsUpdate = 0;
 		public bool Contains(Item item, out int index) => Contains(item.type, out index);
 		public bool Contains(int itemType, out int index) {
@@ -606,7 +623,7 @@ namespace androLib
 			return ItemsIHaveThisTick.ContainsKey(itemType);
 		}
 		public override string ToString() {
-			return GetModFullName();
+			return $"{GetModFullName()} ({StorageID})";
 		}
 	}
 	public static class StorageManager {
@@ -874,7 +891,8 @@ namespace androLib
 			itemList = GetPlayerBlacklist(storageID);
 			return true;
 		}
-		public static void AddToPlayerWhitelist(int storageID, int itemType) {
+		public static bool AddToPlayerWhitelist(int storageID, int itemType) {
+			bool message = false;
 			if (TryGetPlayerWhitelist(storageID, out ItemList whiteList)) {
 				for (int i = 0; i < whiteList.ItemDefinitions.Count; i++) {
 					if (whiteList.ItemDefinitions[i].Type == itemType)
@@ -882,33 +900,51 @@ namespace androLib
 				}
 
 				whiteList.ItemDefinitions.Add(new(itemType));
+				message = true;
 			}
 
-			if (RegisteredStorages[storageID].ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
-				string bagName = bagItemTypes.First().CSI().Name;
-				Main.NewText(AndroLibGameMessages.AddedToWhitelist.ToString().Lang(AndroMod.ModName, L_ID1.AndroLibGameMessages, new object[] { itemType.CSI().Name, bagName }));
+			message |= TryRemoveFromPlayerBlacklist(storageID, itemType, true);
+
+			if (message) {
+				if (RegisteredStorages[storageID].ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
+					string bagName = bagItemTypes.First().CSI().Name;
+					Main.NewText(AndroLibGameMessages.AddedToWhitelist.ToString().Lang(AndroMod.ModName, L_ID1.AndroLibGameMessages, new object[] { itemType.CSI().Name, bagName }));
+				}
 			}
 
-			TryRemoveFromPlayerBlacklist(storageID, itemType, true);
+			return message;
 		}
-		public static void AddToPlayerBlacklist(int storageID, int itemType) {
-			if (TryGetPlayerBlacklist(storageID, out ItemList blackList)) {
+		public static bool AddToPlayerBlacklist(int storageID, int itemType) {
+			bool message = false;
+			Storage storage = BagUIs[storageID].Storage;
+			bool skipAddingToBlacklist = storage.CanVacuumItemWhenNotContained != null && storage.HasWhiteListGetter && storage.CanVacuumItemWhenNotContained(itemType.CSI());
+			if (!skipAddingToBlacklist && TryGetPlayerBlacklist(storageID, out ItemList blackList)) {
 				for (int i = 0; i < blackList.ItemDefinitions.Count; i++) {
 					if (blackList.ItemDefinitions[i].Type == itemType)
 						break;
 				}
 
 				blackList.ItemDefinitions.Add(new(itemType));
+				message = true;
 			}
 
-			if (RegisteredStorages[storageID].ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
-				string bagName = bagItemTypes.First().CSI().Name;
-				Main.NewText(AndroLibGameMessages.AddedToBlacklist.ToString().Lang(AndroMod.ModName, L_ID1.AndroLibGameMessages, new object[] { itemType.CSI().Name, bagName }));
+			message |= TryRemoveFromPlayerWhitelist(storageID, itemType, true);
+
+			if (message) {
+				if (RegisteredStorages[storageID].ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
+					string bagName = bagItemTypes.First().CSI().Name;
+					if (skipAddingToBlacklist) {
+						Main.NewText(AndroLibGameMessages.RemovedFromWhitelist.ToString().Lang(AndroMod.ModName, L_ID1.AndroLibGameMessages, new object[] { itemType.CSI().Name, bagName }));
+					}
+					else {
+						Main.NewText(AndroLibGameMessages.AddedToBlacklist.ToString().Lang(AndroMod.ModName, L_ID1.AndroLibGameMessages, new object[] { itemType.CSI().Name, bagName }));
+					}
+				}
 			}
 
-			TryRemoveFromPlayerWhitelist(storageID, itemType, true);
+			return message && !skipAddingToBlacklist;
 		}
-		public static void TryRemoveFromPlayerWhitelist(int storageID, int itemType, bool forseSave = false) {
+		public static bool TryRemoveFromPlayerWhitelist(int storageID, int itemType, bool forseSave = false) {
 			bool shouldSave = forseSave;
 			if (TryGetPlayerWhitelist(storageID, out ItemList whiteList)) {
 				for (int i = 0; i < whiteList.ItemDefinitions.Count; i++) {
@@ -921,11 +957,13 @@ namespace androLib
 			}
 
 			if (!shouldSave)
-				return;
+				return shouldSave;
 
 			SaveClientAndroConfig();
+
+			return shouldSave;
 		}
-		public static void TryRemoveFromPlayerBlacklist(int storageID, int itemType, bool forseSave = false) {
+		public static bool TryRemoveFromPlayerBlacklist(int storageID, int itemType, bool forseSave = false) {
 			bool shouldSave = forseSave;
 			if (TryGetPlayerBlacklist(storageID, out ItemList blackList)) {
 				for (int i = 0; i < blackList.ItemDefinitions.Count; i++) {
@@ -938,9 +976,11 @@ namespace androLib
 			}
 
 			if (!shouldSave)
-				return;
+				return shouldSave;
 
 			SaveClientAndroConfig();
+
+			return shouldSave;
 		}
 		public static SortedSet<int> GetPlayerWhiteListSortedSet(int storageID) => TryGetPlayerWhitelist(storageID, out ItemList whiteList) ? new (whiteList.ItemDefinitions.Select(d => d.Type)) : new();
 		public static SortedSet<int> GetPlayerBlackListSortedSet(int storageID) => TryGetPlayerBlacklist(storageID, out ItemList blackList) ? new (blackList.ItemDefinitions.Select(d => d.Type)) : new();
@@ -1134,6 +1174,11 @@ namespace androLib
 		public static void GiveNewItemToPlayer(int itemType, Player player) {
 			Item item = new Item(itemType);
 			TryReturnItemToPlayer(ref item, player, true);
+		}
+		public static void ResetAllBagSizesFromConfig() {
+			foreach (BagUI bagUI in BagUIs) {
+				bagUI.MyStorage.ResetBagSizeFromConfig();
+			}
 		}
 
 

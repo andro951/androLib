@@ -115,12 +115,6 @@ namespace androLib.Localization
 									{ L_ID3.Tooltip.ToString(), "Messages will continue to show up in your chat, but only once during a game session.\n" +
 														"(The error message must be the exact same as a previous message to be prevented.)" }
 								}) },
-								{ nameof(AndroClientConfig.ForceAllowedListUpdate), new(dict: new() {
-									{ L_ID3.Label.ToString(), nameof(AndroClientConfig.ForceAllowedListUpdate).AddSpaces() },
-									{ L_ID3.Tooltip.ToString(), "This will force changes made to the Whitelists and Blacklists that you made by manually adjusting the config to be updated.\n" +
-										"This will be immediately turned back off when the update is complete.  It is not required if updating the white/black lists in game.\n" +
-										"This is prevents requiring a reload when changing the lists." }
-								}) },
 								{ nameof(AndroClientConfig.WhiteLists), new(dict: new() {
 									{ L_ID3.Label.ToString(), $"{nameof(AndroClientConfig.WhiteLists).AddSpaces()} (Manage in game instead!)" },
 									{ L_ID3.Tooltip.ToString(), "Items can be whitelisted in game by manually clicking them into a storage bag with your mouse.\n" +
@@ -170,6 +164,7 @@ namespace androLib.Localization
 							dict: new() {
 								{ AndroLibGameMessages.AddedToWhitelist.ToString(), "{0} whitelisted for the {1}.  Items can be blacklisted by right clicking on them in the {1} with the shift key held." },
 								{ AndroLibGameMessages.AddedToBlacklist.ToString(), "{0} blacklisted for the {1}.  Items can be whitelisted by placing them into the {1} with the mouse." },
+								{ AndroLibGameMessages.RemovedFromWhitelist.ToString(), "{0} removed from whitelist for the {1}." },
 								{ AndroLibGameMessages.BossChecklistNotEnabled.ToString(), "BossChecklist mod is not enabled.  Weapon Enchantments uses BossChecklist to determine which bosses determine Power Booster drops from Modded bosses.  Since BossChecklist is not enabled, all Modded bosses will drop the regular Power Booster." },
 								{ AndroLibGameMessages.FailedDetermineProgression.ToString(), "Failed to determine the progression of Wall of Flesh and Plantera from BossChecklistData" },
 								{ AndroLibGameMessages.UnableDetermineNPCDropsBossBag.ToString(), "Unable to determine the npc that drops this boss bag:" },

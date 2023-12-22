@@ -13,8 +13,15 @@ namespace androLib.Items
 {
 	public interface INeedsSetUpAllowedList
 	{
+		public int BagStorageID { get; }
 		public AllowedItemsManager GetAllowedItemsManager { get; }
 		public virtual void PostSetup() { }
+		public static Dictionary<int, AllowedItemsManager> AllowedItemsManagers = new();
+		public Func<AllowedItemsManager> CreateAllowedItemsManager { get; }
+		public static void RegisterAllowedItemsManager(int storageID, Func<AllowedItemsManager> allowedItemsManager) {
+			if (!AllowedItemsManagers.ContainsKey(storageID))
+				AllowedItemsManagers.Add(storageID, allowedItemsManager());
+		}
 	}
 
 	public class AllowedItemsManager {
@@ -33,6 +40,7 @@ namespace androLib.Items
 		private Func<SortedSet<ItemGroup>> GetDevItemGroups = null;
 		private Func<SortedSet<string>> GetDevEndWords = null;
 		private Func<SortedSet<string>> GetDevSearchWords = null;
+		private Action PostSetupAction = null;
 
 		private SortedSet<int> playerWhiteList = null;
 		private SortedSet<int> playerBlackList = null;
@@ -60,7 +68,8 @@ namespace androLib.Items
 			Func<SortedSet<string>> DevModBlackList = null,
 			Func<SortedSet<ItemGroup>> DevItemGroups = null,
 			Func<SortedSet<string>> DevEndWords = null,
-			Func<SortedSet<string>> DevSearchWords = null
+			Func<SortedSet<string>> DevSearchWords = null,
+			Action PostSetUp = null
 			) {
 
 			getOwningBagItemType = GetBagItemType;
@@ -76,6 +85,7 @@ namespace androLib.Items
 			GetDevItemGroups = DevItemGroups;
 			GetDevEndWords = DevEndWords;
 			GetDevSearchWords = DevSearchWords;
+			PostSetupAction = PostSetUp;
 		}
 		public void Setup() {
 			AllowedItems.Clear();
@@ -202,6 +212,7 @@ namespace androLib.Items
 				playerModBlackListForLog = null;
 			}
 		}
+		public void PostSetup() => PostSetupAction?.Invoke();
 	}
 
 	public struct ItemSetInfo

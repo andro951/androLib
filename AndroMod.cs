@@ -60,6 +60,11 @@ namespace androLib
 		public static bool bossChecklistEnabled = ModLoader.TryGetMod("BossChecklist", out Mod _);
 		public static Mod wikiThis;
 		public static bool wikiThisEnabled = ModLoader.TryGetMod("Wikithis", out wikiThis);
+		public static Mod GadgetGalore;
+		public static bool gadgetGaloreEnabled = ModLoader.TryGetMod("GadgetGalore", out GadgetGalore);
+		public const string dbzTerrariaName = "DBZMODPORT";
+		public static Mod dbzTerrariaMod;
+		public static bool dbzTerrariaEnabled = ModLoader.TryGetMod(dbzTerrariaName, out dbzTerrariaMod);
 
 		public static int VanillaRecipeCount = -1;
 		private enum CallID {
@@ -436,7 +441,7 @@ namespace androLib
 			//IL_032f: call void Terraria.ModLoader.TileLoader::NearbyEffects(int32, int32, int32, bool)
 
 			if (!c.TryGotoNext(MoveType.Before,
-			i => i.MatchLdloc(5),
+				i => i.MatchLdloc(5),
 				i => i.MatchLdloc(6),
 				i => i.MatchLdloca(7),
 				i => i.MatchCall(out _),

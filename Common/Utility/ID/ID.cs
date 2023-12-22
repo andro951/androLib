@@ -142,6 +142,7 @@ namespace androLib.Common.Utility
 	public enum AndroLibGameMessages {
 		AddedToWhitelist,
 		AddedToBlacklist,
+		RemovedFromWhitelist,
 		BossChecklistNotEnabled,
 		FailedDetermineProgression,
 		UnableDetermineNPCDropsBossBag,

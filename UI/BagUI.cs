@@ -613,9 +613,11 @@ namespace androLib.UI
 								bool doClickInteractions = Main.mouseItem.NullOrAir();
 								bool unloaded = Main.mouseItem.ModItem is UnloadedItem;
                                 if (MasterUIManager.LeftMouseClicked) {
-									if (!doClickInteractions && (item.NullOrAir() || Main.mouseItem.type == item.type) && (!DisplayedBagUI.CanBeStored(Main.mouseItem) || Storage.IsVacuumBag == null && Storage.CanVacuumItem != null && !Storage.CanVacuumItem(item))) {
-										if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
-											SoundEngine.PlaySound(SoundID.ResearchComplete);
+									if (!doClickInteractions && (item.NullOrAir() || Main.mouseItem.type == item.type)) {
+										if (!DisplayedBagUI.CanBeStored(Main.mouseItem) || Storage.IsVacuumBag == null && Storage.HasWhiteListGetter && Storage.CanVacuumItemWhenNotContained != null && !Storage.CanVacuumItemWhenNotContained(Main.mouseItem)) {
+											if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
+												SoundEngine.PlaySound(SoundID.ResearchComplete);
+										}
 									}
 								}
 
@@ -874,7 +876,7 @@ namespace androLib.UI
 		#region Single
 
 		public bool CanBeStored(Item item) => !item.NullOrAir() && MyStorage.ItemAllowedToBeStored(item);
-		public bool VacuumAllowed(Item item) => MyStorage.IsVacuumBag == true || MyStorage.IsVacuumBag == null && MyStorage.CanVacuumItem != null && MyStorage.CanVacuumItem(item);
+		public bool VacuumAllowed(Item item) => MyStorage.IsVacuumBag == true || MyStorage.IsVacuumBag == null && (MyStorage.CanVacuumItemWhenNotContained != null && MyStorage.CanVacuumItemWhenNotContained(item) || ContainsItem(item));
 		public bool ContainsItem(Item item) => MyStorage.ContainsSlow(item);
 		public bool RoomInStorage(Item item) {
 			Item[] inv = MyInventory;
@@ -1105,17 +1107,19 @@ namespace androLib.UI
 			}
 		}
 		public bool TryAddToPlayerWhitelist(int type) {
-			if (Storage.TryAddToPlayerWhitelist(type)) {
-				StorageManager.AddToPlayerWhitelist(StorageID, type);
-				return true;
+			if (Storage.HasWhiteOreBlacklistGetter) {
+				bool updated = StorageManager.AddToPlayerWhitelist(StorageID, type);
+				Storage.TryAddToPlayerWhitelist(type);
+				return updated;
 			}
 
 			return false;
 		}
 		public bool TryAddToPlayerBlacklist(int type) {
-			if (Storage.TryAddToPlayerBlacklist(type)) {
-				StorageManager.AddToPlayerBlacklist(StorageID, type);
-				return true;
+			if (Storage.HasWhiteOreBlacklistGetter) {
+				bool updated = StorageManager.AddToPlayerBlacklist(StorageID, type);
+				Storage.TryAddToPlayerBlacklist(type);
+				return updated;
 			}
 
 			return false;

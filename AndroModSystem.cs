@@ -44,6 +44,14 @@ namespace androLib
 					string temp2 = item.DamageType.Name;
 				}
 
+				if (item.createTile > 0) {
+					ModTile tile = TileLoader.GetTile(item.createTile);
+                    if (tile != null) {
+						string tileName = tile.Name;
+						string tileFullName = tile.FullName;
+					}
+				}
+
 				if (item.ModItem != null) {
 					ModItem modItem = item.ModItem;
 					string modItemName = modItem.Name;

@@ -148,8 +148,7 @@ namespace androLib
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			List<INeedsSetUpAllowedList> iNeedsSetUpAllowedLists = StorageManager.AllBagTypesFirstForEachInventory.Select(t => ContentSamples.ItemsByType[t].ModItem).OfType<INeedsSetUpAllowedList>().ToList();
-			List<AllowedItemsManager> allowedItemManagers = iNeedsSetUpAllowedLists.Select(b => b.GetAllowedItemsManager).ToList();
+			IEnumerable<AllowedItemsManager> allowedItemManagers = INeedsSetUpAllowedList.AllowedItemsManagers.Values;
 			SortedDictionary<int, SortedSet<int>> enchantedItemsAllowedInBags = new();
 			foreach (AllowedItemsManager allowedItemsManager in allowedItemManagers) {
 				allowedItemsManager.Setup();
@@ -191,16 +190,16 @@ namespace androLib
 
 			foreach (AllowedItemsManager allowedItemsManager in allowedItemManagers) {
 				allowedItemsManager.ClearSetupLists();
-			}
-
-			foreach (INeedsSetUpAllowedList list in iNeedsSetUpAllowedLists) {
-				list.PostSetup();
+				allowedItemsManager.PostSetup();
 			}
 		}
 		public static bool ClientConfigChanged = false;
+		public static Action OnAndroLibClientConfigChangedInGame;
 		public static void CheckClientConfigChanged() {
 			if (ClientConfigChanged && !Main.gameMenu) {
 				SetupAllAllowedItemManagers();
+				OnAndroLibClientConfigChangedInGame?.Invoke();
+				StorageManager.ResetAllBagSizesFromConfig();
 				ClientConfigChanged = false;
 			}
 		}

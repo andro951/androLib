@@ -111,21 +111,14 @@ namespace androLib.Common.Configs
 		public const string ItemListsKey = "ItemLists";
 		[Header($"$Mods.{AndroMod.ModName}.{L_ID_Tags.Configs}.{ClientConfigName}.{ItemListsKey}")]
 
-		[DefaultValue(false)]
-		public bool ForceAllowedListUpdate;
-
 		public List<ItemList> WhiteLists = new();
 
 		public List<ItemList> BlackLists = new();
 
 		public override void OnChanged() {
-			if  (ForceAllowedListUpdate) {
-				StoragePlayer.ClientConfigChanged = true;
-				ForceAllowedListUpdate = false;
-				if (!Main.gameMenu)
-					StoragePlayer.CheckClientConfigChanged();
-
-			}
+			StoragePlayer.ClientConfigChanged = true;
+			if (!Main.gameMenu)
+				StoragePlayer.CheckClientConfigChanged();
 		}
 	}
 
@@ -151,7 +144,6 @@ namespace androLib.Common.Configs
 		public const int MaxStorageSize = 10000;
 		public string ModFullName => modFullName;
 		private string modFullName;
-		[ReloadRequired]
 		[Range(1, MaxStorageSize)]
 		public int StorageSize;
 

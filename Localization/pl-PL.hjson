@@ -1,4 +1,4 @@
-#(Google Translated.  No contributions yet)
+#
 Mods: {
 	androLib: {
 		AndroLibGameMessages: {
@@ -6,10 +6,12 @@ Mods: {
 			AddedToWhitelist: "{0} na białej liście dla {1}. Elementy można umieścić na czarnej liście, klikając je prawym przyciskiem myszy w {1}, przytrzymując klawisz Shift."
 			BossChecklistNotEnabled: Mod BossChecklist nie jest włączony. Zaklęcia broni korzystają z listy kontrolnej bossów, aby określić, którzy bossowie decydują o wypadaniu Boosterów mocy ze zmodyfikowanych bossów. Ponieważ lista kontrolna bossów nie jest włączona, wszyscy zmodyfikowani bossowie upuszczą zwykły wzmacniacz mocy.
 			FailedDetermineProgression: Nie udało się określić postępu Wall of Flesh i Plantera z BossChecklistData
-			MainUpdateCount: "Main.GameUpdateCount: {0}"
+			MainUpdateCount: Main.GameUpdateCount: {0}
+			RemovedFromWhitelist: "{0} removed from whitelist for the {1}."
 			ReportErrorToAndro: Zgłoś to do andro951 (Zaklęcia Broni) wraz z opisem tego, co robiłeś w tym czasie.
 			UnableDetermineNPCDropsBossBag: Nie można określić NPC, który upuści tę torbę z bossem:
 		}
+
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Konfiguracja klienta
@@ -17,146 +19,169 @@ Mods: {
 				ItemLists: Listy dozwolonych (zamiast tego należy je zmodyfikować w grze!)
 				LoggingInformation: Informacje o logowaniu
 				StorageSettings: Ustawienia przechowywania
+
 				BlackLists: {
 					Label: Czarne listy (zamiast tego zarządzaj w grze!)
-					Tooltip: 
+					Tooltip:
 						'''
 						Przedmioty można umieścić na czarnej liście w grze, klikając prawym przyciskiem myszy przedmiot w torbie do przechowywania, przytrzymując klawisz Shift.
 						Zmiana pełnej nazwy moda uniemożliwi działanie tej listy i zostanie utworzona nowa, pusta.
 						'''
 				}
+
 				ClosingInventoryClosesBags: {
 					Label: Zamknięcie zapasów zamyka torby
 					Tooltip: Jeśli to prawda, zamknięcie ekwipunku gracza spowoduje zamknięcie wszystkich toreb.
 				}
+
 				DisableAllErrorMessagesInChat: {
 					Label: Wyłącz wszystkie komunikaty o błędach na czacie
-					Tooltip: 
+					Tooltip:
 						'''
 						Zapobiega wyświetlaniu na czacie wiadomości z prośbą
 						Zgłoś to do andro951 (Zaklęcia Broni) wraz z opisem tego, co robiłeś w tym czasie.
 						'''
 				}
+
 				ForceAllowedListUpdate: {
 					Label: Wymuś aktualizację listy dozwolonych
-					Tooltip: 
+					Tooltip:
 						'''
 						Wymusi to zmiany na białych i czarnych listach wprowadzone poprzez ręczne dostosowanie konfiguracji do aktualizacji.
 						Funkcja ta zostanie natychmiast wyłączona po zakończeniu aktualizacji. Nie jest to wymagane w przypadku aktualizacji białych/czarnych list w grze.
 						Zapobiega to konieczności ponownego ładowania podczas zmiany list.
 						'''
 				}
+
 				LogAllPlayerWhiteAndBlackLists: {
 					Label: Zaloguj wszystkich białych i czarnych list graczy
-					Tooltip: 
+					Tooltip:
 						'''
 						Jeśli ma wartość true, wszystkie białe i czarne listy graczy będą rejestrowane w pliku client.log.
 						Jeśli dokonasz zmian na białych/czarnych listach, które Twoim zdaniem powinny być standardowymi zmianami dla wszystkich, wydrukuj je i wyślij mi swój plik Client.log. -andro951
 						'''
 				}
+
 				OnlyShowErrorMessagesInChatOnce: {
 					Label: Wyświetlaj komunikaty o błędach na czacie tylko raz
-					Tooltip: 
+					Tooltip:
 						'''
 						Wiadomości będą nadal pojawiać się na czacie, ale tylko raz podczas sesji gry.
 						(Aby można było temu zapobiec, komunikat o błędzie musi być dokładnie taki sam, jak poprzedni komunikat.)
 						'''
 				}
+
 				PrintItemDrops: {
 					Label: Zarejestruj listę źródeł upuszczania przedmiotów
-					Tooltip: 
+					Tooltip:
 						'''
 						Lista jest drukowana w pliku client.log po wejściu na świat.
 						Domyślna lokalizacja pliku Client.log to C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
+
 				PrintLocalizationLists: {
 					Label: Rejestruj wszystkie listy tłumaczeń
-					Tooltip: 
+					Tooltip:
 						'''
 						Listy są drukowane w pliku client.log po wejściu do świata.
 						Domyślna lokalizacja pliku Client.log to C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
+
 				RemoveItemsWhenBlacklisted: {
 					Label: Usuń elementy, gdy znajdują się na czarnej liście
-					Tooltip: 
+					Tooltip:
 						'''
 						Jeśli ma wartość true, elementy zostaną usunięte z magazynu po umieszczeniu na czarnej liście.
 						Przedmioty można umieścić na czarnej liście, klikając je prawym przyciskiem myszy w magazynie, przytrzymując klawisz Shift.
 						'''
 				}
+
 				ReOpenBagSwitcherAutomatically: {
 					Label: Automatycznie otwórz ponownie przełącznik worków
-					Tooltip: 
+					Tooltip:
 						'''
 						Zmiana na torbę za pomocą przełącznika worków, a następnie zamknięcie i ponowne otwarcie torby spowoduje powrót do oryginalnej torby
 						otworzyć (wyłącznik worka zamknięty) zamiast otwierać wcześniej przełączony na worek.
 						'''
 				}
+
 				StopProvidingItemsInBagsForCrafting: {
 					Label: Przestań dostarczać przedmioty w workach do wytwarzania
 					Tooltip: Przedmioty w torbach są zwykle dostępne do wytworzenia tak, jakby znajdowały się w twoim ekwipunku. Włącz tę opcję, aby przestać udostępniać je do wytwarzania.
 				}
+
 				StorageSizes: {
 					Label: Rozmiary przechowywania
-					Tooltip: 
+					Tooltip:
 						'''
 						Umożliwia zmianę rozmiaru magazynów.
 						Zmiana dowolnego rozmiaru wymaga ręcznego ponownego załadowania modów, aby zmiana odniosła skutek.(Twórca modów w magazynie musi wybrać, czy ich pamięć będzie konfigurowalna, aby pojawiła się na tej liście. Użycie przycisku + nic nie da .)
 						'''
 				}
+
 				UITransparency: {
 					Label: Przejrzystość interfejsu użytkownika
 					Tooltip: Przejrzystość wszystkich interfejsów użytkownika zależnych od androLib. 0 jest niewidoczne, 255 w pełni nasycone.
 				}
+
 				UseAlternateRarityColors: {
 					Label: Używaj alternatywnych kolorów i tekstur rzadkości
 					Tooltip: Domyślne kolory są przyjazne dla osób niewidomych. Alternatywne tekstury różnią się niewielkimi różnicami, ale uznano, że należy je zachować.
 				}
+
 				WhiteLists: {
 					Label: Białe listy (zamiast tego zarządzaj w grze!)
-					Tooltip: 
+					Tooltip:
 						'''
 						Przedmioty można dodać do białej listy w grze, ręcznie umieszczając je myszką w torbie do przechowywania.
 						Zmiana pełnej nazwy moda uniemożliwi działanie tej listy i zostanie utworzona nowa, pusta.
 						'''
 				}
 			}
+
 			ItemList: {
 				Tooltip: Umożliwia edycję białej/czarnej listy toreb.
+
 				ItemDefinitions: {
 					Label: Definicje przedmiotów
 					Tooltip: Pozycje na liście. Spowoduje to zastąpienie moich białych/czarnych list.
 				}
+
 				ModFullName: {
 					Label: Pełna nazwa moda
 					Tooltip: Edycja tego spowoduje, że lista nie będzie działać. Jest to klucz używany do określenia, do którego magazynu należy dana lista.
 				}
 			}
+
 			StorageSizePair: {
 				Tooltip: Umożliwia zmianę rozmiaru magazynu.
+
 				ModFullName: {
 					Label: Pełna nazwa moda
 					Tooltip: Edycja tego spowoduje, że rozmiar nie będzie działał. Jest to klucz używany do określenia magazynu, do którego należy lista.
 				}
+
 				StorageSize: {
 					Label: Rozmiar pamięci
 					Tooltip: Rozmiar magazynu. Jest to liczba przedmiotów, które można przechowywać w magazynie.
 				}
 			}
 		}
+
 		GameModeNameIDs: {
 			Expert: Ekspert
 			Journey: Podróż
 			Master: Gospodarz
 			Normal: Normalna
 		}
+
 		Items: {
 		}
-		MagicStorageButtonsText: {
-			DepositAllFromVacuumBags: Zdeponuj wszystko z worków próżniowych
-		}
+
+		MagicStorageButtonsText.DepositAllFromVacuumBags: Zdeponuj wszystko z worków próżniowych
+
 		StorageText: {
 			ClearTrash: Wyczyść Kosz
 			CloseBag: Zamknij torbę

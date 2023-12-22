@@ -6,10 +6,12 @@ Mods: {
 			AddedToWhitelist: "{0} whitelisted for the {1}.  Items can be blacklisted by right clicking on them in the {1} with the shift key held."
 			BossChecklistNotEnabled: BossChecklist mod is not enabled.  Weapon Enchantments uses BossChecklist to determine which bosses determine Power Booster drops from Modded bosses.  Since BossChecklist is not enabled, all Modded bosses will drop the regular Power Booster.
 			FailedDetermineProgression: Failed to determine the progression of Wall of Flesh and Plantera from BossChecklistData
-			MainUpdateCount: "Main.GameUpdateCount: {0}"
+			MainUpdateCount: Main.GameUpdateCount: {0}
+			RemovedFromWhitelist: "{0} removed from whitelist for the {1}."
 			ReportErrorToAndro: Please report this to andro951(Weapon Enchantments) along with a description of what you were doing at the time.
 			UnableDetermineNPCDropsBossBag: Unable to determine the npc that drops this boss bag:
 		}
+
 		Configs: {
 			AndroClientConfig: {
 				DisplayName: Client Config
@@ -17,146 +19,169 @@ Mods: {
 				ItemLists: Allowed Lists (Should be modified in game instead!)
 				LoggingInformation: Logging Information
 				StorageSettings: Storage Settings
+
 				BlackLists: {
 					Label: Black Lists (Manage in game instead!)
-					Tooltip: 
+					Tooltip:
 						'''
 						Items can be blacklisted in game by right clicking on an item in a storage bag with the shift key held.
 						Changing the Mod Full Name will prevent that list from working and a new blank one will be made.
 						'''
 				}
+
 				ClosingInventoryClosesBags: {
 					Label: Closing Inventory Closes Bags
 					Tooltip: If true, closing the players inventory will close all bags.
 				}
+
 				DisableAllErrorMessagesInChat: {
 					Label: Disable All Error Messages In Chat
-					Tooltip: 
+					Tooltip:
 						'''
 						Prevents messages showing up in your chat that ask you to 
 						Please report this to andro951(Weapon Enchantments) along with a description of what you were doing at the time.
 						'''
 				}
+
 				ForceAllowedListUpdate: {
 					Label: Force Allowed List Update
-					Tooltip: 
+					Tooltip:
 						'''
 						This will force changes made to the Whitelists and Blacklists that you made by manually adjusting the config to be updated.
 						This will be immediately turned back off when the update is complete.  It is not required if updating the white/black lists in game.
 						This is prevents requiring a reload when changing the lists.
 						'''
 				}
+
 				LogAllPlayerWhiteAndBlackLists: {
 					Label: Log All Player White And Black Lists
-					Tooltip: 
+					Tooltip:
 						'''
 						If true, all player white lists and black lists will be logged to the client.log.
 						If you make changes to the white/black lists that you think should be standard changes for everyone, please print them and send me your client.log. -andro951
 						'''
 				}
+
 				OnlyShowErrorMessagesInChatOnce: {
 					Label: Only show error messages in chat once
-					Tooltip: 
+					Tooltip:
 						'''
 						Messages will continue to show up in your chat, but only once during a game session.
 						(The error message must be the exact same as a previous message to be prevented.)
 						'''
 				}
+
 				PrintItemDrops: {
 					Label: Log a List of Item Drop sources
-					Tooltip: 
+					Tooltip:
 						'''
 						The list is printed to the client.log when you enter a world.
 						The client.log default location is C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
+
 				PrintLocalizationLists: {
 					Label: Log all translation lists
-					Tooltip: 
+					Tooltip:
 						'''
 						The lists are printed to the client.log when you enter a world.
 						The client.log default location is C:\Steam\SteamApps\common\tModLoader\tModLoader-Logs
 						'''
 				}
+
 				RemoveItemsWhenBlacklisted: {
 					Label: Remove Items When Blacklisted
-					Tooltip: 
+					Tooltip:
 						'''
 						If true, items will be removed from the storage when blacklisted.
 						Items can be blacklisted by right clicking on them in the storage with the shift key held.
 						'''
 				}
+
 				ReOpenBagSwitcherAutomatically: {
 					Label: Re Open Bag Switcher Automatically
-					Tooltip: 
+					Tooltip:
 						'''
 						Switching to a bag with the bag switcher then closing and reopening the bag will have the original bag 
 						open (bag switcher closed) instead of opening the previously switched to bag.
 						'''
 				}
+
 				StopProvidingItemsInBagsForCrafting: {
 					Label: Stop Providing Items In Bags For Crafting
 					Tooltip: Items in bags are usually available for crafting as if they were in your inventory.  Enable this option to stop providing them for crafting.
 				}
+
 				StorageSizes: {
 					Label: Storage Sizes
-					Tooltip: 
+					Tooltip:
 						'''
 						Allows you to change the size of storages.  
 						Changing any of the sizes requires you to manually reload mods for the change to take effect.(The mod creator of the storage must choose for their storage to be configurable for it to show up in this list.  Using the + button will not do anything.)
 						'''
 				}
+
 				UITransparency: {
 					Label: UI Transparency
 					Tooltip: The transparency of all UIs that depend on androLib.  0 is invisible, 255 fully saturated.
 				}
+
 				UseAlternateRarityColors: {
 					Label: Use Alternate Rarity Colors and Textures
 					Tooltip: The default colors are color blind friendly.  The alternate textures have minor differences, but were voted to be kept.
 				}
+
 				WhiteLists: {
 					Label: White Lists (Manage in game instead!)
-					Tooltip: 
+					Tooltip:
 						'''
 						Items can be whitelisted in game by manually clicking them into a storage bag with your mouse.
 						Changing the Mod Full Name will prevent that list from working and a new blank one will be made.
 						'''
 				}
 			}
+
 			ItemList: {
 				Tooltip: Allows you to edit the whitelist/blacklist of the bags.
+
 				ItemDefinitions: {
 					Label: Item Definitions
 					Tooltip: Items in the list.  This will override my white/black lists.
 				}
+
 				ModFullName: {
 					Label: Mod Full Name
 					Tooltip: Editing this will prevent the list from working.  It is the key used to determine which storage the list belongs to.
 				}
 			}
+
 			StorageSizePair: {
 				Tooltip: Allows you to change the size of the storage.
+
 				ModFullName: {
 					Label: Mod Full Name
 					Tooltip: Editing this will prevent the size from working.  It is the key used to determine which storage the list belongs to.
 				}
+
 				StorageSize: {
 					Label: Storage Size
 					Tooltip: The size of the storage.  This is the number of items that can be stored in the storage.
 				}
 			}
 		}
+
 		GameModeNameIDs: {
 			Expert: Expert
 			Journey: Journey
 			Master: Master
 			Normal: Normal
 		}
+
 		Items: {
 		}
-		MagicStorageButtonsText: {
-			DepositAllFromVacuumBags: Deposit All From Vacuum Bags
-		}
+
+		MagicStorageButtonsText.DepositAllFromVacuumBags: Deposit All From Vacuum Bags
+
 		StorageText: {
 			ClearTrash: Clear Trash
 			CloseBag: Close Bag
