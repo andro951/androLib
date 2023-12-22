@@ -28,8 +28,6 @@ using androLib.Common.Configs;
 namespace androLib.UI
 {
 	public static class MasterUIManager {
-		public static event Action UpdateUIAlpha;
-
 		public static BoolCheck IsDisplayingUI = new();
 		public static BoolCheck ShouldPreventTrashingItem = new();
 		public static BoolCheck ShouldPreventRecipeScrolling = new();
