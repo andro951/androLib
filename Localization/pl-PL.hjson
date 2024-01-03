@@ -7,7 +7,7 @@ Mods: {
 			BossChecklistNotEnabled: Mod BossChecklist nie jest włączony. Zaklęcia broni korzystają z listy kontrolnej bossów, aby określić, którzy bossowie decydują o wypadaniu Boosterów mocy ze zmodyfikowanych bossów. Ponieważ lista kontrolna bossów nie jest włączona, wszyscy zmodyfikowani bossowie upuszczą zwykły wzmacniacz mocy.
 			FailedDetermineProgression: Nie udało się określić postępu Wall of Flesh i Plantera z BossChecklistData
 			MainUpdateCount: Main.GameUpdateCount: {0}
-			RemovedFromWhitelist: "{0} removed from whitelist for the {1}."
+			RemovedFromWhitelist: „{0} usunięto z białej listy dla {1}”.
 			ReportErrorToAndro: Zgłoś to do andro951 (Zaklęcia Broni) wraz z opisem tego, co robiłeś w tym czasie.
 			UnableDetermineNPCDropsBossBag: Nie można określić NPC, który upuści tę torbę z bossem:
 		}
@@ -40,16 +40,6 @@ Mods: {
 						'''
 						Zapobiega wyświetlaniu na czacie wiadomości z prośbą
 						Zgłoś to do andro951 (Zaklęcia Broni) wraz z opisem tego, co robiłeś w tym czasie.
-						'''
-				}
-
-				ForceAllowedListUpdate: {
-					Label: Wymuś aktualizację listy dozwolonych
-					Tooltip:
-						'''
-						Wymusi to zmiany na białych i czarnych listach wprowadzone poprzez ręczne dostosowanie konfiguracji do aktualizacji.
-						Funkcja ta zostanie natychmiast wyłączona po zakończeniu aktualizacji. Nie jest to wymagane w przypadku aktualizacji białych/czarnych list w grze.
-						Zapobiega to konieczności ponownego ładowania podczas zmiany list.
 						'''
 				}
 

@@ -7,7 +7,7 @@ Mods: {
 			BossChecklistNotEnabled: La modalità BossChecklist non è abilitata. Gli incantesimi delle armi utilizzano la lista di controllo dei boss per determinare quali boss determinano il rilascio di potenziamenti di potere dai boss modificati. Poiché la BossChecklist non è abilitata, tutti i boss modificati lasceranno cadere il normale Power Booster.
 			FailedDetermineProgression: Impossibile determinare la progressione di Wall of Flesh e Plantera da BossChecklistData
 			MainUpdateCount: Main.GameUpdateCount: {0}
-			RemovedFromWhitelist: "{0} removed from whitelist for the {1}."
+			RemovedFromWhitelist: "{0} rimosso dalla lista bianca per {1}."
 			ReportErrorToAndro: Per favore segnalalo ad andro951 (Incantesimi per armi) insieme a una descrizione di ciò che stavi facendo in quel momento.
 			UnableDetermineNPCDropsBossBag: Impossibile determinare l'NPC che rilascia questa borsa del boss:
 		}
@@ -40,16 +40,6 @@ Mods: {
 						'''
 						Impedisce che nella chat vengano visualizzati messaggi che ti chiedono di farlo
 						Per favore segnalalo ad andro951 (Incantesimi per armi) insieme a una descrizione di ciò che stavi facendo in quel momento.
-						'''
-				}
-
-				ForceAllowedListUpdate: {
-					Label: Forza l'aggiornamento dell'elenco consentiti
-					Tooltip:
-						'''
-						Ciò forzerà l'aggiornamento delle modifiche apportate alle whitelist e alle blacklist apportate regolando manualmente la configurazione.
-						Questo verrà immediatamente disattivato una volta completato l'aggiornamento. Non è necessario se si aggiornano le liste bianche/nere nel gioco.
-						Ciò impedisce di richiedere un ricaricamento quando si modificano gli elenchi.
 						'''
 				}
 

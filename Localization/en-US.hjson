@@ -43,16 +43,6 @@ Mods: {
 						'''
 				}
 
-				ForceAllowedListUpdate: {
-					Label: Force Allowed List Update
-					Tooltip:
-						'''
-						This will force changes made to the Whitelists and Blacklists that you made by manually adjusting the config to be updated.
-						This will be immediately turned back off when the update is complete.  It is not required if updating the white/black lists in game.
-						This is prevents requiring a reload when changing the lists.
-						'''
-				}
-
 				LogAllPlayerWhiteAndBlackLists: {
 					Label: Log All Player White And Black Lists
 					Tooltip:

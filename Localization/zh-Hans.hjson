@@ -7,7 +7,7 @@ Mods: {
 			BossChecklistNotEnabled: BossChecklist 模组未启用。 武器附魔使用 BossChecklist 来确定哪些 老板 决定来自 改装老板 的能量助推器掉落。 由于 BossChecklist 未启用，所有 改装老板 都会掉落常规能量助推器。
 			FailedDetermineProgression: 无法从 BossChecklistData 确定血肉墙和世纪之花的进度
 			MainUpdateCount: Main.GameUpdateCount：{0}
-			RemovedFromWhitelist: "{0} removed from whitelist for the {1}."
+			RemovedFromWhitelist: “{0} 从 {1} 的白名单中删除。”
 			ReportErrorToAndro: 请将此事报告给andro951（武器附魔）并描述您当时所做的事情。
 			UnableDetermineNPCDropsBossBag: 无法确定掉落此Boss包的npc：
 		}
@@ -40,16 +40,6 @@ Mods: {
 						'''
 						防止在您的聊天中显示要求您这样做的消息
 						请将此事报告给andro951（武器附魔）并描述您当时所做的事情。
-						'''
-				}
-
-				ForceAllowedListUpdate: {
-					Label: 强制更新允许列表
-					Tooltip:
-						'''
-						这将强制您通过手动调整要更新的配置对白名单和黑名单所做的更改。
-						更新完成后，此功能将立即关闭。 如果更新游戏中的白/黑名单则不需要。
-						这可以防止更改列表时需要重新加载。
 						'''
 				}
 

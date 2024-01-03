@@ -7,7 +7,7 @@ Mods: {
 			BossChecklistNotEnabled: El mod BossChecklist no está habilitado. Enchantments de armas usa BossChecklist para determinar qué jefes determinan las caídas de Power Booster de los jefes modificados. Dado que BossChecklist no está habilitado, todos los jefes modificados eliminarán el Power Booster normal.
 			FailedDetermineProgression: No se pudo determinar la progresión de Wall of Flesh y Plantera de BossChecklistData
 			MainUpdateCount: Main.GameUpdateCount: {0}
-			RemovedFromWhitelist: "{0} removed from whitelist for the {1}."
+			RemovedFromWhitelist: "{0} eliminado de la lista blanca para {1}."
 			ReportErrorToAndro: Informe esto a andro951 (Encantamientos de armas) junto con una descripción de lo que estaba haciendo en ese momento.
 			UnableDetermineNPCDropsBossBag: No se puede determinar el npc que arroja esta bolsa de jefe:
 		}
@@ -40,16 +40,6 @@ Mods: {
 						'''
 						Evita que aparezcan mensajes en tu chat que te piden que
 						Informe esto a andro951 (Encantamientos de armas) junto con una descripción de lo que estaba haciendo en ese momento.
-						'''
-				}
-
-				ForceAllowedListUpdate: {
-					Label: Forzar actualización de la lista permitida
-					Tooltip:
-						'''
-						Esto forzará los cambios realizados en las listas blancas y negras que realizó ajustando manualmente la configuración para que se actualice.
-						Esto se desactivará inmediatamente cuando se complete la actualización. No es necesario si se actualizan las listas blanca/negra del juego.
-						Esto evita que sea necesario recargar al cambiar las listas.
 						'''
 				}
 

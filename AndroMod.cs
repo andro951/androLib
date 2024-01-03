@@ -65,6 +65,9 @@ namespace androLib
 		public const string dbzTerrariaName = "DBZMODPORT";
 		public static Mod dbzTerrariaMod;
 		public static bool dbzTerrariaEnabled = ModLoader.TryGetMod(dbzTerrariaName, out dbzTerrariaMod);
+		public const string warframeModName = "WarframeMod";
+		public static Mod warframeMod;
+		public static bool warframeModEnabled = ModLoader.TryGetMod(warframeModName, out warframeMod);
 
 		public static int VanillaRecipeCount = -1;
 		private enum CallID {

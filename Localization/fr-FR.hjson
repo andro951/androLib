@@ -7,7 +7,7 @@ Mods: {
 			BossChecklistNotEnabled: Le mod BossChecklist n’est pas activé. Weapon Enchantments utilise BossChecklist pour déterminer quels boss déterminent les baisses de Power Booster des boss Modded. Étant donné que BossChecklist n'est pas activé, tous les boss Modded abandonneront le Power Booster habituel.
 			FailedDetermineProgression: Impossible de déterminer la progression de Wall of Flesh et Plantera à partir de BossChecklistData
 			MainUpdateCount: Main.GameUpdateCount : {0}
-			RemovedFromWhitelist: "{0} removed from whitelist for the {1}."
+			RemovedFromWhitelist: "{0} supprimé de la liste blanche pour le {1}."
 			ReportErrorToAndro: Veuillez signaler cela à andro951 (Enchantements d'armes) avec une description de ce que vous faisiez à ce moment-là.
 			UnableDetermineNPCDropsBossBag: Impossible de déterminer le PNJ qui lâche ce sac de boss :
 		}
@@ -40,16 +40,6 @@ Mods: {
 						'''
 						Empêche l'apparition de messages dans votre chat vous demandant de le faire
 						Veuillez signaler cela à andro951 (Enchantements d'armes) avec une description de ce que vous faisiez à ce moment-là.
-						'''
-				}
-
-				ForceAllowedListUpdate: {
-					Label: Forcer la mise à jour de la liste autorisée
-					Tooltip:
-						'''
-						Cela forcera la mise à jour des modifications apportées aux listes blanches et aux listes noires que vous avez effectuées en ajustant manuellement la configuration.
-						Ceci sera immédiatement désactivé une fois la mise à jour terminée. Ce n'est pas obligatoire si vous mettez à jour les listes blanches/noires dans le jeu.
-						Cela évite de devoir recharger lors du changement de liste.
 						'''
 				}
 

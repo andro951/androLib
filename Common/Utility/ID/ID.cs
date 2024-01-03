@@ -2219,112 +2219,112 @@ namespace androLib.Common.Utility
 				return false;
 			}
 		}
-		public static bool IsWeaponItem(this Item item) {
-			if (item.NullOrAir())
-				return false;
+public static bool IsWeaponItem(this Item item) {
+	if (item.NullOrAir())
+		return false;
 
-			if (IsArmorItem(item))
-				return false;
+	if (IsArmorItem(item))
+		return false;
 
-			if (item.ModItem != null) {
-				string modName = item.ModItem.Mod.Name;
-				//Manually prevent calamity items from being weapons
-				if (AndroMod.calamityEnabled && modName == AndroMod.calamityModName) {
-					switch (item.ModFullName()) {
-						case "CalamityMod/WulfrumFusionCannon":
-							return false;
-					}
-				}
-
-				//Manually prevent magic storage items from being weapons
-				if (AndroMod.magicStorageEnabled && modName == AndroMod.magicStorageName) {
-					switch (item.ModFullName()) {
-						case "MagicStorage/BiomeGlobe":
-							return false;
-					}
-				}
-
-				if (AndroMod.thoriumEnabled && modName == AndroMod.thoriumModName) {
-					string modItemFullName = item.ModFullName();
-					switch (modItemFullName) {
-						case "ThoriumMod/HiveMind":
-						case "ThoriumMod/PiousBanner":
-						case "ThoriumMod/PrecisionBanner":
-							return false;
-						case "ThoriumMod/TechniqueBloodLotus":
-						case "ThoriumMod/TechniqueCobraBite":
-						case "ThoriumMod/TechniqueHiddenBlade":
-						case "ThoriumMod/TechniquePaperExplosive":
-						case "ThoriumMod/TechniqueShadowClone":
-						case "ThoriumMod/Gauze":
-							return true;
-						default:
-							if (modItemFullName.Contains("InspirationNote") || modItemFullName.Contains("Tester"))
-								return false;
-
-							break;
-					}
-
-					//Some Thorium non-weapon consumables were counting as weapons.
-					if (item.consumable && item.damage <= 0 && item.mana <= 0)
-						return false;
-				}
-
-				if (AndroMod.fargosEnabled && modName == AndroMod.fargosModName) {
-					switch (item.ModFullName()) {
-						case "Fargowiltas/BrittleBone":
-							return false;
-					}
-				}
-
-				if (AndroMod.amuletOfManyMinionsEnabled && modName == AndroMod.amuletOfManyMinionsName) {
-					List<string> aOMMNonItemNames = new() {
-						"AmuletOfManyMinions/AxolotlMinionItem",
-						"AmuletOfManyMinions/CinderHenMinionItem",
-						"AmuletOfManyMinions/WyvernFlyMinionItem",
-						"AmuletOfManyMinions/TruffleTurtleMinionItem",
-						"AmuletOfManyMinions/SmolederMinionItem",
-						"AmuletOfManyMinions/PlantPupMinionItem",
-						"AmuletOfManyMinions/LilGatorMinionItem",
-						"AmuletOfManyMinions/CloudiphantMinionItem"
-					};
-					string modItemFullName = item.ModFullName();
-					if (aOMMNonItemNames.Contains(modItemFullName) || modItemFullName.Contains("Replica"))
-						return false;
-				}
+	if (item.ModItem != null) {
+		string modName = item.ModItem.Mod.Name;
+		//Manually prevent calamity items from being weapons
+		if (AndroMod.calamityEnabled && modName == AndroMod.calamityModName) {
+			switch (item.ModFullName()) {
+				case "CalamityMod/WulfrumFusionCannon":
+					return false;
 			}
+		}
 
-			bool isWeapon;
-			switch (item.type) {
-				case ItemID.ExplosiveBunny:
-				case ItemID.TreeGlobe:
-				case ItemID.WorldGlobe:
-				case ItemID.MoonGlobe:
-					isWeapon = false;
-					break;
-				case ItemID.LawnMower:
-					isWeapon = true;
-					break;
+		//Manually prevent magic storage items from being weapons
+		if (AndroMod.magicStorageEnabled && modName == AndroMod.magicStorageName) {
+			switch (item.ModFullName()) {
+				case "MagicStorage/BiomeGlobe":
+					return false;
+			}
+		}
+
+		if (AndroMod.thoriumEnabled && modName == AndroMod.thoriumModName) {
+			string modItemFullName = item.ModFullName();
+			switch (modItemFullName) {
+				case "ThoriumMod/HiveMind":
+				case "ThoriumMod/PiousBanner":
+				case "ThoriumMod/PrecisionBanner":
+					return false;
+				case "ThoriumMod/TechniqueBloodLotus":
+				case "ThoriumMod/TechniqueCobraBite":
+				case "ThoriumMod/TechniqueHiddenBlade":
+				case "ThoriumMod/TechniquePaperExplosive":
+				case "ThoriumMod/TechniqueShadowClone":
+				case "ThoriumMod/Gauze":
+					return true;
 				default:
-					isWeapon = (item.DamageType != DamageClass.Default || item.damage > 0 || item.crit > 0) && (item.ammo == 0 || item.ammo == ItemID.Grenade);
+					if (modItemFullName.Contains("InspirationNote") || modItemFullName.Contains("Tester"))
+						return false;
+
 					break;
 			}
 
-			return isWeapon && !item.accessory;
-		}
-		public static bool IsArmorItem(this Item item) {
-			if (item.NullOrAir())
+			//Some Thorium non-weapon consumables were counting as weapons.
+			if (item.consumable && item.damage <= 0 && item.mana <= 0)
 				return false;
-
-			return !item.vanity && (item.headSlot > -1 || item.bodySlot > -1 || item.legSlot > -1);
 		}
-		public static bool IsAccessoryItem(this Item item) {
-			if (item.NullOrAir())
+
+		if (AndroMod.fargosEnabled && modName == AndroMod.fargosModName) {
+			switch (item.ModFullName()) {
+				case "Fargowiltas/BrittleBone":
+					return false;
+			}
+		}
+
+		if (AndroMod.amuletOfManyMinionsEnabled && modName == AndroMod.amuletOfManyMinionsName) {
+			List<string> aOMMNonItemNames = new() {
+				"AmuletOfManyMinions/AxolotlMinionItem",
+				"AmuletOfManyMinions/CinderHenMinionItem",
+				"AmuletOfManyMinions/WyvernFlyMinionItem",
+				"AmuletOfManyMinions/TruffleTurtleMinionItem",
+				"AmuletOfManyMinions/SmolederMinionItem",
+				"AmuletOfManyMinions/PlantPupMinionItem",
+				"AmuletOfManyMinions/LilGatorMinionItem",
+				"AmuletOfManyMinions/CloudiphantMinionItem"
+			};
+			string modItemFullName = item.ModFullName();
+			if (aOMMNonItemNames.Contains(modItemFullName) || modItemFullName.Contains("Replica"))
 				return false;
-
-			//Check for armor item is a fix for Reforge-able armor mod setting armor to accessories
-			return item.accessory && !IsArmorItem(item);
 		}
+	}
+
+	bool isWeapon;
+	switch (item.type) {
+		case ItemID.ExplosiveBunny:
+		case ItemID.TreeGlobe:
+		case ItemID.WorldGlobe:
+		case ItemID.MoonGlobe:
+			isWeapon = false;
+			break;
+		case ItemID.LawnMower:
+			isWeapon = true;
+			break;
+		default:
+			isWeapon = (item.DamageType != DamageClass.Default || item.damage > 0 || !AndroMod.warframeModEnabled && item.crit > 0) && (item.ammo == 0 || item.ammo == ItemID.Grenade);
+			break;
+	}
+
+	return isWeapon && !item.accessory;
+}
+public static bool IsArmorItem(this Item item) {
+	if (item.NullOrAir())
+		return false;
+
+	return !item.vanity && (item.headSlot > -1 || item.bodySlot > -1 || item.legSlot > -1);
+}
+public static bool IsAccessoryItem(this Item item) {
+	if (item.NullOrAir())
+		return false;
+
+	//Check for armor item is a fix for Reforge-able armor mod setting armor to accessories
+	return item.accessory && !IsArmorItem(item);
+}
 		public static bool IsFishingPole(this Item item) {
 			if (item.NullOrAir())
 				return false;
