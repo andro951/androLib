@@ -382,7 +382,7 @@ namespace androLib.Common.Utility
 		Golden_LockBox = ItemID.LockBox,
 		Obsidian_LockBox = ItemID.ObsidianLockbox
 	}
-	public enum DashID : byte {
+	public enum DashID_WE : byte {
 		NinjaTabiDash = 1,
 		EyeOfCthulhuShieldDash,
 		SolarDash,
