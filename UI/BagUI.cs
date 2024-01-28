@@ -32,6 +32,7 @@ namespace androLib.UI
 			public const int BagSearch = 3;
 			public const int BagResizePannel = 4;
 			public const int BagCollapseButton = 5;
+			public const int BagRename = 6;
 			public const int BagButtons = 100;
 			public const int BagItemSlot = 200;
 			public const int BagSwitcherPannel = 201;
@@ -66,6 +67,7 @@ namespace androLib.UI
 		public int depositAllUIIndex;
 		public int ID => GetUI_ID(Bag_UI_ID.Bag);
 		public int SearchID => GetUI_ID(Bag_UI_ID.BagSearch);
+		public int RenameID => GetUI_ID(Bag_UI_ID.BagRename);
 		public bool Hovering => MasterUIManager.HoveringMyUIType(RegisteredUI_ID);
 		public int BagUILeft => MyStorage.UILeft;
 		public int BagUITop => MyStorage.UITop;
@@ -149,6 +151,7 @@ namespace androLib.UI
 		}
 		private DrawnUIData drawnUIData;
 		public class DrawnUIData {
+			public UITextData nameData;
 			public UIButtonData searchBarData;
 			public List<UITextData> textButtons;
 			public UIPanelData panel;
@@ -257,8 +260,9 @@ namespace androLib.UI
 			//Name Data
 			int nameLeft = BagUILeft + PanelBorder;
 			int nameTop = BagUITop + PanelBorder;
-			string name = Storage.GetLocalizedName();
-			UITextData nameData = new(UI_ID.None, nameLeft, nameTop, name, 1f, mouseColor);
+			string name = MasterUIManager.DisplayedRenameBarString(RenameID, Storage.DisplayedName);
+			drawnUIData.nameData = new(RenameID, nameLeft, nameTop, name, 1f, mouseColor);
+			UITextData nameData = drawnUIData.nameData;
 			int nameWidth = nameData.Width;
 			int nameHeight = nameData.Height;
 			minPanelWidth += nameWidth;
@@ -455,7 +459,7 @@ namespace androLib.UI
 			drawnUIData.slotData = new UIItemSlotData[inventory.Length];
 			UIItemSlotData[] slotData = drawnUIData.slotData;
 			int startRow = scrollPanelPosition;
-			bool usingSearchBar = MasterUIManager.UsingSearchBar(SearchID);
+			bool usingSearchBar = MasterUIManager.UsingTypingBar(SearchID);
 			int inventoryIndexStart = startRow * itemSlotColumns;
 			int slotsToDisplay = itemSlotRowsDisplayed * itemSlotColumns;
 			int slotNum = 0;
@@ -469,7 +473,7 @@ namespace androLib.UI
 					break;
 
 				ref Item item = ref inventory[inventoryIndex];
-				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
+				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.TypingBarString.ToLower())) {
 					slotData[inventoryIndex] = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
 					int context = selectedItemSlots.TryGetValue(inventoryIndex, out int selectedContext) ? selectedContext : ItemSlotContextID.Normal;
 					slotData[inventoryIndex].Draw(spriteBatch, item, context, glowHue, glowTime);
@@ -541,6 +545,7 @@ namespace androLib.UI
 				}
 			}
 
+			UITextData nameData = drawnUIData.nameData;
 			UIButtonData searchBarData = drawnUIData.searchBarData;
 			List<UITextData> textButtons = drawnUIData.textButtons;
 			UIPanelData panel = drawnUIData.panel;
@@ -570,12 +575,12 @@ namespace androLib.UI
 			int itemSlotX = itemSlotsLeft;
 			int itemSlotY = itemSlotsTop;
 			int slotNum = 0;
-			for (int inventoryIndex = inventoryIndexStart; inventoryIndex < inventory.Length && slotNum <  slotsToDisplay; inventoryIndex++) {
+			for (int inventoryIndex = inventoryIndexStart; inventoryIndex < inventory.Length && slotNum < slotsToDisplay; inventoryIndex++) {
 				if (inventoryIndex >= inventory.Length || inventoryIndex >= slotDatas.Length)
 					break;
 
 				ref Item item = ref inventory[inventoryIndex];
-				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.SearchBarString.ToLower())) {
+				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.TypingBarString.ToLower())) {
 					UIItemSlotData slotData = slotDatas[inventoryIndex];
 					if (slotData.MouseHovering()) {
 						if (AndroModSystem.FavoriteKeyDown) {
@@ -612,7 +617,7 @@ namespace androLib.UI
 							else {
 								bool doClickInteractions = Main.mouseItem.NullOrAir();
 								bool unloaded = Main.mouseItem.ModItem is UnloadedItem;
-                                if (MasterUIManager.LeftMouseClicked) {
+								if (MasterUIManager.LeftMouseClicked) {
 									if (!doClickInteractions && (item.NullOrAir() || Main.mouseItem.type == item.type)) {
 										if (!DisplayedBagUI.CanBeStored(Main.mouseItem) || Storage.IsVacuumBag == null && Storage.HasWhiteListGetter && Storage.CanVacuumItemWhenNotContained != null && !Storage.CanVacuumItemWhenNotContained(Main.mouseItem)) {
 											if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
@@ -631,7 +636,7 @@ namespace androLib.UI
 						item.favorited = true;
 
 					slotNum++;
-					if (slotNum %  itemSlotColumns == 0) {
+					if (slotNum % itemSlotColumns == 0) {
 						itemSlotX = itemSlotsLeft;
 						itemSlotY += itemSlotSpaceHeight;
 					}
@@ -641,21 +646,42 @@ namespace androLib.UI
 				}
 			}
 
-			//Search bar
-			bool mouseHoveringSearchBar = searchBarData.MouseHovering();
-			if (mouseHoveringSearchBar) {
-				if (MasterUIManager.LeftMouseClicked)
-					MasterUIManager.ClickSearchBar(SearchID);
+			//Rename
+			bool mouseHoveringRename = nameData.MouseHovering();
+			if (mouseHoveringRename) {
+				if (MasterUIManager.LeftMouseClicked) {
+					MasterUIManager.ClickTypingBar(RenameID);
+					MasterUIManager.TypingBarString = Storage.DisplayedName;
+				}
 			}
 
-			if (MasterUIManager.TypingOnSearchBar(SearchID)) {
-				if (MasterUIManager.LeftMouseClicked && !mouseHoveringSearchBar || Main.mouseRight || !Main.playerInventory) {
-					MasterUIManager.StopTypingOnSearchBar();
+			if (MasterUIManager.TypingOnBar(RenameID)) {
+				if (MasterUIManager.LeftMouseClicked && !mouseHoveringRename || MasterUIManager.ShouldStopTypingOnBar()) {
+					MasterUIManager.StopTypingOnBar();
 				}
 				else {
 					PlayerInput.WritingText = true;
 					Main.instance.HandleIME();
-					MasterUIManager.SearchBarString = Main.GetInputText(MasterUIManager.SearchBarString);
+					MasterUIManager.TypingBarString = Main.GetInputText(MasterUIManager.TypingBarString);
+					Storage.Rename(MasterUIManager.TypingBarString);
+				}
+			}
+
+			//Search bar
+			bool mouseHoveringSearchBar = searchBarData.MouseHovering();
+			if (mouseHoveringSearchBar) {
+				if (MasterUIManager.LeftMouseClicked)
+					MasterUIManager.ClickTypingBar(SearchID);
+			}
+
+			if (MasterUIManager.TypingOnBar(SearchID)) {
+				if (MasterUIManager.LeftMouseClicked && !mouseHoveringSearchBar || MasterUIManager.ShouldStopTypingOnBar()) {
+					MasterUIManager.StopTypingOnBar();
+				}
+				else {
+					PlayerInput.WritingText = true;
+					Main.instance.HandleIME();
+					MasterUIManager.TypingBarString = Main.GetInputText(MasterUIManager.TypingBarString);
 				}
 			}
 
@@ -853,7 +879,8 @@ namespace androLib.UI
 		public void CloseBag(bool noSound = false) {
 			scrollPanelY = int.MinValue;
 			MyStorage.DisplayBagUI = false;
-			MasterUIManager.TryResetSearch(SearchID);
+			MasterUIManager.TryResetTypingBar(RenameID);
+			MasterUIManager.TryResetTypingBar(SearchID);
 			if (Main.LocalPlayer.chest == -1) {
 				if (!noSound)
 					SoundEngine.PlaySound(SoundID.Grab);

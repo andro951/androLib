@@ -85,11 +85,11 @@ namespace androLib.UI
 		public static int ScrollWheelTicks => (LastScrollWheel - ScrollWheel) / 120;
 		public static int FocusRecipe = Main.focusRecipe;
 		public static int LastFocusRecipe = Main.focusRecipe;
-		public static int SearchBarTimer = 0;
-		public static bool ShouldShowSearchBarHeartbeat => SearchBarTimer % 60 >= 30;
-		public static string SearchBarString = "";
-		public static int SearchBarInUse = UI_ID.None;
-		public static bool TypingOnAnySearchBar = false;
+		public static int TypingTimer = 0;
+		public static bool ShouldShowTypingBarHeartbeat => TypingTimer % 60 >= 30;
+		public static string TypingBarString = "";
+		public static int TypingBarInUse = UI_ID.None;
+		public static bool TypingOnAnyBar = false;
 		public static Action PreDrawUIStaticFunctions;
 		public static void PostDrawInterface(SpriteBatch spriteBatch) {
 			StoragePlayer genericModPlayer = StoragePlayer.LocalStoragePlayer;
@@ -126,11 +126,11 @@ namespace androLib.UI
 					UIBeingHovered = UI_ID.None;
 				}
 
-				if (TypingOnAnySearchBar) {
-					SearchBarTimer++;
+				if (TypingOnAnyBar) {
+					TypingTimer++;
 				}
 				else {
-					SearchBarTimer = 0;
+					TypingTimer = 0;
 				}
 
 				LastScrollWheel = ScrollWheel;
@@ -181,48 +181,69 @@ namespace androLib.UI
 			if (Main.focusRecipe != FocusRecipe && ShouldPreventRecipeScrolling.Invoke())
 				Main.focusRecipe = FocusRecipe;
 		}
-		public static string DisplayedSearchBarString(int SearchBarID) {
-			if (!UsingSearchBar(SearchBarID))
-				return StorageTextID.Search.ToString().Lang(AndroMod.ModName, L_ID1.StorageText);
-
-			return $"{(SearchBarString.Length > 15 ? SearchBarString.Substring(SearchBarString.Length - 15) : SearchBarString)}{Main.chatText}{(ShouldShowSearchBarHeartbeat ? "|" : SearchBarString != "" ? "" : " ")}";
-		}
-		public static bool UsingSearchBar(int ID) => SearchBarInUse == ID;
-		public static bool TypingOnSearchBar(int ID) => UsingSearchBar(ID) && TypingOnAnySearchBar;
-		public static void TryResetSearch(int ID) {
-			if (SearchBarInUse == ID)
-				ResetSearch();
-		}
-		public static void ResetSearch() {
-			SearchBarString = "";
-			SearchBarInUse = UI_ID.None;
-			TypingOnAnySearchBar = false;
-		}
-		public static void StopTypingOnSearchBar() {
-			TypingOnAnySearchBar = false;
-			if (SearchBarString == "")
-				SearchBarInUse = UI_ID.None;
-		}
-		public static void ClickSearchBar(int ID) {
-			if (UsingSearchBar(ID)) {
-				if (TypingOnAnySearchBar) {
-					StopTypingOnSearchBar();
+		public static string DisplayedTypingBarString(int maxLength = -1, bool preventTypingPastMax = false) {
+			string displayedString = TypingBarString;
+			if (TypingBarString.Length > maxLength) {
+				if (preventTypingPastMax) {
+					TypingBarString = TypingBarString.Substring(0, maxLength);
+					displayedString = TypingBarString;
 				}
 				else {
-					TypingOnAnySearchBar = true;
+					displayedString = TypingBarString.Substring(TypingBarString.Length - maxLength);
+				}
+			}
+
+			return $"{displayedString}{Main.chatText}{(ShouldShowTypingBarHeartbeat ? AndroUtilityMethods.DisplayedHeartbeatString : "")}";
+		}
+		public static string DisplayedRenameBarString(int TypingBarID, string name) {
+			if (!UsingTypingBar(TypingBarID))
+				return name;
+
+			return DisplayedTypingBarString(100, true);
+		}
+		public static string DisplayedSearchBarString(int TypingBarID) {
+			if (!UsingTypingBar(TypingBarID))
+				return StorageTextID.Search.ToString().Lang(AndroMod.ModName, L_ID1.StorageText);
+
+			return DisplayedTypingBarString(15);
+		}
+		public static bool UsingTypingBar(int ID) => TypingBarInUse == ID;
+		public static bool TypingOnBar(int ID) => UsingTypingBar(ID) && TypingOnAnyBar;
+		public static void TryResetTypingBar(int ID) {
+			if (TypingBarInUse == ID)
+				ResetTypingBar();
+		}
+		public static void ResetTypingBar() {
+			TypingBarString = "";
+			TypingBarInUse = UI_ID.None;
+			TypingOnAnyBar = false;
+		}
+		public static void StopTypingOnBar() {
+			TypingOnAnyBar = false;
+			if (TypingBarString == "")
+				TypingBarInUse = UI_ID.None;
+		}
+		public static void ClickTypingBar(int ID) {
+			if (UsingTypingBar(ID)) {
+				if (TypingOnAnyBar) {
+					StopTypingOnBar();
+				}
+				else {
+					TypingOnAnyBar = true;
 				}
 			}
 			else {
-				if (SearchBarInUse != UI_ID.None)
-					TryResetSearch(SearchBarInUse);
+				if (TypingBarInUse != UI_ID.None)
+					TryResetTypingBar(TypingBarInUse);
 
-				StartTypingOnSearchBar(ID);
+				StartTypingOnBar(ID);
 			}
 		}
-		public static void StartTypingOnSearchBar(int ID) {
-			TypingOnAnySearchBar = true;
-			SearchBarInUse = ID;
+		public static void StartTypingOnBar(int ID) {
+			TypingOnAnyBar = true;
+			TypingBarInUse = ID;
 		}
+		public static bool ShouldStopTypingOnBar() => Main.mouseRight || !Main.playerInventory || Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape) || Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Enter);
 		public static bool MouseHovering(UIPanel panel, int ID, bool playSound = false) {
 			if (NoUIBeingHovered && panel.IsMouseHovering) {
 				SetMouseHovering(ID, playSound);
@@ -610,7 +631,7 @@ namespace androLib.UI
 			Center = center;
 			Color = color;
 			AncorBotomLeft = ancorBotomLeft;
-			Vector2 baseSize = text != null ? FontAssets.MouseText.Value.MeasureString(Text) : Vector2.Zero;
+			Vector2 baseSize = text != null ? Text.MeasureString() : Vector2.Zero;
 			BaseTextSize = baseSize;
 			Vector2 size = baseSize * scale;
 			TextSize = size;
@@ -639,7 +660,7 @@ namespace androLib.UI
 			int left = Center ? TopLeft.X - Width / 2: TopLeft.X;
 			ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.MouseText.Value, Text, new Vector2(left, TopLeft.Y), Color, 0f, Position, new Vector2(Scale), -1f, 1.5f);
 		}
-		public static Vector2 GetBaseSize(string text) => text != null ? FontAssets.MouseText.Value.MeasureString(text) : Vector2.Zero;
+		public static Vector2 GetBaseSize(string text) => text != null ? text.MeasureString() : Vector2.Zero;
 	}
 	public struct TextData {
 		public string Text;
@@ -653,7 +674,7 @@ namespace androLib.UI
 		public TextData(string text, float scale = 1f) {
 			Text = text;
 			Scale = scale;
-			BaseTextSize = text != null ? FontAssets.MouseText.Value.MeasureString(text) : Vector2.Zero;
+			BaseTextSize = text != null ? text.MeasureString() : Vector2.Zero;
 			TextSize = BaseTextSize * Scale;
 		}
 	}
@@ -677,7 +698,7 @@ namespace androLib.UI
 			Text = text;
 			Scale = scale;
 			Color = color;
-			TextSize = FontAssets.MouseText.Value.MeasureString(text) * scale;
+			TextSize = text.MeasureString() * scale;
 			Borders = new Vector2(borderWidth, borderHeight);
 			Width = (int)TextSize.X + borderWidth * 2;
 			Height = (int)TextSize.Y + borderHeight * 2;

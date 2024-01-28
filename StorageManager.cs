@@ -67,6 +67,7 @@ namespace androLib
 		public Action SelectItemForUIOnly { get; }
 		public bool ShouldRefreshInfoAccs { get; }
 		private string modFullName;
+		private string name = null;
 		private int myLastBagLocation = -1;
 		private int myLastIndexInTheBag = -1;
 		private int foundBagType = -1;
@@ -152,6 +153,7 @@ namespace androLib
 		public string GetModFullName() => modFullName;
 		private string DefaultModFullName() => $"{Mod.Name}_{VacuumStorageType.Name}";
 		public const string ItemsTag = "_Items";
+		public const string NameTag = "_Name";
 		public const string UILeftTag = "_UILeft";
 		public const string UITopTag = "_UITop";
 		public const string ShouldVacuumItemsTag = "_ShouldVacuumItems";
@@ -164,6 +166,7 @@ namespace androLib
 		public void SaveData(TagCompound tag) {
 			string modFullName = GetModFullName();
 			tag[$"{modFullName}{ItemsTag}"] = Items;
+			tag[$"{modFullName}{NameTag}"] = name;
 			tag[$"{modFullName}{UILeftTag}"] = UILeft;
 			tag[$"{modFullName}{UITopTag}"] = UITop;
 			tag[$"{modFullName}{ShouldVacuumItemsTag}"] = ShouldVacuum;
@@ -183,6 +186,8 @@ namespace androLib
 			if (Mod != null && Items.Length > StorageSize)
 				TryUpdateItemsToCurrentStorageSize();
 
+			string loadedName = tag.Get<string>($"{modFullName}{NameTag}");
+			Rename(loadedName);
 			bool temp = !Items.Where(i => !i.NullOrAir()).Any();
 			
 			int uiLeft = tag.Get<int>($"{modFullName}{UILeftTag}");
@@ -286,6 +291,7 @@ namespace androLib
 				CanVacuumItemWhenNotContained
 			);
 
+			clone.name = name;
 			clone.UILeft = UILeft;
 			clone.UITop = UITop;
 			clone.StorageSize = StorageSize;
@@ -621,6 +627,27 @@ namespace androLib
 
 
 			return ItemsIHaveThisTick.ContainsKey(itemType);
+		}
+		public string DisplayedName => name ?? GetLocalizedName();
+		public string Name => name;
+		public void Rename(string newName) {
+			if (newName == "") {
+				newName = null;
+			}
+			else if (newName != null) {
+				bool allSpaces = true;
+				foreach (char c in newName) {
+					if (c != ' ') {
+						allSpaces = false;
+						break;
+					}
+				}
+
+				if (allSpaces)
+					newName = null;
+			}
+
+			name = newName;
 		}
 		public override string ToString() {
 			return $"{GetModFullName()} ({StorageID})";

@@ -14,6 +14,7 @@ using androLib.Items;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Xna.Framework;
 using Terraria.UI;
+using Terraria.GameContent;
 
 namespace androLib.Common.Utility
 {
@@ -699,6 +700,21 @@ namespace androLib.Common.Utility
 				return item.type == compareItem.type;
 
 			return false;
+		}
+
+		public const char DisplayedHeartbeatString = '|';
+		public static Vector2 MeasureString(this string s) {
+            if (s.Length > 0 && s[s.Length - 1] == DisplayedHeartbeatString)
+                s = s.Substring(0, s.Length - 1);
+
+            Vector2 size = FontAssets.MouseText.Value.MeasureString(s);
+			if (size.Y <= 0) {
+				Vector2 defaultSizeForHeight = FontAssets.MouseText.Value.MeasureString("Z");
+				float height = defaultSizeForHeight.Y;
+				size = new Vector2(size.X, height);
+			}
+
+			return size;
 		}
 
 		#endregion
