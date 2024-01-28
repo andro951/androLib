@@ -625,7 +625,6 @@ namespace androLib
 				}
 			}
 
-
 			return ItemsIHaveThisTick.ContainsKey(itemType);
 		}
 		public string DisplayedName => name ?? GetLocalizedName();
