@@ -560,9 +560,9 @@ namespace androLib.Common.Utility
 			Item item = new(itemType, stack);
 			Item[] inv = Main.chest[chest].item;
 
-			return inv.Deposit(ref item, out int _);
+			return inv.Deposit(item, out int _);
 		}
-		public static bool Deposit(this Item[] inv, ref Item item, out int index) {
+		public static bool Deposit(this Item[] inv, Item item, out int index) {
 			if (inv == null) {
 				index = inv.Length;
 				return false;
@@ -578,7 +578,7 @@ namespace androLib.Common.Utility
 				return false;
 			}
 
-			if (Restock(inv, ref item, out index))
+			if (Restock(inv, item, out index))
 				return true;
 
 			index = 0;
@@ -597,7 +597,7 @@ namespace androLib.Common.Utility
 
 			return true;
 		}
-		public static bool Restock(this Item[] inv, ref Item item, out int index) {
+		public static bool Restock(this Item[] inv, Item item, out int index) {
 			for (int i = 0; i < inv.Length; i++) {
 				Item bagItem = inv[i];
 				if (!bagItem.NullOrAir() && bagItem.type == item.type && bagItem.stack < bagItem.maxStack) {

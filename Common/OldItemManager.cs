@@ -52,9 +52,12 @@ namespace androLib.Common.OldItemManager
             ReplaceOldItems(player.bank4.item, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
 
             if (player.TryGetModPlayer(out StoragePlayer storagePlayer)) {
-                foreach (Item[] storageInventory in storagePlayer.Storages.Select(s => s.Items)) {
-                    ReplaceOldItems(storageInventory, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
-                }
+                foreach (Storage storage in storagePlayer.Storages) {
+                    if (storage.GetItems != null)
+                        continue;
+
+					ReplaceOldItems(storage.Items, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
+				}
 
 				//ReplaceOldItems(wePlayer.enchantingTableEssence, player);
 				//ReplaceOldItems(wePlayer.enchantmentStorageItems, player);

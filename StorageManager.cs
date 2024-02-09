@@ -61,7 +61,12 @@ namespace androLib
 		public static int UIResizePanelDefaultY = DefaultResizePanelIncrement * 3;
 		public int LastUIResizePanelDefaultX;
 		public int LastUIResizePanelDefaultY;
-		public Item[] Items;
+		public Func<Item[]> GetItems;
+		public Item[] Items {
+			get => GetItems != null ? GetItems() : items;
+			set => items = value;
+		}
+		private Item[] items;
 		public int RegisteredUI_ID { get; }
 		public bool DisplayBagUI = false;
 		public Action SelectItemForUIOnly { get; }
@@ -77,6 +82,7 @@ namespace androLib
 		private SortedDictionary<int, int> ItemsIHaveThisTick = new();
 		public int SwitcherStorageID;
 		public bool ShouldDepositToMagicStorage = false;
+		public bool ShouldAddMaterialsForCrafting = true;
 
 		#region Simple HasRequiredItemToUseStorage
 
@@ -131,7 +137,8 @@ namespace androLib
 			SelectItemForUIOnly = selectItemForUIOnly;
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
 			CanVacuumItemWhenNotContained = canVacuumItem;
-			Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
+			GetItems = () => items;
+			items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
 			UIResizePanelX = UIResizePanelDefaultX;
 			UIResizePanelY = UIResizePanelDefaultY;
@@ -165,7 +172,9 @@ namespace androLib
 		public const string ShouldDepositToMagicStorageTag = "_ShouldDepositToMagicStorage";
 		public void SaveData(TagCompound tag) {
 			string modFullName = GetModFullName();
-			tag[$"{modFullName}{ItemsTag}"] = Items;
+			if (GetItems == null)
+				tag[$"{modFullName}{ItemsTag}"] = items;
+
 			tag[$"{modFullName}{NameTag}"] = name;
 			tag[$"{modFullName}{UILeftTag}"] = UILeft;
 			tag[$"{modFullName}{UITopTag}"] = UITop;
@@ -179,16 +188,16 @@ namespace androLib
 		}
 		public void LoadData(TagCompound tag) {
 			string modFullName = GetModFullName();
-			if (!tag.TryGet($"{modFullName}{ItemsTag}", out Items))
-				Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
+			if (!tag.TryGet($"{modFullName}{ItemsTag}", out items))
+				items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 
 			//Mod != null is checking if the bag is loaded the correct way instead of unloaded.
-			if (Mod != null && Items.Length > StorageSize)
+			if (Mod != null && items.Length > StorageSize)
 				TryUpdateItemsToCurrentStorageSize();
 
 			string loadedName = tag.Get<string>($"{modFullName}{NameTag}");
 			Rename(loadedName);
-			bool temp = !Items.Where(i => !i.NullOrAir()).Any();
+			bool temp = !items.Where(i => !i.NullOrAir()).Any();
 			
 			int uiLeft = tag.Get<int>($"{modFullName}{UILeftTag}");
 			int uiTop = tag.Get<int>($"{modFullName}{UITopTag}");
@@ -222,22 +231,22 @@ namespace androLib
 			ShouldDepositToMagicStorage = tag.Get<bool>($"{modFullName}{ShouldDepositToMagicStorageTag}");
 		}
 		private void TryUpdateItemsToCurrentStorageSize() {
-			if (Items.Length == StorageSize)
+			if (items.Length == StorageSize || GetItems != null)
 				return;
 
-			if (Items.Length < StorageSize) {
-				Items = Items.Concat(Enumerable.Repeat(new Item(), StorageSize - Items.Length)).ToArray();
+			if (items.Length < StorageSize) {
+				items = items.Concat(Enumerable.Repeat(new Item(), StorageSize - items.Length)).ToArray();
 				return;
 			}
 
-			IEnumerable<Item> nonAirItems = Items.Where(item => !item.NullOrAir());
+			IEnumerable<Item> nonAirItems = items.Where(item => !item.NullOrAir());
 			int nonAirItemCount = nonAirItems.Count();
 			if (nonAirItemCount >= StorageSize) {
-				Items = nonAirItems.ToArray();
+				items = nonAirItems.ToArray();
 				return;
 			}
 			else if (nonAirItemCount < 1) {
-				Items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
+				items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 				return;
 			}
 
@@ -245,13 +254,13 @@ namespace androLib
 			int index = 0;
 			int airCount = 0;
 			while (airCount <= allowedOpenSlots && index <= StorageSize) {
-				if (Items[index].NullOrAir())
+				if (items[index].NullOrAir())
 					airCount++;
 
 				index++;
 			}
 
-			Items = Items.Take(index - 1).Concat(nonAirItems.Reverse().Take(StorageSize - (index - 1)).Reverse()).ToArray();
+			items = items.Take(index - 1).Concat(nonAirItems.Reverse().Take(StorageSize - (index - 1)).Reverse()).ToArray();
 		}
 		private bool TryGetNextOpenSlot(Item[] items, ref int nextOpenSlot, bool fromEnd = false) {
 			if (!fromEnd) {
@@ -295,8 +304,8 @@ namespace androLib
 			clone.UILeft = UILeft;
 			clone.UITop = UITop;
 			clone.StorageSize = StorageSize;
-			clone.Items = new Item[StorageSize];
-			Array.Copy(Items, clone.Items, StorageSize);
+			clone.items = new Item[StorageSize];
+			Array.Copy(items, clone.items, StorageSize);
 			clone.ShouldVacuum = ShouldVacuum;
 			clone.UIResizePanelX = UIResizePanelX;
 			clone.UIResizePanelY = UIResizePanelY;
@@ -353,6 +362,9 @@ namespace androLib
 				return player.inventory[hasRequiredItemToUseStorageIndex];
 
 			if (lastBagUIFoundIn < 0)
+				return null;
+
+			if (StoragePlayer.LocalStoragePlayer.Storages[lastBagUIFoundIn].GetItems != null)
 				return null;
 
 			int index = ItemsIndexFromHasRequiredItemToUseStorageIndex(hasRequiredItemToUseStorageIndex);
@@ -1080,7 +1092,7 @@ namespace androLib
 
 			CanVacuumItemHandler.Add((Item item, Player player) => bagUI.CanVacuumItem(item, player));
 			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
-			TryRestockItemHandler.Add((Item item) => bagUI.Restock(ref item));
+			TryRestockItemHandler.Add((Item item) => bagUI.RestockFunc(item, true, false));
 			TryQuickStackItemHandler.Add((Item item, Player player) => bagUI.QuickStack(ref item, player));
 
 			MasterUIManager.IsDisplayingUI.Add(() => bagUI.DisplayBagUI);
@@ -1148,7 +1160,7 @@ namespace androLib
 			bagUI = BagUIs[storageID];
 			return true;
 		}
-		public static IEnumerable<Item[]> AllItems => BagUIs.Select(bagUI => bagUI.MyStorage.Items);
+		public static IEnumerable<Item[]> AllItems => BagUIs.Where(bagUI => bagUI.MyStorage.GetItems == null).Select(bagUI => bagUI.MyStorage.Items);
 		private static SortedDictionary<int, List<Action<BagUI>>> BagUIEdits = new();
 		public static void AddBagUIEdit(int storageID, Action<BagUI> edit) {
 			BagUIEdits.AddOrCombine(storageID, edit);

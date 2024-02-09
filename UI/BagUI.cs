@@ -30,12 +30,12 @@ namespace androLib.UI
 			public const int BagScrollBar = 1;
 			public const int BagScrollPanel = 2;
 			public const int BagSearch = 3;
-			public const int BagResizePannel = 4;
+			public const int BagResizePanel = 4;
 			public const int BagCollapseButton = 5;
 			public const int BagRename = 6;
 			public const int BagButtons = 100;
 			public const int BagItemSlot = 200;
-			public const int BagSwitcherPannel = 201;
+			public const int BagSwitcherPanel = 201;
 			public const int BagSwitcherButtons = 202;
 		}
 
@@ -46,13 +46,13 @@ namespace androLib.UI
 		public BagUI DisplayedBagUI => StorageManager.BagUIs[StorageID];
 		public int RegisteredUI_ID { get; }
 		public int StorageID => displayAllBagButtons ? MyStorage.SwitcherStorageID : storageID;
-		private int storageID;
+		private readonly int storageID;
 		private int GetUI_ID(int id) => MasterUIManager.GetUI_ID(id, RegisteredUI_ID);
 		public struct ButtonProperties {
 			public int ButtonUI_ID { get; private set; }
 			public Action<BagUI> OnClicked;
-			private Func<string> GetText;
-			public string Text => GetText();
+			private readonly Func<string> GetText;
+			public readonly string Text => GetText();
 			public Func<Color, Color> ButtonColor;
 			public ButtonProperties(int uiID, Action<BagUI> onClicked, Func<string> getText, Func<Color, Color> buttonColor = null) {
 				ButtonUI_ID = uiID;
@@ -61,7 +61,7 @@ namespace androLib.UI
 				ButtonColor = buttonColor;
 			}
 		}
-		public List<ButtonProperties> DisplayedAllButtonProperites => DisplayedBagUI.MyButtonProperties;
+		public List<ButtonProperties> DisplayedAllButtonProperties => DisplayedBagUI.MyButtonProperties;
 		public List<ButtonProperties> MyButtonProperties;
 
 		public int depositAllUIIndex;
@@ -89,40 +89,40 @@ namespace androLib.UI
 		public const float buttonScaleMinimum = 0.75f;
 		public const float buttonScaleMaximum = 1f;
 		public float[] ButtonScale;
-		public void ResetButtonScaleArray() => ButtonScale = Enumerable.Repeat(buttonScaleMinimum, DisplayedAllButtonProperites.Count).ToArray();
-		public int glowTime {
-			get => DisplayedBagUI.myGlowTime;
-			set => DisplayedBagUI.myGlowTime = value;
+		public void ResetButtonScaleArray() => ButtonScale = Enumerable.Repeat(buttonScaleMinimum, DisplayedAllButtonProperties.Count).ToArray();
+		public int GlowTime {
+			get => DisplayedBagUI.MyGlowTime;
+			set => DisplayedBagUI.MyGlowTime = value;
 		}
-		public int myGlowTime = 0;
-		public float glowHue {
-			get => DisplayedBagUI.myGlowHue;
-			set => DisplayedBagUI.myGlowHue = value;
+		public int MyGlowTime = 0;
+		public float GlowHue {
+			get => DisplayedBagUI.MyGlowHue;
+			set => DisplayedBagUI.MyGlowHue = value;
 		}
-		public float myGlowHue = 0;
-		public int scrollPanelY {
-			get => DisplayedBagUI.myScrollPanelY;
-			set => DisplayedBagUI.myScrollPanelY = value;
+		public float MyGlowHue = 0;
+		public int ScrollPanelY {
+			get => DisplayedBagUI.MyScrollPanelY;
+			set => DisplayedBagUI.MyScrollPanelY = value;
 		}
-		public ref int scrollPanelY_ref => ref DisplayedBagUI.myScrollPanelY;
-		public int myScrollPanelY = int.MinValue;
-		public int scrollPanelPosition {
-			get => DisplayedBagUI.myScrollPanelPosition;
-			set => DisplayedBagUI.myScrollPanelPosition = value;
+		public ref int ScrollPanelY_ref => ref DisplayedBagUI.MyScrollPanelY;
+		public int MyScrollPanelY = int.MinValue;
+		public int ScrollPanelPosition {
+			get => DisplayedBagUI.MyScrollPanelPosition;
+			set => DisplayedBagUI.MyScrollPanelPosition = value;
 		}
-		public ref int scrollPanelPosition_ref => ref DisplayedBagUI.myScrollPanelPosition;
-		public int myScrollPanelPosition = 0;
-		private int myResizeUIXBeforeDoubleClick = 0;
-		private int myResizeUIYBeforeDoubleClick = 0;
+		public ref int ScrollPanelPosition_ref => ref DisplayedBagUI.MyScrollPanelPosition;
+		public int MyScrollPanelPosition = 0;
+		private int MyResizeUIXBeforeDoubleClick = 0;
+		private int MyResizeUIYBeforeDoubleClick = 0;
 		/// <summary>
 		/// For changing how items are visually displayed when selected only.
 		/// </summary>
-		public SortedDictionary<int, int> selectedItemSlots => DisplayedBagUI.mySelectedItemSlots;
-		public SortedDictionary<int, int> mySelectedItemSlots { get; private set; } = new();
+		public SortedDictionary<int, int> SelectedItemSlots => DisplayedBagUI.MySelectedItemSlots;
+		public SortedDictionary<int, int> MySelectedItemSlots { get; private set; } = new();
 		private bool displayAllBagButtons = false;
 		private static int displayAllBagButtonsCount = 0;
 		private static bool DisplayingAnyAllBagButtons => displayAllBagButtonsCount > 0;
-		private static List<KeyValuePair<int, int>> AllBagButtonInfos = new();//bagItemType, StorageID
+		private readonly static List<KeyValuePair<int, int>> AllBagButtonInfos = new();//bagItemType, StorageID
 		private static void UpdateAllBagButtonsInfo() {
 			if (!DisplayingAnyAllBagButtons)
 				return;
@@ -148,6 +148,12 @@ namespace androLib.UI
 		public BagUI(int storageID, int registeredUI_ID) {
 			this.storageID = storageID;
 			RegisteredUI_ID = registeredUI_ID;
+
+			CanDepositFunc = CanDeposit;
+			CanVacuumItemFunc = CanVacuumItem;
+			DepositFunc = Deposit;
+			RestockFunc = Restock;
+			MyUpdateItemSlotFunc = UpdateItemSlot;
 		}
 		private DrawnUIData drawnUIData;
 		public class DrawnUIData {
@@ -185,7 +191,7 @@ namespace androLib.UI
 			AddButton((bagUI) => bagUI.LootAll(), () => StorageTextID.LootAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			AddButton((bagUI) => bagUI.DepositAll(Main.LocalPlayer.inventory.TakePlayerInventory40()), () => StorageTextID.DepositAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			depositAllUIIndex = MyButtonProperties.Count - 1;
-			AddButton((bagUI) => bagUI.QuickStack(Main.LocalPlayer.inventory.TakePlayerInventory40(), Main.LocalPlayer), () => StorageTextID.QuickStack.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			AddButton((bagUI) => bagUI.QuickStackAll(Main.LocalPlayer.inventory.TakePlayerInventory40(), Main.LocalPlayer), () => StorageTextID.QuickStack.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			AddButton((bagUI) => bagUI.Sort(), () => StorageTextID.Sort.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			
 			if (StorageManager.RegisteredStorages[storageID].IsVacuumBag != false)
@@ -226,10 +232,10 @@ namespace androLib.UI
 			drawnUIData = new DrawnUIData();
 
 			Color mouseColor = MasterUIManager.MouseColor;
-			if (glowTime > 0) {
-				glowTime--;
-				if (glowTime <= 0)
-					glowHue = 0f;
+			if (GlowTime > 0) {
+				GlowTime--;
+				if (GlowTime <= 0)
+					GlowHue = 0f;
 			}
 
 			//ItemSlots Data 1/2
@@ -239,7 +245,7 @@ namespace androLib.UI
 			int minPanelWidth = PanelBorder * 2;
 
 			//Button Texts
-			string[] buttonTexts = DisplayedAllButtonProperites.Select(p => p.Text).ToArray();
+			string[] buttonTexts = DisplayedAllButtonProperties.Select(p => p.Text).ToArray();
 			Vector2[] buttonSizes = buttonTexts.Select(t => UITextData.GetBaseSize(t)).ToArray();
 			int longestButtonNameBaseWidth = (int)(buttonSizes[0].X * buttonScaleMinimum);
 			int longestButtonNameWidth = (int)(buttonSizes[0].X * ButtonScale[0]);
@@ -326,7 +332,7 @@ namespace androLib.UI
 					break;
 
 				if (changed) {
-					if (MyStorage.UIResizePanelX == myResizeUIXBeforeDoubleClick && MyStorage.UIResizePanelY == myResizeUIYBeforeDoubleClick) {
+					if (MyStorage.UIResizePanelX == MyResizeUIXBeforeDoubleClick && MyStorage.UIResizePanelY == MyResizeUIYBeforeDoubleClick) {
 						checkForLargerDefault = true;
 						MyStorage.UIResizePanelY = Storage.LastUIResizePanelDefaultY;
 						MyStorage.UIResizePanelX = Storage.LastUIResizePanelDefaultX;
@@ -339,7 +345,7 @@ namespace androLib.UI
 			int measuredPanelWidth = widthFromResizePanel < minPanelWidth ? minPanelWidth : widthFromResizePanel;
 			int itemSlotsAndScrollbarWidth = measuredPanelWidth - longestButtonNameWidth - PanelBorder * 2;
 			int itemSlotsWidth = itemSlotsAndScrollbarWidth;
-			int pannelInnerHeight = Math.Max(allButtonsHeight, nameHeight + MasterUIManager.ItemSlotSize);
+			int panelInnerHeight = Math.Max(allButtonsHeight, nameHeight + MasterUIManager.ItemSlotSize);
 			int itemSlotColumns = (itemSlotsWidth - MasterUIManager.ItemSlotSize) / itemSlotSpaceWidth + 1;
 			int itemSlotTotalRows = inventory.Length.CeilingDivide(itemSlotColumns);
 
@@ -371,7 +377,7 @@ namespace androLib.UI
 
 			drawnUIData.itemSlotColumns = itemSlotColumns;
 			drawnUIData.itemSlotSpaceWidth = itemSlotsAndScrollbarWidth;
-			drawnUIData.itemSlotSpaceHeight = pannelInnerHeight;
+			drawnUIData.itemSlotSpaceHeight = panelInnerHeight;
 			drawnUIData.itemSlotsLeft = itemSlotsLeft;
 
 			//ItemSlots Data 2/2
@@ -387,8 +393,8 @@ namespace androLib.UI
 			drawnUIData.textButtons = new();
 			List<UITextData> textButtons = drawnUIData.textButtons;
 			float buttonHeightMult = Math.Min(MinButtonHeightMult * (measuredPanelHeight - PanelBorder * 2) / allButtonsHeight, ButtonHeightMult);
-			for (int buttonIndex = 0; buttonIndex < DisplayedAllButtonProperites.Count; buttonIndex++) {
-				ButtonProperties buttonProperties = DisplayedAllButtonProperites[buttonIndex];
+			for (int buttonIndex = 0; buttonIndex < DisplayedAllButtonProperties.Count; buttonIndex++) {
+				ButtonProperties buttonProperties = DisplayedAllButtonProperties[buttonIndex];
 				string text = buttonTexts[buttonIndex];
 				float scale = ButtonScale[buttonIndex];
 				Color color = buttonProperties.ButtonColor?.Invoke(mouseColor) ?? mouseColor;
@@ -438,27 +444,27 @@ namespace androLib.UI
 			if (displayScrollbar) {
 				drawnUIData.scrollBarData.Draw(spriteBatch);
 
-				int lastScrollPanelPosition = scrollPanelPosition;
+				int lastScrollPanelPosition = ScrollPanelPosition;
 				//If panel is being dragged, force scrollPanelY to be in it's correct position by calculating with scrollPanelPosition.
 				bool draggingScrollPanel = MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel);
 				drawnUIData.draggingScrollPanel = draggingScrollPanel;
 				if (draggingScrollPanel) {
 					int scrollPanelRange = drawnUIData.scrollPanelMaxY - drawnUIData.scrollPanelMinY;
-					scrollPanelPosition = ((scrollPanelY - drawnUIData.scrollPanelMinY) * possiblePanelPositions).RoundDivide(scrollPanelRange);
+					ScrollPanelPosition = ((ScrollPanelY - drawnUIData.scrollPanelMinY) * possiblePanelPositions).RoundDivide(scrollPanelRange);
 				}
 
-				scrollPanelPosition_ref.Clamp(0, possiblePanelPositions);
-				if (lastScrollPanelPosition != scrollPanelPosition)
+				ScrollPanelPosition_ref.Clamp(0, possiblePanelPositions);
+				if (lastScrollPanelPosition != ScrollPanelPosition)
 					SoundEngine.PlaySound(SoundID.MenuTick);
 			}
 			else {
-				scrollPanelPosition = 0;
+				ScrollPanelPosition = 0;
 			}
 
 			//ItemSlots Draw
 			drawnUIData.slotData = new UIItemSlotData[inventory.Length];
 			UIItemSlotData[] slotData = drawnUIData.slotData;
-			int startRow = scrollPanelPosition;
+			int startRow = ScrollPanelPosition;
 			bool usingSearchBar = MasterUIManager.UsingTypingBar(SearchID);
 			int inventoryIndexStart = startRow * itemSlotColumns;
 			int slotsToDisplay = itemSlotRowsDisplayed * itemSlotColumns;
@@ -475,8 +481,8 @@ namespace androLib.UI
 				ref Item item = ref inventory[inventoryIndex];
 				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.TypingBarString.ToLower())) {
 					slotData[inventoryIndex] = new(GetUI_ID(Bag_UI_ID.BagItemSlot), itemSlotX, itemSlotY);
-					int context = selectedItemSlots.TryGetValue(inventoryIndex, out int selectedContext) ? selectedContext : ItemSlotContextID.Normal;
-					slotData[inventoryIndex].Draw(spriteBatch, item, context, glowHue, glowTime);
+					int context = SelectedItemSlots.TryGetValue(inventoryIndex, out int selectedContext) ? selectedContext : ItemSlotContextID.Normal;
+					slotData[inventoryIndex].Draw(spriteBatch, item, context, GlowHue, GlowTime);
 
 					slotNum++;
 					if (slotNum % itemSlotColumns == 0) {
@@ -507,26 +513,26 @@ namespace androLib.UI
 			if (displayScrollbar) {
 				//Scroll Panel Data 2 / 2
 				if (MasterUIManager.PanelBeingDragged == GetUI_ID(Bag_UI_ID.BagScrollPanel)) {
-					scrollPanelY_ref.Clamp(drawnUIData.scrollPanelMinY, drawnUIData.scrollPanelMaxY);
+					ScrollPanelY_ref.Clamp(drawnUIData.scrollPanelMinY, drawnUIData.scrollPanelMaxY);
 				}
 				else {
 					int scrollPanelRange = drawnUIData.scrollPanelMaxY - drawnUIData.scrollPanelMinY;
-					int offset = possiblePanelPositions > 0 ? scrollPanelPosition * scrollPanelRange / possiblePanelPositions : 0;
-					scrollPanelY = offset + drawnUIData.scrollPanelMinY;
+					int offset = possiblePanelPositions > 0 ? ScrollPanelPosition * scrollPanelRange / possiblePanelPositions : 0;
+					ScrollPanelY = offset + drawnUIData.scrollPanelMinY;
 				}
 
-				drawnUIData.scrollPanelData = new(GetUI_ID(Bag_UI_ID.BagScrollPanel), scrollBarLeft + SpacingTiny, scrollPanelY, drawnUIData.scrollPanelWidth, drawnUIData.scrollPanelHeight, mouseColor);
+				drawnUIData.scrollPanelData = new(GetUI_ID(Bag_UI_ID.BagScrollPanel), scrollBarLeft + SpacingTiny, ScrollPanelY, drawnUIData.scrollPanelWidth, drawnUIData.scrollPanelHeight, mouseColor);
 
 				drawnUIData.scrollPanelData.Draw(spriteBatch);
 			}
 
 			//Resize Panel Draw
-			drawnUIData.resizePanelData = new(GetUI_ID(Bag_UI_ID.BagResizePannel), panel.BottomRight.X - resizePanelWidthSpace, panel.BottomRight.Y - resizePanelHeightSpace, resizePanelWidth, resizePanelHeight, mouseColor);
+			drawnUIData.resizePanelData = new(GetUI_ID(Bag_UI_ID.BagResizePanel), panel.BottomRight.X - resizePanelWidthSpace, panel.BottomRight.Y - resizePanelHeightSpace, resizePanelWidth, resizePanelHeight, mouseColor);
 			UIPanelData resizePanelData = drawnUIData.resizePanelData;
 			resizePanelData.Draw(spriteBatch);
 
 			if (displayAllBagButtons)
-				DrawBagButtonsPannel(spriteBatch);
+				DrawBagButtonsPanel(spriteBatch);
 		}
 		public void UpdateInterface() {
 			StoragePlayer storagePlayer = StoragePlayer.LocalStoragePlayer;
@@ -579,61 +585,8 @@ namespace androLib.UI
 				if (inventoryIndex >= inventory.Length || inventoryIndex >= slotDatas.Length)
 					break;
 
-				ref Item item = ref inventory[inventoryIndex];
-				if (!usingSearchBar || item.Name.ToLower().Contains(MasterUIManager.TypingBarString.ToLower())) {
-					UIItemSlotData slotData = slotDatas[inventoryIndex];
-					if (slotData.MouseHovering()) {
-						if (AndroModSystem.FavoriteKeyDown) {
-							Main.cursorOverride = CursorOverrideID.FavoriteStar;
-							if (MasterUIManager.LeftMouseClicked) {
-								item.favorited = !item.favorited;
-								SoundEngine.PlaySound(SoundID.MenuTick);
-								if (item.TryGetGlobalItem(out VacuumToStorageItem vacummItem2))
-									vacummItem2.favorited = item.favorited;
-							}
-						}
-						else {
-							if (ItemSlot.ShiftInUse && Main.mouseRight && Main.mouseItem.NullOrAir()) {
-								bool unloaded = item.ModItem is UnloadedItem;
-								if (MasterUIManager.RightMouseClicked && !item.NullOrAir() && !item.favorited) {
-									int type = item.type;
-									bool allowed = DisplayedBagUI.CanBeStored(item);
-									if (unloaded || !allowed || TryAddToPlayerBlacklist(type)) {
-										if (!unloaded && allowed)
-											SoundEngine.PlaySound(SoundID.Research);
-
-										if (unloaded || AndroMod.clientConfig.RemoveItemsWhenBlacklisted) {
-											for (int i = 0; i < inventory.Length; i++) {
-												ref Item checkItem = ref inventory[i];
-												if (checkItem.type == type) {
-													if (!StorageManager.TryReturnItemToPlayer(ref checkItem, Main.LocalPlayer))
-														break;
-												}
-											}
-										}
-									}
-								}
-							}
-							else {
-								bool doClickInteractions = Main.mouseItem.NullOrAir();
-								bool unloaded = Main.mouseItem.ModItem is UnloadedItem;
-								if (MasterUIManager.LeftMouseClicked) {
-									if (!doClickInteractions && (item.NullOrAir() || Main.mouseItem.type == item.type)) {
-										if (!DisplayedBagUI.CanBeStored(Main.mouseItem) || Storage.IsVacuumBag == null && Storage.HasWhiteListGetter && Storage.CanVacuumItemWhenNotContained != null && !Storage.CanVacuumItemWhenNotContained(Main.mouseItem)) {
-											if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
-												SoundEngine.PlaySound(SoundID.ResearchComplete);
-										}
-									}
-								}
-
-								if (doClickInteractions || DisplayedBagUI.CanBeStored(Main.mouseItem) || Main.mouseItem.type == item.type || unloaded)
-									slotData.ClickInteractions(ref item);
-							}
-						}
-					}
-
-					if (!item.IsAir && !item.favorited && item.TryGetGlobalItem(out VacuumToStorageItem vacummItem) && vacummItem.favorited)
-						item.favorited = true;
+				if (!usingSearchBar || inventory[inventoryIndex].Name.ToLower().Contains(MasterUIManager.TypingBarString.ToLower())) {
+					UpdateItemSlotFunc(inventoryIndex, this, inventory, slotDatas);
 
 					slotNum++;
 					if (slotNum % itemSlotColumns == 0) {
@@ -705,7 +658,7 @@ namespace androLib.UI
 						ButtonScale[allButtonPropertiesIndex] = buttonScaleMaximum;
 
 					if (MasterUIManager.LeftMouseClicked) {
-						DisplayedAllButtonProperites[allButtonPropertiesIndex].OnClicked(allButtonPropertiesIndex < DisplayedAllButtonProperites.Count - 1 ? DisplayedBagUI : this);
+						DisplayedAllButtonProperties[allButtonPropertiesIndex].OnClicked(allButtonPropertiesIndex < DisplayedAllButtonProperties.Count - 1 ? DisplayedBagUI : this);
 						SoundEngine.PlaySound(SoundID.MenuTick);
 					}
 				}
@@ -722,28 +675,28 @@ namespace androLib.UI
 				if (scrollBarData.MouseHovering()) {
 					if (MasterUIManager.LeftMouseClicked) {
 						MasterUIManager.UIBeingHovered = Bag_UI_ID.BagScrollPanel;
-						scrollPanelY = Main.mouseY - scrollPanelHeight / 2;
-						scrollPanelY_ref.Clamp(scrollPanelMinY, scrollPanelMaxY);
-						scrollPanelData.SetCenterY(scrollPanelY);
+						ScrollPanelY = Main.mouseY - scrollPanelHeight / 2;
+						ScrollPanelY_ref.Clamp(scrollPanelMinY, scrollPanelMaxY);
+						scrollPanelData.SetCenterY(ScrollPanelY);
 
 						scrollPanelData.TryStartDraggingUI();
 					}
 				}
 
 				if (scrollPanelData.ShouldDragUI()) {
-					MasterUIManager.DragUI(out _, out scrollPanelY_ref);
+					MasterUIManager.DragUI(out _, out ScrollPanelY_ref);
 				}
 				else if (draggingScrollPanel) {
 					int scrollPanelRange = scrollPanelMaxY - scrollPanelMinY;
-					scrollPanelPosition = ((scrollPanelY - scrollPanelMinY) * possiblePanelPositions).RoundDivide(scrollPanelRange);
+					ScrollPanelPosition = ((ScrollPanelY - scrollPanelMinY) * possiblePanelPositions).RoundDivide(scrollPanelRange);
 				}
 			}
 
 			//Resize Panel Hover and Drag
 			if (resizePanelData.MouseHovering()) {
 				if (MasterUIManager.DoubleClick) {
-					myResizeUIXBeforeDoubleClick = MyStorage.UIResizePanelX;
-					myResizeUIYBeforeDoubleClick = MyStorage.UIResizePanelY;
+					MyResizeUIXBeforeDoubleClick = MyStorage.UIResizePanelX;
+					MyResizeUIYBeforeDoubleClick = MyStorage.UIResizePanelY;
 					MyStorage.UIResizePanelX = Storage.UIResizePanelDefaultX;
 					MyStorage.UIResizePanelY = Storage.UIResizePanelDefaultY;
 				}
@@ -772,14 +725,72 @@ namespace androLib.UI
 			if (displayScrollbar) {
 				int scrollWheelTicks = MasterUIManager.ScrollWheelTicks;
 				if (scrollWheelTicks != 0 && Hovering && MasterUIManager.NoPanelBeingDragged) {
-					if (scrollPanelPosition > 0 && scrollWheelTicks < 0 || scrollPanelPosition < possiblePanelPositions && scrollWheelTicks > 0) {
+					if (ScrollPanelPosition > 0 && scrollWheelTicks < 0 || ScrollPanelPosition < possiblePanelPositions && scrollWheelTicks > 0) {
 						SoundEngine.PlaySound(SoundID.MenuTick);
-						scrollPanelPosition += scrollWheelTicks;
+						ScrollPanelPosition += scrollWheelTicks;
 					}
 				}
 			}
 			
-			selectedItemSlots.Clear();
+			SelectedItemSlots.Clear();
+		}
+		public Action<int, BagUI, Item[], UIItemSlotData[]> MyUpdateItemSlotFunc;
+		public Action<int, BagUI, Item[], UIItemSlotData[]> UpdateItemSlotFunc => DisplayedBagUI.MyUpdateItemSlotFunc;
+		private void UpdateItemSlot(int inventoryIndex, BagUI bagUI, Item[] inventory, UIItemSlotData[] slotDatas) {
+			ref Item item = ref inventory[inventoryIndex];
+			UIItemSlotData slotData = slotDatas[inventoryIndex];
+			if (slotData.MouseHovering()) {
+				if (AndroModSystem.FavoriteKeyDown) {
+					Main.cursorOverride = CursorOverrideID.FavoriteStar;
+					if (MasterUIManager.LeftMouseClicked) {
+						item.favorited = !item.favorited;
+						SoundEngine.PlaySound(SoundID.MenuTick);
+						if (item.TryGetGlobalItem(out VacuumToStorageItem vacuumItem2))
+							vacuumItem2.favorited = item.favorited;
+					}
+				}
+				else {
+					if (ItemSlot.ShiftInUse && Main.mouseRight && Main.mouseItem.NullOrAir()) {
+						bool unloaded = item.ModItem is UnloadedItem;
+						if (MasterUIManager.RightMouseClicked && !item.NullOrAir() && !item.favorited) {
+							int type = item.type;
+							bool allowed = DisplayedBagUI.CanBeStored(item);
+							if (unloaded || !allowed || TryAddToPlayerBlacklist(type)) {
+								if (!unloaded && allowed)
+									SoundEngine.PlaySound(SoundID.Research);
+
+								if (unloaded || AndroMod.clientConfig.RemoveItemsWhenBlacklisted) {
+									for (int i = 0; i < inventory.Length; i++) {
+										ref Item checkItem = ref inventory[i];
+										if (checkItem.type == type) {
+											if (!StorageManager.TryReturnItemToPlayer(ref checkItem, Main.LocalPlayer))
+												break;
+										}
+									}
+								}
+							}
+						}
+					}
+					else {
+						bool doClickInteractions = Main.mouseItem.NullOrAir();
+						bool unloaded = Main.mouseItem.ModItem is UnloadedItem;
+						if (MasterUIManager.LeftMouseClicked) {
+							if (!doClickInteractions && (item.NullOrAir() || Main.mouseItem.type == item.type)) {
+								if (!DisplayedBagUI.CanBeStored(Main.mouseItem) || Storage.IsVacuumBag == null && Storage.HasWhiteListGetter && Storage.CanVacuumItemWhenNotContained != null && !Storage.CanVacuumItemWhenNotContained(Main.mouseItem)) {
+									if (!unloaded && TryAddToPlayerWhitelist(Main.mouseItem.type))
+										SoundEngine.PlaySound(SoundID.ResearchComplete);
+								}
+							}
+						}
+
+						if (doClickInteractions || DisplayedBagUI.CanBeStored(Main.mouseItem) || Main.mouseItem.type == item.type || unloaded)
+							slotData.ClickInteractions(ref item);
+					}
+				}
+			}
+
+			if (!item.IsAir && !item.favorited && item.TryGetGlobalItem(out VacuumToStorageItem vacuumItem) && vacuumItem.favorited)
+				item.favorited = true;
 		}
 		private void MainPanelClickInteractions() {
 			UIPanelData panel = drawnUIData.panel;
@@ -801,7 +812,7 @@ namespace androLib.UI
 			public UIPanelData switcherPanel;
 			public List<UIItemButtonData> uIImageButtonDatas;
 		}
-		private void DrawBagButtonsPannel(SpriteBatch spriteBatch) {
+		private void DrawBagButtonsPanel(SpriteBatch spriteBatch) {
 			UIPanelData panel = drawnUIData.panel;
 
 			drawnSwitcherUIData = new();
@@ -840,7 +851,7 @@ namespace androLib.UI
 			
 			//Switcher Panel Data 2/2
 			int bagSwitcherHeightBorder = bagSwitcherHeight + PanelBorder * 2;
-			drawnSwitcherUIData.switcherPanel = new(Bag_UI_ID.BagSwitcherPannel, panel.TopLeft.X, panel.TopLeft.Y - bagSwitcherHeightBorder, bagSwitcherWidth, bagSwitcherHeightBorder, panel.Color);
+			drawnSwitcherUIData.switcherPanel = new(Bag_UI_ID.BagSwitcherPanel, panel.TopLeft.X, panel.TopLeft.Y - bagSwitcherHeightBorder, bagSwitcherWidth, bagSwitcherHeightBorder, panel.Color);
 			UIPanelData switcherPanel = drawnSwitcherUIData.switcherPanel;
 
 			//Switcher Panel Draw
@@ -871,13 +882,13 @@ namespace androLib.UI
 			}
 		}
 		public void OpenBag() {
-			scrollPanelY = int.MinValue;
+			ScrollPanelY = int.MinValue;
 			Main.playerInventory = true;
 			MyStorage.DisplayBagUI = true;
 			Main.LocalPlayer.chest = -1;
 		}
 		public void CloseBag(bool noSound = false) {
-			scrollPanelY = int.MinValue;
+			ScrollPanelY = int.MinValue;
 			MyStorage.DisplayBagUI = false;
 			MasterUIManager.TryResetTypingBar(RenameID);
 			MasterUIManager.TryResetTypingBar(SearchID);
@@ -922,6 +933,8 @@ namespace androLib.UI
 
 			return false;
 		}
+
+		public Func<Item, bool> CanDepositFunc;
 		public bool CanDeposit(Item item) {
 			if (item.NullOrAir())
 				return false;
@@ -934,6 +947,7 @@ namespace androLib.UI
 
 			return true;
 		}
+		public Func<Item, Player, bool, bool> CanVacuumItemFunc;
 		public bool CanVacuumItem(Item item, Player player, bool ignoreNeedBagInInventory = false) {
 			if (item.NullOrAir())
 				return false;
@@ -957,14 +971,15 @@ namespace androLib.UI
 			return true;
 		}
 		public bool TryVacuumItem(ref Item item, Player player, bool ignoreNeedBagInInventory = false, bool playSound = true) {
-			if (CanVacuumItem(item, player, ignoreNeedBagInInventory))
-				return Deposit(ref item, playSound);
+			if (CanVacuumItemFunc(item, player, ignoreNeedBagInInventory))
+				return DepositFunc(item, playSound, false);
 
 			return false;
 		}
-		public bool Deposit(ref Item item, bool playSound = true, bool displayedInventory = false) {
+		public Func<Item, bool, bool, bool> DepositFunc;
+		public bool Deposit(Item item, bool playSound = true, bool displayedInventory = false) {
 			Item[] inv = displayedInventory ? Inventory : MyInventory;
-			if (inv.Deposit(ref item, out int _)) {
+			if (inv.Deposit(item, out int _)) {
 				if (playSound)
 					SoundEngine.PlaySound(SoundID.Grab);
 
@@ -973,9 +988,10 @@ namespace androLib.UI
 
 			return false;
 		}
-		public bool Restock(ref Item item, bool playSound = true, bool displayedInventory = false) {
+		public Func<Item, bool, bool, bool> RestockFunc;
+		public bool Restock(Item item, bool playSound = true, bool displayedInventory = false) {
 			Item[] bagInventory = displayedInventory ? Inventory : MyInventory;
-			if (bagInventory.Restock(ref item, out int _)) {
+			if (bagInventory.Restock(item, out int _)) {
 				if (playSound)
 					SoundEngine.PlaySound(SoundID.Grab);
 
@@ -988,14 +1004,14 @@ namespace androLib.UI
 			if (!DisplayBagUI)
 				return false;
 
-			if (!CanDeposit(item))
+			if (!CanDepositFunc(item))
 				return false;
 
 			return true;
 		}
 		public bool TryShiftClickNonBagItemToBag(ref Item item) {
 			if (CanShiftClickNonBagItemToBag(item))
-				return Deposit(ref item, displayedInventory: true);
+				return DepositFunc(item, true, true);
 
 			return false;
 		}
@@ -1004,9 +1020,12 @@ namespace androLib.UI
 
 		#region Multiple
 
+		/// <summary>
+		/// Do not use for anything besides a button function unless you add an optional Func<> to make it possible to replace.
+		/// </summary>
 		public bool DepositAll(IEnumerable<Item> inv, bool playSound = true) {
 			IEnumerable<Item> items = inv.Where(i => !i.NullOrAir() && !i.favorited && CanBeStored(i));
-			bool transferedAnyItem = Restock(items, false);
+			bool transferredAnyItem = RestockAll(items, false);
 			int index = 0;
 			Item[] bagInventory = MyInventory;
 			foreach (Item item in items) {
@@ -1026,21 +1045,25 @@ namespace androLib.UI
 					bagInventory.DoCoins(index);
 
 				item.TurnToAir();
-				transferedAnyItem = true;
+				transferredAnyItem = true;
 			}
 
-			if (transferedAnyItem) {
+			if (transferredAnyItem) {
 				if (playSound)
 					SoundEngine.PlaySound(SoundID.Grab);
 
 				Recipe.FindRecipes(true);
 			}
 
-			return transferedAnyItem;
+			return transferredAnyItem;
 		}
-		public bool Restock(IEnumerable<Item> inv, bool playSound = true) {
+
+		/// <summary>
+		/// Do not use for anything besides a button function unless you add an optional Func<> to make it possible to replace.
+		/// </summary>
+		public bool RestockAll(IEnumerable<Item> inv, bool playSound = true) {
 			Item[] bagInventory = MyInventory;
-			bool transferedAnyItem = false;
+			bool transferredAnyItem = false;
 			SortedDictionary<int, List<int>> nonAirItemsInStorage = new();
 			for (int i = 0; i < bagInventory.Length; i++) {
 				Item bagItem = bagInventory[i];
@@ -1054,7 +1077,7 @@ namespace androLib.UI
 						ref Item bagItem = ref bagInventory[bagIndex];
 						if (bagItem.stack < item.maxStack) {
 							if (ItemLoader.TryStackItems(bagItem, item, out _)) {
-								transferedAnyItem = true;
+								transferredAnyItem = true;
 								if (item.stack < 1) {
 									item.TurnToAir();
 									break;
@@ -1065,13 +1088,13 @@ namespace androLib.UI
 				}
 			}
 
-			if (playSound && transferedAnyItem) {
+			if (playSound && transferredAnyItem) {
 				bagInventory.DoCoins();
 				SoundEngine.PlaySound(SoundID.Grab);
 				Recipe.FindRecipes(true);
 			}
 
-			return transferedAnyItem;
+			return transferredAnyItem;
 		}
 
 		#endregion
@@ -1082,7 +1105,7 @@ namespace androLib.UI
 
 			return false;
 		}
-		public void QuickStack(Item[] inv, Player player) {
+		public void QuickStackAll(Item[] inv, Player player) {
 			for (int i = 0; i < inv.Length; i++) {
 				ref Item item = ref inv[i];
 				if (item.NullOrAir())
@@ -1096,7 +1119,12 @@ namespace androLib.UI
 		}
 		
 		private void Sort() {
-			MasterUIManager.SortItems(ref MyStorage.Items);
+			if (MyStorage.GetItems != null)
+				return;
+
+			Item[] storageItems = MyStorage.Items;
+			MasterUIManager.SortItems(ref storageItems);
+			MyStorage.Items = storageItems;
 			Type itemSlotType = typeof(ItemSlot);
 			int[] inventoryGlowTime = (int[])itemSlotType.GetField("inventoryGlowTime", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
 			for (int i = 0; i < inventoryGlowTime.Length; i++) {
@@ -1111,9 +1139,9 @@ namespace androLib.UI
 			}
 
 			//prevent glow on bags that select items.
-			if (mySelectedItemSlots.Count == 0) {
-				glowTime = 300;
-				glowHue = 0.5f;
+			if (MySelectedItemSlots.Count == 0) {
+				GlowTime = 300;
+				GlowHue = 0.5f;
 			}
 		}
 		private void ToggleVacuum() {
@@ -1124,11 +1152,11 @@ namespace androLib.UI
 				AddSelectedItemSlot(selectedItemSlot.Key, selectedItemSlot.Value);
 			}
 		}
-		public void AddSelectedItemSlot(int selectedItemSlot, int context) => mySelectedItemSlots.TryAdd(selectedItemSlot, context);
+		public void AddSelectedItemSlot(int selectedItemSlot, int context) => MySelectedItemSlots.TryAdd(selectedItemSlot, context);
 		private void UpdateSelectedItemSlots() {
 			Storage.SelectItemSlotFunc();
-			if (mySelectedItemSlots.Count == 1) {
-				Item selectedItem = Inventory[mySelectedItemSlots.First().Key];
+			if (MySelectedItemSlots.Count == 1) {
+				Item selectedItem = Inventory[MySelectedItemSlots.First().Key];
 				if (selectedItem.stack < 1)
 					selectedItem.favorited = false;
 			}
