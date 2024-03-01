@@ -137,7 +137,6 @@ namespace androLib
 			SelectItemForUIOnly = selectItemForUIOnly;
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
 			CanVacuumItemWhenNotContained = canVacuumItem;
-			GetItems = () => items;
 			items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
 			UIResizePanelX = UIResizePanelDefaultX;
