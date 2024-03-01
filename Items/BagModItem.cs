@@ -216,6 +216,13 @@ namespace VacuumBags.Items
 
 				return fromBag();
 			}
+			else {
+				int endOfAmmoIndex = 58;
+				for (int j = startOfAmmoIndex; j < endOfAmmoIndex; j++) {
+					if (inventory[j].stack > 0 && itemCondition(inventory[j]))
+						return null;
+				}
+			}
 
 			for (int k = 0; k < bagIndex; k++) {
 				if (inventory[k].stack > 0 && itemCondition(inventory[k]))
