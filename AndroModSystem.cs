@@ -40,6 +40,8 @@ namespace androLib
 				bool useTurn = item.useTurn;
 				bool autoReuse = item.autoReuse;
 				bool consumable = item.consumable;
+				int useTime = item.useTime;
+				int useAnimation = item.useAnimation;
 				if (item.DamageType != DamageClass.Default) {
 					string temp2 = item.DamageType.Name;
 				}
