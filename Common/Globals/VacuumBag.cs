@@ -38,7 +38,7 @@ namespace androLib.Common.Globals
 			if (!StorageManager.TryGetBagUI(bagStorageID, out BagUI bagUI))
 				return;
 
-			if (StorageManager.BagUIs[bagStorageID].DisplayBagUI && Main.LocalPlayer.chest == -1) {
+			if (StorageManager.BagUIs[bagStorageID].DisplayBagUI) {
 				if (Main.playerInventory) {
 					bagUI.CloseBag(true);
 				}

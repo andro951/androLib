@@ -143,7 +143,7 @@ namespace androLib.UI
 				}
 			}
 		}
-		public bool DisplayBagUI => MyStorage.DisplayBagUI && Main.LocalPlayer.chest == -1;
+		public bool DisplayBagUI => MyStorage.DisplayBagUI;
 
 		public BagUI(int storageID, int registeredUI_ID) {
 			this.storageID = storageID;
@@ -885,17 +885,14 @@ namespace androLib.UI
 			ScrollPanelY = int.MinValue;
 			Main.playerInventory = true;
 			MyStorage.DisplayBagUI = true;
-			Main.LocalPlayer.chest = -1;
 		}
 		public void CloseBag(bool noSound = false) {
 			ScrollPanelY = int.MinValue;
 			MyStorage.DisplayBagUI = false;
 			MasterUIManager.TryResetTypingBar(RenameID);
 			MasterUIManager.TryResetTypingBar(SearchID);
-			if (Main.LocalPlayer.chest == -1) {
-				if (!noSound)
-					SoundEngine.PlaySound(SoundID.Grab);
-			}
+			if (!noSound)
+				SoundEngine.PlaySound(SoundID.Grab);
 
 			if (!AndroMod.clientConfig.ReOpenBagSwitcherAutomatically)
 				displayAllBagButtons = false;
