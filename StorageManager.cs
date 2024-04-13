@@ -1194,12 +1194,16 @@ namespace androLib
 				Main.cursorOverride = CursorOverrideID.InventoryToChest;
 		}
 		public static bool TryReturnItemToPlayer(ref Item item, Player player, bool allowQuickSpawn = false) {
-			if (TryVacuumItem(ref item, player))
+			if (TryVacuumItem(ref item, player)) {
+				Recipe.FindRecipes();
 				return true;
+			}
 
 			item = player.GetItem(player.whoAmI, item, GetItemSettings.InventoryEntityToPlayerInventorySettings);
-			if (item.IsAir)
+			if (item.IsAir) {
+				Recipe.FindRecipes();
 				return true;
+			}
 
 			if (!allowQuickSpawn)
 				return false;
