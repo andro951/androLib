@@ -295,8 +295,8 @@ namespace androLib
 				throw new Exception("Failed to find instructions IL_ItemSlot_RightClick_ItemArray_int_int");
 			}
 
-			c.Emit(OpCodes.Ldarg, 0);
-			c.Emit(OpCodes.Ldarg, 2);
+			c.EmitLdarg(0);
+			c.EmitLdarg(2);
 			c.EmitDelegate((bool mouseRightReleased, Item[] inv, int slot) => {
 				Item item = inv[slot];
 				if (item.NullOrAir() || !ItemSets.Sets.ContinuousRightClickItems.Contains(item.type))
