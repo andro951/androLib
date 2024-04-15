@@ -2376,8 +2376,9 @@ namespace androLib.Common.Utility
 				int bannerID = Item.NPCtoBanner(npc.BannerID());
 				int bannerItemID = Item.BannerToItem(bannerID);
 				if (bannerItemID > ItemID.None && bannerItemID < ItemLoader.ItemCount && bannerID > 0) {
-					if (!itemToBanner.TryAdd(bannerItemID, bannerID) && Debugger.IsAttached)
-						$"banner {bannerID} already exists.  current [{ContentSamples.NpcsByNetId[Item.BannerToNPC(itemToBanner[bannerItemID])].S()}], new [{bannerItemID.GetItemIDOrName()}, npc: {npc.S()}]".LogSimple();
+					if (!itemToBanner.TryAdd(bannerItemID, bannerID)) {
+						//if (Debugger.IsAttached) $"banner {bannerID} already exists.  current [{ContentSamples.NpcsByNetId[Item.BannerToNPC(itemToBanner[bannerItemID])].S()}], new [{bannerItemID.GetItemIDOrName()}, npc: {npc.S()}]".LogSimple();
+					}
 				}
 			}
 		}

@@ -8,6 +8,7 @@ using Terraria.ID;
 using Terraria;
 using Terraria.ModLoader;
 using static Terraria.ID.TileID;
+using System.Diagnostics;
 
 namespace androLib.Common.Globals
 {
@@ -39,7 +40,7 @@ namespace androLib.Common.Globals
 								case "SCalAltar":
 									break;//No dropped item, don't log.
 								default:
-									$"Failed to find find modded tile name for tile: {tileType.GetTileIDOrName()}, modTileName: {modTileName}".LogSimple();
+									//if (Debugger.IsAttached) $"Failed to find find modded tile name for tile: {tileType.GetTileIDOrName()}, modTileName: {modTileName}".LogSimple();
 									break;
 							}
 						}
@@ -399,13 +400,13 @@ namespace androLib.Common.Globals
 									case "SCalAltar":
 										break;//No dropped item, don't log.
 									default:
-										$"Failed to determine the dropItem of tile: {type.GetTileIDOrName()}, modTile.Name: {modTile.Name}, modTile.ItemDrop: {itemDrop}.".LogSimple();
+										//if (Debugger.IsAttached) $"Failed to determine the dropItem of tile: {type.GetTileIDOrName()}, modTile.Name: {modTile.Name}, modTile.ItemDrop: {itemDrop}.".LogSimple();
 										break;
 								}
 							}
 						}
 						else if (!ignoreError) {
-							$"Failed to determine the dropItem of tile: {type.GetTileIDOrName()}.".LogSimple();
+							//if (Debugger.IsAttached) $"Failed to determine the dropItem of tile: {type.GetTileIDOrName()}.".LogSimple();
 						}
 					}
 
