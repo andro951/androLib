@@ -92,18 +92,35 @@ namespace androLib
 
 			if (MasterUIManager.NoUIBeingHovered) {
 				bool openAndCouldStore = false;
+				bool stopVanilla = false;
+				bool transferredAll = false;
 				foreach (BagUI bagUI in StorageManager.BagUIs) {
 					if (bagUI.DisplayBagUI && bagUI.CanBeStored(item)) {
 						openAndCouldStore = true;
-						if (bagUI.TryShiftClickNonBagItemToBag(ref item))
-							return true;
+						transferredAll = bagUI.TryShiftClickNonBagItemToBag(ref item);
+						if (transferredAll) {
+							stopVanilla = true;
+							break;
+						}
 					}
 				}
 
-				if (openAndCouldStore || !Main.mouseItem.NullOrAir()) {
-					MasterUIManager.SwapMouseItem(ref item);
-					return true;
+				if (!transferredAll) {
+					if (openAndCouldStore || !Main.mouseItem.NullOrAir()) {
+						MasterUIManager.SwapMouseItem(ref item);
+						stopVanilla = true;
+					}
 				}
+
+				//Chest
+				if (context == 3) {
+					if (Main.netMode == NetmodeID.MultiplayerClient) {
+						NetMessage.SendData(MessageID.SyncChestItem, -1, -1, null, Main.LocalPlayer.chest, slot);
+					}
+				}
+
+				if (stopVanilla)
+					return true;
 			}
 
 			return false;
