@@ -68,6 +68,9 @@ namespace androLib
 		public const string warframeModName = "WarframeMod";
 		public static Mod warframeMod;
 		public static bool warframeModEnabled = ModLoader.TryGetMod(warframeModName, out warframeMod);
+		public const string ammoToolModName = "AmmoTool";
+		public static Mod ammoToolMod;
+		public static bool ammoToolModEnabled = ModLoader.TryGetMod(ammoToolModName, out ammoToolMod);
 
 		public static int VanillaRecipeCount = -1;
 		private enum CallID {
