@@ -187,7 +187,7 @@ namespace VacuumBags.Items
 			if (!player.TryGetModPlayer(out StoragePlayer storagePlayer))
 				return null;
 
-			if (!storagePlayer.Storages[storageID].HasRequiredItemToUseStorage(storagePlayer.Player, out _, out int bagIndex) || bagIndex == Storage.RequiredItemNotFound)
+			if (!storagePlayer.Storages[storageID].HasRequiredItemToUseStorage(player, out _, out int bagIndex) || bagIndex == Storage.RequiredItemNotFound)
 				return null;
 
 			IEnumerable<KeyValuePair<int, Item>> indexItemsPairs = GetFirstFromBag(storageID, itemCondition, player);

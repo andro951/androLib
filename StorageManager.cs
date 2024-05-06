@@ -432,6 +432,10 @@ namespace androLib
 				}
 			}
 
+			//Fix for dynamicgearadvancements calling ItemLoader.ChooseAmmo() before Mod Players are set up.
+			if (!player.TryGetModPlayer(out StoragePlayer _))
+				return false;
+
 			//Check all other bags for this bag.
 			foreach (int bagType in bagItemTypes) {
 				Item bagItem = bagType.CSI();
