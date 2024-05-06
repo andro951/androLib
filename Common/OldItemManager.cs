@@ -118,7 +118,7 @@ namespace androLib.Common.OldItemManager
         }
         public static void ReplaceItem(ref Item item, int type, string unloadedItemName, bool replaceWithCoins = false, bool sellPrice = true) {
             int stack = item.stack;
-
+            bool favorited = item.favorited;
             item.TurnToAir(true);
             if (replaceWithCoins) {
                 int total = type * stack;
@@ -131,6 +131,7 @@ namespace androLib.Common.OldItemManager
 			}
             else {
                 item = new Item(type, stack);
+                item.favorited = favorited;
                 ($"{unloadedItemName} has been removed from Weapon Enchantments.  It has been replaced with {item.S()}").LogSimple();
 
 			}
