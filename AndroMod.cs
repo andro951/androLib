@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Linq;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
+using Terraria.GameContent.ItemDropRules;
 
 namespace androLib
 {
@@ -265,7 +266,7 @@ namespace androLib
 		List<Hook> hooks = new();
 		public override void Load() {
 			VanillaRecipeCount = Recipe.numRecipes;
-			hooks.Add(new(ModLoaderModifyItemLootMethodInfo, ModifyItemLootDetour));
+			hooks.Add(new(ItemDropDatabaseRegisterToItem, RegisterToItemDetour));
 			hooks.Add(new(ItemLoaderRightClickMethodInfo, ItemLoaderRightClickDetour));
 			foreach (Hook hook in hooks) {
 				hook.Apply();
@@ -386,14 +387,14 @@ namespace androLib
 
 			orig();
 		}
-		private delegate void orig_ModifyItemLoot(Item item, ItemLoot itemLoot);
-		private delegate void hook_ModifyItemLoot(orig_ModifyItemLoot orig, Item item, ItemLoot itemLoot);
-		private static readonly MethodInfo ModLoaderModifyItemLootMethodInfo = typeof(ItemLoader).GetMethod("ModifyItemLoot");
-		private void ModifyItemLootDetour(orig_ModifyItemLoot orig, Item item, ItemLoot itemLoot) {
-			if (StorageManager.AllBagTypesSorted.Contains(item.type))
-				return;
+		private delegate IItemDropRule orig_RegisterToItem(ItemDropDatabase instance, int type, IItemDropRule entry);
+		private delegate void hook_RegisterToItem(orig_RegisterToItem orig, ItemDropDatabase instance, int type, IItemDropRule entry);
+		private static readonly MethodInfo ItemDropDatabaseRegisterToItem = typeof(ItemDropDatabase).GetMethod("RegisterToItem");
+		private IItemDropRule RegisterToItemDetour(orig_RegisterToItem orig, ItemDropDatabase instance, int type, IItemDropRule entry) {
+			if (!StorageManager.AllBagTypesSorted.Contains(type))
+				return orig(instance, type, entry);
 
-			orig(item, itemLoot);
+			return entry;
 		}
 
 		private delegate void orig_RightClick(Item item, Player player);
