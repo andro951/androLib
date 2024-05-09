@@ -178,21 +178,22 @@ namespace androLib.Common.Utility
 			float targetVelocityLength = targetVelocity.Length();
 			float projectileVelocityLength = getProjectileVelocityLength();
 			Vector2 targetVelocityNormal = targetVelocity.SafeNormalize(Vector2.Zero);
-			float velcityRatio = projectileVelocityLength / (targetVelocityLength != 0f ? targetVelocityLength : PsudoZero);
-			if (velcityRatio > 1f) {
+			float velocityRatio = projectileVelocityLength / (targetVelocityLength != 0f ? targetVelocityLength : PsudoZero);
+			if (velocityRatio > 1f) {
 				//Homing
 				Vector2 homingTarget = targetCenter;
 				Vector2 projectileCenter = getProjectileCenter();
 				if (TryGetPerpendicularLineIntercept(targetVelocity, targetCenter, projectileCenter, out Vector2 perpendicualarIntercept)) {
 					float relativeB1 = targetCenter.Distance(perpendicualarIntercept);
 					float relativeA = projectileCenter.Distance(perpendicualarIntercept);
-					if (QuadraticEvaluate(relativeA, relativeB1, velcityRatio, out float targetVectorLength)) {
+					if (QuadraticEvaluate(relativeA, relativeB1, velocityRatio, out float targetVectorLength)) {
 						//Less than 1 tick away, show full distance traveled in the tick.
 						if (targetVectorLength < targetVelocityLength)
 							targetVectorLength = targetVelocityLength;
 
 						Vector2 homingTargetVector = targetVelocityNormal * (targetVectorLength);
 						homingTarget = homingTargetVector + targetCenter;
+						Main.NewText($"homingTarget: {homingTarget}");
 					}
 				}
 
