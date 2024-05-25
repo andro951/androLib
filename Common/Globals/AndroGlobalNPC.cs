@@ -106,7 +106,61 @@ namespace androLib.Common.Globals
 			UsedBossChecklistForBossPowerBoosterDrops = true;
 		}
 		public static SortedDictionary<int, float> multipleSegmentBossTypes;
-		public static List<int> normalNpcsThatDropsBags;
+		public static SortedSet<int> bossPartsNotMarkedAsBoss => new () {
+			NPCID.SkeletronHand,
+			NPCID.PrimeCannon,
+			NPCID.PrimeLaser,
+			NPCID.PrimeSaw,
+			NPCID.PrimeVice,
+			NPCID.PlanterasHook,
+			NPCID.PlanterasTentacle,
+			NPCID.MartianSaucerCannon,
+			NPCID.MartianSaucerTurret,
+			NPCID.MartianSaucer,
+			NPCID.MoonLordFreeEye,
+			NPCID.MoonLordHand,
+			NPCID.MoonLordHead,
+			NPCID.PirateShip,
+			NPCID.PirateShipCannon,
+
+		};
+		public static SortedSet<int> fakeNPCs = new() {
+			NPCID.ForceBubble,
+			NPCID.CultistTablet,
+			NPCID.MothronEgg,
+			NPCID.TargetDummy,
+			NPCID.LunarTowerNebula,
+			NPCID.LunarTowerSolar,
+			NPCID.LunarTowerStardust,
+			NPCID.LunarTowerVortex,
+			NPCID.DD2EterniaCrystal,
+			NPCID.DD2LanePortal,
+		};
+		public static SortedSet<int> npcsThatAreActuallyProjectiles = new() {
+			NPCID.BurningSphere,
+			NPCID.ChaosBall,
+			NPCID.WaterSphere,
+			NPCID.SpikeBall,
+			NPCID.BlazingWheel,
+			NPCID.VileSpit,
+			NPCID.Bee,
+			NPCID.BeeSmall,
+			NPCID.FungiSpore,
+			NPCID.Spore,
+			NPCID.DetonatingBubble,
+			NPCID.MoonLordLeechBlob,
+			NPCID.SolarFlare,
+			NPCID.SolarGoop,
+			NPCID.AncientLight,
+			NPCID.AncientDoom,
+			NPCID.LarvaeAntlion,
+			NPCID.WindyBalloon,
+			NPCID.ChaosBall,
+			NPCID.VileSpitEaterOfWorlds,
+		};
+		public static bool IsIregularNPC(NPC npc) => bossPartsNotMarkedAsBoss.Contains(npc.netID) || fakeNPCs.Contains(npc.netID) || npcsThatAreActuallyProjectiles.Contains(npc.netID);
+		public static SortedSet<int> normalNpcsThatDropsBags;
+		public static SortedSet<int> normalNpcsThatAreBosses;
 		public static SortedDictionary<int, List<DropData>> npcDropTypes = new();
 		public static SortedDictionary<string, List<DropData>> modNpcDropNames = new();
 		public static SortedDictionary<int, List<DropData>> npcAIDrops = new();
@@ -134,16 +188,21 @@ namespace androLib.Common.Globals
 				{ NPCID.TheDestroyerTail, 1f },
 			};
 
-			normalNpcsThatDropsBags = new List<int>() {
+			normalNpcsThatAreBosses = new() {
 				NPCID.DD2Betsy
 			};
 
+			if (!AndroMod.thoriumEnabled)
+				normalNpcsThatDropsBags = new(normalNpcsThatAreBosses);
+
+			normalNpcsThatAreBosses.Add(NPCID.DD2DarkMageT1);
+			normalNpcsThatAreBosses.Add(NPCID.DD2DarkMageT3);
+			normalNpcsThatAreBosses.Add(NPCID.DD2OgreT2);
+			normalNpcsThatAreBosses.Add(NPCID.DD2OgreT3);
+			normalNpcsThatAreBosses.Add(NPCID.PirateShip);
+
 			if (AndroMod.thoriumEnabled) {
-				normalNpcsThatDropsBags.Add(NPCID.DD2DarkMageT1);
-				normalNpcsThatDropsBags.Add(NPCID.DD2DarkMageT3);
-				normalNpcsThatDropsBags.Add(NPCID.DD2OgreT2);
-				normalNpcsThatDropsBags.Add(NPCID.DD2OgreT3);
-				normalNpcsThatDropsBags.Add(NPCID.PirateShip);
+				normalNpcsThatDropsBags = new(normalNpcsThatAreBosses);
 			}
 
 		}
@@ -392,6 +451,119 @@ namespace androLib.Common.Globals
 		}
 	}
 	public static class NPCStaticMethods {
+		public static bool IsDummy(this NPC npc) => npc.netID < NPCID.Count ? npc.netID == NPCID.TargetDummy : npc.ModFullName() is string modFullName && (AndroMod.calamityEnabled && modFullName == "CalamityMod/SuperDummyNPC" || AndroMod.fargosEnabled && modFullName == "Fargowiltas/SuperDummy");
+		public static bool IsBoss(this NPC npc) => npc.boss || AndroGlobalNPC.multipleSegmentBossTypes.ContainsKey(npc.netID) || AndroGlobalNPC.normalNpcsThatAreBosses.Contains(npc.netID);
+		public static bool IsMiniBoss(this NPC npc) {
+			switch (npc.netID) {
+				case NPCID.Everscream:
+				case NPCID.SantaNK1:
+				case NPCID.IceQueen:
+				case NPCID.Mothron:
+				case NPCID.MourningWood:
+				case NPCID.Pumpking:
+				case NPCID.PumpkingBlade:
+				case NPCID.DungeonGuardian:
+				case NPCID.BigMimicCorruption:
+				case NPCID.BigMimicCrimson:
+				case NPCID.BigMimicHallow:
+				case NPCID.BigMimicJungle:
+				case NPCID.Paladin:
+					return true;
+				default:
+					string modFullName = npc.ModFullName();
+					if (AndroMod.calamityEnabled) {
+						switch (modFullName) {
+							case "CalamityMod/DesertNuisanceHeadYoung":
+							case "CalamityMod/DesertNuisanceHead":
+							case "CalamityMod/PerforatorHeadLarge":
+							case "CalamityMod/PerforatorHeadMedium":
+							case "CalamityMod/PerforatorHeadSmall":
+							case "CalamityMod/AquaticScourgeHead":
+							case "CalamityMod/ProfanedGuardianHealer":
+							case "CalamityMod/ProfanedGuardianDefender":
+							case "CalamityMod/SupremeCatastrophe":
+							case "CalamityMod/SupremeCataclysm":
+							case "CalamityMod/PlaguebringerMiniboss":
+							case "CalamityMod/EidolonWyrmHead":
+							case "CalamityMod/GiantClam":
+							case "CalamityMod/Horse":
+							case "CalamityMod/ThiccWaifu":
+							case "CalamityMod/CragmawMire":
+							case "CalamityMod/ArmoredDiggerHead":
+							case "CalamityMod/GreatSandShark":
+							case "CalamityMod/ColossalSquid":
+							case "CalamityMod/ReaperShark":
+							case "CalamityMod/Mauler":
+							case "CalamityMod/NuclearTerror":
+								return true;
+							default:
+								return false;
+						}
+					}
+
+					//if (AndroMod.starsAboveEnabled) {
+					//    switch(modFullName) {
+
+					//    }
+					//}
+
+					if (AndroMod.thoriumEnabled) {
+						switch (modFullName) {
+							case "ThoriumMod/PatchWerk":
+							case "ThoriumMod/CorpseBloom":
+							case "ThoriumMod/Illusionist":
+								return true;
+						}
+					}
+
+					return false;
+			}
+		}
+		public static bool ModBossPart(this NPC npc) {
+			string modFullName = npc.ModFullName();
+			if (AndroMod.calamityEnabled) {
+				switch (modFullName) {
+					case "CalamityMod/DesertNuisanceBodyYoung":
+					case "CalamityMod/DesertNuisanceTailYoung":
+					case "CalamityMod/DesertNuisanceBody":
+					case "CalamityMod/DesertNuisanceTail":
+					case "CalamityMod/PerforatorCyst":
+					case "CalamityMod/PerforatorBodyLarge":
+					case "CalamityMod/PerforatorBodyMedium":
+					case "CalamityMod/PerforatorBodySmall":
+					case "CalamityMod/PerforatorTailLarge":
+					case "CalamityMod/PerforatorTailMedium":
+					case "CalamityMod/PerforatorTailSmall":
+					case "CalamityMod/AquaticScourgeBodyAlt":
+					case "CalamityMod/AquaticScourgeBody":
+					case "CalamityMod/AquaticScourgeTail":
+					case "CalamityMod/EidolonWyrmBody":
+					case "CalamityMod/EidolonWyrmBodyAlt":
+					case "CalamityMod/EidolonWyrmTail":
+					case "CalamityMod/ArmoredDiggerBody":
+					case "CalamityMod/ArmoredDiggerTail":
+						return true;
+					default:
+						return false;
+				}
+			}
+
+			//if (AndroMod.starsAboveEnabled) {
+			//    switch(modFullName) {
+
+			//    }
+			//}
+
+			if (AndroMod.thoriumEnabled) {
+				switch (modFullName) {
+					case "ThoriumMod/IllusionGlass":
+					case "ThoriumMod/IllusionistDecoy":
+						return true;
+				}
+			}
+
+			return false;
+		}
 		public static bool IsWorm(this NPC npc) {
 			return npc.aiStyle == NPCAIStyleID.Worm || npc.aiStyle == NPCAIStyleID.TheDestroyer;
 		}

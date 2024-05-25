@@ -276,6 +276,7 @@ namespace androLib
 			On_ChestUI.Restock += On_ChestUI_Restock;
 			On_Player.QuickStackAllChests += On_Player_QuickStackAllChests;
 			On_Chest.AskForChestToEatItem += On_Chest_AskForChestToEatItem;
+			On_Main.GetBuffTooltip += On_Main_GetBuffTooltip;
 			IL_ItemSlot.RightClick_ItemArray_int_int += IL_ItemSlot_RightClick_ItemArray_int_int;
 			IL_SceneMetrics.ScanAndExportToMain += IL_SceneMetrics_ScanAndExportToMain;
 
@@ -283,7 +284,8 @@ namespace androLib
 			AndroLocalizationData.RegisterSDataPackage();
 		}
 
-		private void IL_ItemSlot_RightClick_ItemArray_int_int(MonoMod.Cil.ILContext il) {
+
+		private void IL_ItemSlot_RightClick_ItemArray_int_int(ILContext il) {
 			//IL_0053: brfalse.s IL_0089
 
 			//// if (Main.mouseRightRelease)
@@ -299,8 +301,8 @@ namespace androLib
 				throw new Exception("Failed to find instructions IL_ItemSlot_RightClick_ItemArray_int_int");
 			}
 
-			c.EmitLdarg(0);
-			c.EmitLdarg(2);
+			c.Emit(OpCodes.Ldarg, 0);
+			c.Emit(OpCodes.Ldarg, 2);
 			c.EmitDelegate((bool mouseRightReleased, Item[] inv, int slot) => {
 				Item item = inv[slot];
 				if (item.NullOrAir() || !ItemSets.Sets.ContinuousRightClickItems.Contains(item.type))
@@ -491,6 +493,15 @@ namespace androLib
 				//BannerBag.PostScanAndExportToMain(ref sceneMetrics);
 				//PortableStation.PostScanAndExportToMain(ref sceneMetrics);
 			});
+		}
+
+		private static SortedDictionary<int, Func<Player, string>> BuffDescriptions = new();
+		public static void RegisterBuffDescription(int buffID, Func<Player, string> description) => BuffDescriptions.TryAdd(buffID, description);
+		private string On_Main_GetBuffTooltip(On_Main.orig_GetBuffTooltip orig, Player player, int buffType) {
+			if (BuffDescriptions.TryGetValue(buffType, out Func<Player, string> descriptionFunc))
+				return descriptionFunc(player);
+
+			return orig(player, buffType);
 		}
 	}
 }

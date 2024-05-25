@@ -813,6 +813,7 @@ namespace androLib.UI
 		public const int Normal = 0;
 		public const int Purple = 4;
 		public const int Red = 5;
+		public const int OliveGreen = 6;
 		public const int Favorited = 10;
 		public const int YellowSelected = 14;
 		public const int GoldFavorited = 17;

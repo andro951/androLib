@@ -86,7 +86,9 @@ namespace androLib.Common.Utility
 		DamageClassNames,
 		VanillaBuffs,
 		Header,
-		DisplayName
+		DisplayName,
+		ItemTooltip,
+		Description
 	}
 	public enum L_ID3
 	{

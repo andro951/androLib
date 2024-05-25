@@ -27,23 +27,25 @@ namespace androLib.Common.OldItemManager
 		public static void ReplaceAllOldItems(Dictionary<string, string> wholeNameReplaceWithItemByName, Dictionary<string, int> wholeNameReplaceWithItemByType, Dictionary<string, int> wholeNameReplaceWithCoins, Player player) {
 			ReplaceOldItems(player.armor, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
 
-            int modSlotCount = player.GetModPlayer<ModAccessorySlotPlayer>().SlotCount;
-            var loader = LoaderManager.Get<AccessorySlotLoader>();
-            for (int num = 0; num < modSlotCount; num++) {
-                if (loader.ModdedIsItemSlotUnlockedAndUsable(num, player)) {
-                    Item accessoryClone = loader.Get(num).FunctionalItem.Clone();
-                    if (!accessoryClone.NullOrAir()) {
-                        ReplaceOldItem(ref accessoryClone, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
-                        loader.Get(num).FunctionalItem = accessoryClone;
-				    }
+            if (player.TryGetModPlayer(out ModAccessorySlotPlayer modAccessorySlotPlayer)) {
+				int modSlotCount = modAccessorySlotPlayer.SlotCount;
+				var loader = LoaderManager.Get<AccessorySlotLoader>();
+				for (int num = 0; num < modSlotCount; num++) {
+					if (loader.ModdedIsItemSlotUnlockedAndUsable(num, player)) {
+						Item accessoryClone = loader.Get(num).FunctionalItem.Clone();
+						if (!accessoryClone.NullOrAir()) {
+							ReplaceOldItem(ref accessoryClone, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
+							loader.Get(num).FunctionalItem = accessoryClone;
+						}
 
-                    Item vanityClone = loader.Get(num).VanityItem.Clone();
-                    if (!vanityClone.NullOrAir()) {
-                        ReplaceOldItem(ref vanityClone, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
-                        loader.Get(num).VanityItem = vanityClone;
-				    }
-                }
-            }
+						Item vanityClone = loader.Get(num).VanityItem.Clone();
+						if (!vanityClone.NullOrAir()) {
+							ReplaceOldItem(ref vanityClone, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
+							loader.Get(num).VanityItem = vanityClone;
+						}
+					}
+				}
+			}
 
             ReplaceOldItems(player.inventory, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);
             ReplaceOldItems(player.bank.item, wholeNameReplaceWithItemByName, wholeNameReplaceWithItemByType, wholeNameReplaceWithCoins, player);

@@ -15,6 +15,8 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Xna.Framework;
 using Terraria.UI;
 using Terraria.GameContent;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria.UI.Chat;
 
 namespace androLib.Common.Utility
 {
@@ -22,7 +24,6 @@ namespace androLib.Common.Utility
 
 		#region ModSpecific
 
-        public static StoragePlayer GetStoragePlayer(this Player player) => player.GetModPlayer<StoragePlayer>();
 
 		#endregion
 
@@ -197,6 +198,7 @@ namespace androLib.Common.Utility
 		}
 		public static float Percent(this float value) => value * 100f;
         public static string PercentString(this float value, int decimals = 0) => $"{(value * 100).S(decimals + 2)}%";
+		public static float ToSign(this bool value) => value ? 1f : -1f;
 		public static string Lang(this string s, string modName, string m) => s.Lang(modName, out string result, m) ? result : "";
 		public static bool Lang(this string s, string modName, out string result, string m) {
 			string key = $"Mods.{modName}.{m}.{s}";
@@ -304,9 +306,9 @@ namespace androLib.Common.Utility
             return Language.GetTextValue(key, args);
         }
 
-        #region AddOrCombine
+		#region AddOrCombine
 
-        public static void AddOrCombine(this IDictionary<int, int> dict1, IDictionary<int, int> dict2) {
+		public static void AddOrCombine(this IDictionary<int, int> dict1, IDictionary<int, int> dict2) {
             foreach (var pair in dict2) {
                 dict1.AddOrCombine(pair);
             }
@@ -540,7 +542,7 @@ namespace androLib.Common.Utility
         public const int InventoryStorageCount = 40;
         public static Item[] TakePlayerInventory40(this Item[] inv) => inv.Skip(inv.Length >= InventoryHotbarCount ? InventoryHotbarCount : inv.Length)
             .Take(inv.Length >= InventoryHotbarCount + InventoryStorageCount ? InventoryStorageCount : inv.Length - InventoryHotbarCount).ToArray();
-
+		public static int GetRealDefense(this Player player) => (int)Math.Round((player.statDefense.Positive * (1 + player.statDefense.AdditiveBonus.Value) - player.statDefense.Negative) * player.statDefense.FinalMultiplier.Value);
         public static bool InheritsFrom(this ModType modType, Type parent) => modType.GetType().InheritsFrom(parent);
         public static bool InheritsFrom(this Type type, Type parent) {
             if (type.IsAbstract)
@@ -715,6 +717,43 @@ namespace androLib.Common.Utility
 					break;
 				}
 			}
+		}
+		public static List<Item> SearchForItem(int itemType, out int itemCount, IEnumerable<Item> otherLocation = null, bool inventory = true, bool banks = true) => 
+			SearchForItem(itemType, out itemCount, otherLocation != null ? new List<IEnumerable<Item>>() { otherLocation } : null, inventory, banks);
+		public static List<Item> SearchForItem(int itemType, out int itemCount, IEnumerable<IEnumerable<Item>> otherLocations = null, bool inventory = true, bool banks = true) {
+			List<Item> items = new();
+			itemCount = 0;
+			IEnumerable<IEnumerable<Item>> locationsToSearch = new List<IEnumerable<Item>>();
+			if (inventory)
+				locationsToSearch = locationsToSearch.Concat(new List<IEnumerable<Item>>() { Main.LocalPlayer.inventory });
+
+			if (banks) {
+				List<IEnumerable<Item>> bankItems = new() {
+					Main.LocalPlayer.bank.item,
+					Main.LocalPlayer.bank2.item,
+					Main.LocalPlayer.bank3.item,
+					Main.LocalPlayer.bank4.item,
+				};
+
+				locationsToSearch = locationsToSearch.Concat(bankItems);
+			}
+
+			foreach (IEnumerable<Item> locationToSearch in otherLocations != null ? locationsToSearch.Concat(otherLocations) : locationsToSearch) {
+				foreach (Item item in locationToSearch) {
+					if (item.type == itemType) {
+						items.Add(item);
+						itemCount += item.stack;
+					}
+				}
+			}
+
+			return items;
+		}
+		public static void DrawItem(this Item item, SpriteBatch spriteBatch, Vector2 position, float inventoryScale = 1f, bool alwaysDrawStack = true) {
+			Color color = Color.White;
+			ItemSlot.DrawItemIcon(item, 31, spriteBatch, position, inventoryScale, 20f, color);
+			if (item.stack > 0 || alwaysDrawStack)
+				ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.Value, item.stack.ToString(), position + new Vector2(-item.width + 3.5f, 0f) * inventoryScale, color, 0f, Vector2.Zero, new Vector2(inventoryScale), -1f, inventoryScale);
 		}
 		private static bool IsTheSameAs(this Item item, Item compareItem) {
 			if (item.netID == compareItem.netID)
