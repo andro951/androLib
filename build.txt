@@ -1,6 +1,6 @@
 displayName = androLib
 author = andro951
-version = 1.0.7.0
+version = 1.0.7.1
 weakReferences = MagicStorage
 includeSource = true
 sortAfter = AutoTrash

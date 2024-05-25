@@ -14,6 +14,8 @@ namespace androLib.Common.Globals
 {
 	public class VacuumToStorageItem : GlobalItem {
 		public bool favorited;
+		private int timer;
+		private const int timerReset = 15;
 		public override bool InstancePerEntity => true;
 		public override bool AppliesToEntity(Item entity, bool lateInstantiation) {
 			return !ItemID.Sets.IsAPickup[entity.type];
@@ -23,6 +25,19 @@ namespace androLib.Common.Globals
 		}
 		public override void SaveData(Item item, TagCompound tag) {
 
+		}
+		public override void PostUpdate(Item item) {
+			if (Main.netMode != NetmodeID.Server)
+				return;
+
+			int keepTime = item.keepTime;
+			if (item.playerIndexTheItemIsReservedFor != 255) {
+				timer++;
+				if (timer >= timerReset) {
+					timer = 0;
+					item.playerIndexTheItemIsReservedFor = 255;
+				}
+			}
 		}
 		public override void UpdateInventory(Item item, Player player) {
 			//Track favorited
@@ -59,11 +74,11 @@ namespace androLib.Common.Globals
 			return true;
 		}
 		public override bool ItemSpace(Item item, Player player) {
-			if (player.whoAmI != Main.myPlayer)
-				return false;
-
 			if (Main.netMode == NetmodeID.Server)
 				return true;
+
+			if (player.whoAmI != Main.myPlayer)
+				return false;
 
 			return StorageManager.CanVacuumItem(item, player);
 		}
