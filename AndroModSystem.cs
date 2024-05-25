@@ -173,6 +173,7 @@ namespace androLib
 		public const string StarsAboveAnySkeletronEssence = "AnySkeletronEssence";
 		public const string CursedFlameOrIchor = "CursedFlameOrIchor";
 		public const string GoldOrPlatinumBar = "GoldOrPlatinumBar";
+		public const string AnyEvilBar = "AnyEvilBar";
 		public override void AddRecipeGroups() {
 			int[] commanGems = GemSets.CommonGems.ToArray();
 			int indexOfTopax = Array.IndexOf(commanGems, ItemID.Topaz);
@@ -244,6 +245,12 @@ namespace androLib
 				ItemID.SoulofNight
 			});
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyAlignedSoul}", group);
+
+			group = new RecipeGroup(() => AnyEvilBar.AddSpaces(), new int[] {
+				ItemID.DemoniteBar,
+				ItemID.CrimtaneBar
+			});
+			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyEvilBar}", group);
 
 			if (AndroMod.starsAboveEnabled) {
 				//King Slime

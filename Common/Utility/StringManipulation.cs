@@ -82,9 +82,15 @@ namespace androLib.Common.Utility
 
             int dot = s.IndexOf('.');
             if (dot == -1) {
-                dot = s.IndexOf(',');
-                if (dot == -1)
-					return s;
+                float r = f % 1f;
+                if (r > 0f) {
+					dot = s.IndexOf(',');
+					if (dot == -1)
+						return s;
+				}
+                else {
+                    return s;
+                }
 			}
 
             int length = s.Length;

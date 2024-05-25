@@ -64,22 +64,26 @@ namespace androLib.Common.Utility {
 
 			propertyInfo.SetValue(obj, value);
 		}
-		public static T GetNonPublicStaticClassField<T>(string NameSpace, string className, string fieldName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
-			Assembly assembly = Assembly.Load(NameSpace);
-			Type backupIOType = assembly.GetType($"{NameSpace}.{className}");
-			FieldInfo fieldInfo = backupIOType.GetField(fieldName, bindingFlags);
-			return (T)fieldInfo.GetValue(null);
-		}
-		public static void SetNonPublicStaticClassField<T>(string NameSpace, string className, string fieldName, T value, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
-			Assembly assembly = Assembly.Load(NameSpace);
-			Type backupIOType = assembly.GetType($"{NameSpace}.{className}");
-			FieldInfo fieldInfo = backupIOType.GetField(fieldName, bindingFlags);
-			fieldInfo.SetValue(null, value);
-		}
-		public static void CallNonPublicStaticMethod(string NameSpace, string className, string methodName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
-			Assembly assembly = Assembly.Load(NameSpace);
-			Type backupIOType = assembly.GetType($"{NameSpace}.{className}");
-			MethodInfo methodInfo = backupIOType.GetMethod(methodName, bindingFlags);
+		//public static T GetNonPublicStaticClassField<T>(string NameSpace, string className, string fieldName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
+		//	Assembly assembly = Assembly.Load(NameSpace);
+		//	Type backupIOType = assembly.GetType($"{NameSpace}.{className}");
+		//	FieldInfo fieldInfo = backupIOType.GetField(fieldName, bindingFlags);
+		//	return (T)fieldInfo.GetValue(null);
+		//}
+		//public static void SetNonPublicStaticClassField<T>(string NameSpace, string className, string fieldName, T value, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
+		//	Assembly assembly = Assembly.Load(NameSpace);
+		//	Type backupIOType = assembly.GetType($"{NameSpace}.{className}");
+		//	FieldInfo fieldInfo = backupIOType.GetField(fieldName, bindingFlags);
+		//	fieldInfo.SetValue(null, value);
+		//}
+		//public static void CallNonPublicStaticMethod(string NameSpace, string className, string methodName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
+		//	Assembly assembly = Assembly.Load(NameSpace);
+		//	Type backupIOType = assembly.GetType($"{NameSpace}.{className}");
+		//	MethodInfo methodInfo = backupIOType.GetMethod(methodName, bindingFlags);
+		//	methodInfo.Invoke(null, null);
+		//}
+		public static void CallNonPublicStaticMethod(Type type, string methodName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
+			MethodInfo methodInfo = type.GetMethod(methodName, bindingFlags);
 			methodInfo.Invoke(null, null);
 		}
 	}

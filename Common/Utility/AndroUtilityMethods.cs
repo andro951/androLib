@@ -620,6 +620,27 @@ namespace androLib.Common.Utility
 			index = inv.Length;
 			return false;
 		}
+		public static void PercentFull(this IEnumerable<Item> inv, out float stackPercentFull, out float slotsPercentFull) {
+			slotsPercentFull = 0;
+			float total = 0f;
+			foreach (Item item in inv.Reverse()) {
+				if (item.NullOrAir())
+					continue;
+
+				total += item.stack / (float)item.maxStack;
+				slotsPercentFull++;
+			}
+
+			int count = inv.Count();
+			if (count <= 0) {
+				slotsPercentFull = 1f;
+				stackPercentFull = 1f;
+				return;
+			}
+
+			slotsPercentFull /= count;
+			stackPercentFull = total / count;
+		}
 		public static void DoCoins(this Item[] inv) {
 			int[] coins = new int[4];
 			for (int i = 0; i < coins.Length; i++) {
