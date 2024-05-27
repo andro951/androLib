@@ -2764,6 +2764,15 @@ namespace androLib.Common.Utility
 
 			return directions;
 		}
+		public static (int, int) GetDirection(int x, int y, int directionID) => 
+			directionID switch {
+				None => (x, y),
+				Left => (x - 1, y),
+				Right => (x + 1, y),
+				Up => (x, y - 1),
+				Down => (x, y + 1),
+				_ => (-1, -1)
+			};
 		/// <summary>
 		/// Not Safe.  Need to check if out of world before using.
 		/// </summary>

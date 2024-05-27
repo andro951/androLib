@@ -148,5 +148,6 @@ namespace androLib.Common.Utility
 
 			s.LogSimple();
 		}
+		public static void NT(this string s) => Main.NewText(s);
 	}
 }

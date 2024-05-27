@@ -82,9 +82,13 @@ namespace androLib.Common.Utility {
 		//	MethodInfo methodInfo = backupIOType.GetMethod(methodName, bindingFlags);
 		//	methodInfo.Invoke(null, null);
 		//}
-		public static void CallNonPublicStaticMethod(Type type, string methodName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static) {
+		public static void CallNonPublicStaticMethod(Type type, string methodName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static, object[] parameters = null) {
 			MethodInfo methodInfo = type.GetMethod(methodName, bindingFlags);
-			methodInfo.Invoke(null, null);
+			methodInfo.Invoke(null, parameters);
+		}
+		public static T CallNonPublicStaticMethod<T>(Type type, string methodName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Static, object[] parameters = null) {
+			MethodInfo methodInfo = type.GetMethod(methodName, bindingFlags);
+			return (T)methodInfo.Invoke(null, parameters);
 		}
 	}
 }
