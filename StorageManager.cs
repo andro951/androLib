@@ -552,7 +552,7 @@ namespace androLib
 		public bool HasWhiteListGetter => !IsBlacklistGetter && HasWhiteOreBlacklistGetter;
 		public bool HasWhiteOreBlacklistGetter => UpdateAllowedList != null;
 		private int GetBagSize(int bagSize) {
-			if (bagSize >= 1)
+			if (bagSize >= 1)//Mod creator chose for the bag to not be resizable.
 				return bagSize;
 
 			bagSize = Math.Abs(bagSize);
@@ -576,7 +576,7 @@ namespace androLib
 			return bagSize;
 		}
 		public void ResetBagSizeFromConfig() {
-			if (originalStorageSize >= 0)
+			if (originalStorageSize >= 1)
 				return;
 
 			int oldStorageSize = StorageSize;
@@ -686,6 +686,19 @@ namespace androLib
 		private static SortedDictionary<int, int> vacuumStorageIndexesFromBagTypes = null;
 		public static List<BagUI> BagUIs = new();
 		public static List<Storage> RegisteredStorages = new();
+		public static void Unload() {
+			RegisteredStorages.Clear();
+			BagUIs.Clear();
+			vacuumStorageIndexes.Clear();
+			vacuumStorageIndexesFromBagTypes = null;
+			allBagTypes = null;
+			allBagTypesFirstForEachInventory = null;
+			allBagTypesSorted = null;
+			storageItemTypes = null;
+			storageTileTypes = null;
+			whitelistIndexes = null;
+			blacklistIndexes = null;
+		}
 		public static void PopulateStorages(ref List<Storage> storages) {
 			storages = new();
 			for (int i = 0; i < RegisteredStorages.Count; i++) {

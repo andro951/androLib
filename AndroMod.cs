@@ -284,7 +284,6 @@ namespace androLib
 			AndroLocalizationData.RegisterSDataPackage();
 		}
 
-
 		private void IL_ItemSlot_RightClick_ItemArray_int_int(ILContext il) {
 			//IL_0053: brfalse.s IL_0089
 
@@ -329,6 +328,7 @@ namespace androLib
 
 		public override void Unload() {
 			BossChecklistIntegration.UnloadBossChecklistIntegration();
+			StorageManager.Unload();
 		}
 		private void On_Chest_AskForChestToEatItem(On_Chest.orig_AskForChestToEatItem orig, Vector2 worldPosition, int duration) {
 			orig(worldPosition, duration);

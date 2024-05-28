@@ -59,6 +59,10 @@ namespace androLib
 					unloadedStorages.Add(new Storage(key, tag));
 			}
 		}
+		public override void Unload() {
+			storages = null;
+			unloadedStorages.Clear();
+		}
 		public override IEnumerable<Item> AddMaterialsForCrafting(out ItemConsumedCallback itemConsumedCallback) {
 			itemConsumedCallback = null;
 			if (AndroMod.clientConfig.StopProvidingItemsInBagsForCrafting)
