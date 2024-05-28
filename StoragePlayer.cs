@@ -127,7 +127,7 @@ namespace androLib
 		}
 		public override void OnEnterWorld() {
 			StorageManager.CanVacuumItem(new(1), Player);//Sets up all allowed Lists
-			CheckClientConfigChanged();
+			CheckClientConfigChanged(true);
 		}
 		public override void PreUpdateMovement() {
 			CenterBeforeMoveUpdate = Player.Center;
@@ -212,12 +212,16 @@ namespace androLib
 		}
 		public static bool ClientConfigChanged = false;
 		public static Action OnAndroLibClientConfigChangedInGame;
-		public static void CheckClientConfigChanged() {
-			if (ClientConfigChanged && !Main.gameMenu) {
+		public static void CheckClientConfigChanged(bool onEnterWorld = false) {
+			bool changed = ClientConfigChanged && !Main.gameMenu;
+			if (changed) {
 				SetupAllAllowedItemManagers();
+				ClientConfigChanged = false;
+			}
+
+			if (changed || onEnterWorld) {
 				OnAndroLibClientConfigChangedInGame?.Invoke();
 				StorageManager.ResetAllBagSizesFromConfig();
-				ClientConfigChanged = false;
 			}
 		}
 
