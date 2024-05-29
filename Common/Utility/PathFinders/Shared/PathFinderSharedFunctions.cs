@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -82,5 +83,27 @@ namespace androLib.Common.Utility {
 		}
 
 		public static int GetOppositeDirection(int directionID) => directionID >= 0 ? (directionID + 2) % 4 : -1;
+
+		public static void GetDirectionID(this Player player, int tileX, int tileY, out short directionID) {
+			Point playerCenterTile = player.Center.ToTileCoordinates();
+			int xDiff = tileX - playerCenterTile.X;
+			int yDiff = tileY - playerCenterTile.Y;
+			if (Math.Abs(xDiff) >= Math.Abs(yDiff)) {
+				directionID = Main.LocalPlayer.direction == 1 ? (short)PathDirectionID.Right : (short)PathDirectionID.Left;
+			}
+			else {
+				directionID = yDiff > 0 ? (short)PathDirectionID.Down : (short)PathDirectionID.Up;
+			}
+		}
+		public static void GetDirectionID(int targetTileX, int targetTileY, int centerTileX, int centerTileY, out short directionID) {
+			int xDiff = targetTileX - centerTileX;
+			int yDiff = targetTileY - centerTileY;
+			if (Math.Abs(xDiff) >= Math.Abs(yDiff)) {
+				directionID = xDiff > 0 ? (short)PathDirectionID.Right : (short)PathDirectionID.Left;
+			}
+			else {
+				directionID = yDiff > 0 ? (short)PathDirectionID.Down : (short)PathDirectionID.Up;
+			}
+		}
 	}
 }
