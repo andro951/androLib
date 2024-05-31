@@ -1107,6 +1107,7 @@ namespace androLib
 			BagUI bagUI = new(storageID, registeredUI_ID);
 
 			CanVacuumItemHandler.Add((Item item, Player player) => bagUI.CanVacuumItem(item, player));
+			CanBeStoredHandler.Add((Item item) => bagUI.CanBeStored(item));
 			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
 			TryRestockItemHandler.Add((Item item) => bagUI.RestockFunc(item, true, false));
 			TryQuickStackItemHandler.Add((Item item, Player player) => bagUI.QuickStack(ref item, player));
@@ -1278,6 +1279,26 @@ namespace androLib
 		}
 		public static CanVacuumItemConditions CanVacuumItemHandler = new();
 		public static bool CanVacuumItem(Item item, Player player) => CanVacuumItemHandler.Invoke(item, player);
+
+		public class CanBeStoredConditions {
+			private event Func<Item, bool> eventHandler;
+			public void Add(Func<Item, bool> func) {
+				eventHandler += func;
+			}
+			public bool Invoke(Item item) {
+				if (eventHandler == null)
+					return false;
+
+				foreach (Func<Item, bool> func in eventHandler.GetInvocationList()) {
+					if (func.Invoke(item))
+						return true;
+				}
+
+				return false;
+			}
+		}
+		public static CanBeStoredConditions CanBeStoredHandler = new();
+		public static bool CanBeStored(Item item) => CanBeStoredHandler.Invoke(item);
 
 		public class TryVacuumItemFunc
 		{

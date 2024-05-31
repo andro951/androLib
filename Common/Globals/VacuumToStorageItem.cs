@@ -74,8 +74,9 @@ namespace androLib.Common.Globals
 			return true;
 		}
 		public override bool ItemSpace(Item item, Player player) {
-			if (Main.netMode == NetmodeID.Server)
-				return true;
+			if (Main.netMode == NetmodeID.Server) {
+				return StorageManager.CanBeStored(item);
+			}
 
 			if (player.whoAmI != Main.myPlayer)
 				return false;
