@@ -18,6 +18,9 @@ using System.Linq;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using Terraria.GameContent.ItemDropRules;
+using androLib.Tiles;
+using Terraria.DataStructures;
+using Terraria.ObjectData;
 
 namespace androLib
 {
@@ -277,6 +280,14 @@ namespace androLib
 			On_Player.QuickStackAllChests += On_Player_QuickStackAllChests;
 			On_Chest.AskForChestToEatItem += On_Chest_AskForChestToEatItem;
 			On_Main.GetBuffTooltip += On_Main_GetBuffTooltip;
+			On_Player.PlaceThing_ValidTileForReplacement += AndroModTile.On_Player_PlaceThing_ValidTileForReplacement;
+			On_WorldGen.ReplaceTile += AndroModTile.On_WorldGen_ReplaceTile;
+			On_WorldGen.WouldTileReplacementWork += AndroModTile.On_WorldGen_WouldTileReplacementWork;
+			On_TileObjectPreviewData.Reset += AndroModTile.On_TileObjectPreviewData_Reset;
+			IL_TileObject.DrawPreview += AndroModTile.IL_TileObject_DrawPreview;
+			On_TileObject.DrawPreview += AndroModTile.On_TileObject_DrawPreview;
+			On_Player.UpdatePlacementPreview += AndroModTile.On_Player_UpdatePlacementPreview;
+			On_TileObjectData.CustomPlace += AndroModTile.On_TileObjectData_CustomPlace;
 			IL_ItemSlot.RightClick_ItemArray_int_int += IL_ItemSlot_RightClick_ItemArray_int_int;
 			IL_SceneMetrics.ScanAndExportToMain += IL_SceneMetrics_ScanAndExportToMain;
 

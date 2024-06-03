@@ -19,6 +19,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI.Chat;
 using Terraria.DataStructures;
 using Terraria.ObjectData;
+using Terraria.Audio;
 
 namespace androLib.Common.Utility
 {
@@ -778,9 +779,30 @@ namespace androLib.Common.Utility
 
 			return size;
 		}
+		public static void PlaceTile(int tileTargetX, int tileTargetY, Item sItem) {
+			int tileToCreate = sItem.createTile;
+			int num = sItem.placeStyle;
+			PlantLoader.CheckAndInjectModSapling(tileTargetX, tileTargetY, ref tileToCreate, ref num);
+			if (TileObjectData.CustomPlace(tileToCreate, num) && tileToCreate != 82 && tileToCreate != 227) {
+				int direction = 1;
+				bool canPlace = TileObject.CanPlace(tileTargetX, tileTargetY, (ushort)tileToCreate, num, direction, out TileObject data, onlyCheck: false);
+				bool flag = TileObject.Place(data);
+				WorldGen.SquareTileFrame(tileTargetX, tileTargetY);
+				if (Main.netMode != NetmodeID.Server || !TileID.Sets.IsAContainer[tileToCreate])
+					SoundEngine.PlaySound(SoundID.Dig, new Vector2(tileTargetX * 16, tileTargetY * 16));
 
-		public static void PlaceTile(int i, int j, int tileToPlace) {
-			if (!WorldGen.PlaceTile(i, j, tileToPlace, true, true)) {
+				TileObjectData.CallPostPlacementPlayerHook(tileTargetX, tileTargetY, tileToCreate, num, direction, data.alternate, data);
+				if (Main.netMode == NetmodeID.Server && !Main.tileContainer[tileToCreate] && tileToCreate != 423)
+					NetMessage.SendObjectPlacement(-1, tileTargetX, tileTargetY, data.type, data.style, data.alternate, data.random, direction);
+
+				TileLoader.PlaceInWorld(tileTargetX, tileTargetY, sItem);
+			}
+			else {
+				PlaceTile(tileTargetX, tileTargetY, tileToCreate, sItem.placeStyle);
+			}
+		}
+		public static void PlaceTile(int i, int j, int tileToPlace, int style = 0) {
+			if (!WorldGen.PlaceTile(i, j, tileToPlace, true, true, style: style)) {
 				Tile tile = Main.tile[i, j];
 				switch (tileToPlace) {
 					case TileID.Grass:
@@ -803,7 +825,7 @@ namespace androLib.Common.Utility
 						break;
 				}
 
-				WorldGen.PlaceTile(i, j, tileToPlace, true, true);
+				WorldGen.PlaceTile(i, j, tileToPlace, true, true, style: style);
 			}
 
 			WorldGen.SquareTileFrame(i, j);
@@ -874,6 +896,29 @@ namespace androLib.Common.Utility
 		}
 		public static bool AnyTileWire(this Point16 topLeft) => AnyTileWire(topLeft.X, topLeft.Y);
 		public static bool AnyTileWire(int x, int y) => TilePositionToTileTopLeft(x, y).AnyTileWireTopLeft();
+		public static int PositionValue(this Point16 p) => PositionValue(p.X, p.Y);
+		public static int PositionValue(int x, int y) => x + y * Main.maxTilesX;
+		public static Point16 ValueToPosition(this int v) {
+			int y = v / Main.maxTilesX;
+			int x = v % Main.maxTilesX;
+			return new Point16(x, y);
+		}
+		public static bool DepositVisualizeChestTransfer(this Chest chest, Item item) {
+			Item[] inv = chest?.item;
+			if (inv == null)
+				return false;
+
+			int stack = item.stack;
+			bool transferedAll = chest.item.Deposit(item, out int index);
+			int transferred = stack - item.stack;
+			if (transferred == 0)
+				return false;
+
+			Chest.VisualizeChestTransfer(item.position, new Vector2((chest.x + 1) * 16, (chest.y + 1) * 16), inv[index], transferred);
+
+			return transferedAll;
+		}
+		public static bool Snowing => Main.SceneMetrics.EnoughTilesForSnow;
 
 		#endregion
 	}
