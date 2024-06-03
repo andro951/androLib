@@ -17,6 +17,8 @@ using Terraria.UI;
 using Terraria.GameContent;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI.Chat;
+using Terraria.DataStructures;
+using Terraria.ObjectData;
 
 namespace androLib.Common.Utility
 {
@@ -776,6 +778,102 @@ namespace androLib.Common.Utility
 
 			return size;
 		}
+
+		public static void PlaceTile(int i, int j, int tileToPlace) {
+			if (!WorldGen.PlaceTile(i, j, tileToPlace, true, true)) {
+				Tile tile = Main.tile[i, j];
+				switch (tileToPlace) {
+					case TileID.Grass:
+					case TileID.CorruptGrass:
+					case TileID.CrimsonGrass:
+					case TileID.HallowedGrass:
+						tile.HasTile = true;
+						tile.TileType = TileID.Dirt;
+						break;
+					case TileID.JungleGrass:
+					case TileID.CorruptJungleGrass:
+					case TileID.CrimsonJungleGrass:
+					case TileID.MushroomGrass:
+						tile.HasTile = true;
+						tile.TileType = TileID.Mud;
+						break;
+					case TileID.AshGrass:
+						tile.HasTile = true;
+						tile.TileType = TileID.Ash;
+						break;
+				}
+
+				WorldGen.PlaceTile(i, j, tileToPlace, true, true);
+			}
+
+			WorldGen.SquareTileFrame(i, j);
+			if (Main.netMode == NetmodeID.Server)
+				NetMessage.SendTileSquare(-1, i - 1, j - 1, 3);
+		}
+		public static Point16 TilePositionToTileTopLeft(int x, int y) {
+			Tile tile = Main.tile[x, y];
+			int tileType = tile.TileType;
+			TileObjectData tileData = TileObjectData.GetTileData(tileType, 0);
+			if (tileData == null)
+				return new(x, y);
+
+			int tileX = (tile.TileFrameX / 18) % tileData.Width;
+			int tileY = (tile.TileFrameY / 18) % tileData.Height;
+			return new(x - tileX, y - tileY);
+		}
+		/// <summary>
+		/// Only use this when using the coordinates from placing tiles.
+		/// </summary>
+		public static Point16 TileOriginToMultiTileTopLeft(int x, int y, int tileType = -1) {
+			if (tileType == -1)
+				tileType = Main.tile[x, y].TileType;
+
+			Point16 baseCoords = new Point16(x, y);
+			TileObjectData.OriginToTopLeft(tileType, 0, ref baseCoords);
+			return baseCoords;
+		}
+		public static bool TryGetChest(this Point16 topLeft, out int chest) => TryGetChest(topLeft.X, topLeft.Y, out chest);
+		public static bool TryGetChest(int x, int y, out int chestId) {
+			chestId = Chest.FindChest(x, y);
+			if (chestId > -1)
+				return true;
+
+			return false;
+		}
+		public static bool AnyWire(this Tile tile) => tile.BlueWire || tile.YellowWire || tile.RedWire || tile.GreenWire;
+
+		public static bool AnyTileWireTopLeft(this Point16 topLeft) => AnyTileWireTopLeft(topLeft.X, topLeft.Y);
+		public static bool AnyTileWireTopLeft(int topLeftX, int topLeftY) {
+			int width;
+			int height;
+			Tile tile = Main.tile[topLeftX, topLeftY];
+			TileObjectData tileData = TileObjectData.GetTileData(tile.TileType, 0);
+			if (tileData == null) {
+				width = 1;
+				height = 1;
+			}
+			else {
+				width = tileData.Width;
+				height = tileData.Height;
+			}
+
+			int xEnd = topLeftX + width;
+			int yEnd = topLeftY + height;
+			for (int x = topLeftX; x < xEnd; x++) {
+				for (int y = topLeftY; y < yEnd; y++) {
+					Tile checkTile = Main.tile[x, y];
+					if (checkTile.TileType != tile.TileType)
+						continue;
+
+					if (checkTile.AnyWire())
+						return true;
+				}
+			}
+
+			return false;
+		}
+		public static bool AnyTileWire(this Point16 topLeft) => AnyTileWire(topLeft.X, topLeft.Y);
+		public static bool AnyTileWire(int x, int y) => TilePositionToTileTopLeft(x, y).AnyTileWireTopLeft();
 
 		#endregion
 	}

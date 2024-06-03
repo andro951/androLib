@@ -184,6 +184,9 @@ namespace VacuumBags.Items
 			return GetFirstXFromBag(storageID, itemCondition, player, FirstXItemsChooseAllItems, null, context, selectItems);
 		}
 		public static Item ChooseFromBagOnlyIfFirstInInventory(Item item, Player player, int storageID, Func<Item, bool> itemCondition, int context = ItemSlotContextID.YellowSelected, bool selectItems = true) {
+			if (player.whoAmI != Main.myPlayer || Main.netMode == NetmodeID.Server)
+				return null;
+
 			if (!player.TryGetModPlayer(out StoragePlayer storagePlayer))
 				return null;
 

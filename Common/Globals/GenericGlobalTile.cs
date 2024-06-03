@@ -415,16 +415,13 @@ namespace androLib.Common.Globals
 
 			return dropItem;
 		}
-		public static int GetRequiredPickaxePower(int type, bool forInfusionPower = false) {
+		public static int GetRequiredPickaxePower(int type) {
 			ModTile modTile = TileLoader.GetTile(type);
 			if (modTile != null)
 				return modTile.MinPick;
 
 			switch (type) {
 				case Meteorite:
-					if (forInfusionPower)
-						return 60;//Not correct for vanilla.  Needed it to be changed.
-
 					return 50;
 				case Demonite:
 				case Crimtane:

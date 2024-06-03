@@ -174,6 +174,7 @@ namespace androLib
 		public const string CursedFlameOrIchor = "CursedFlameOrIchor";
 		public const string GoldOrPlatinumBar = "GoldOrPlatinumBar";
 		public const string AnyEvilBar = "AnyEvilBar";
+		public const string AnyIronBar = "AnyIronBar";
 		public override void AddRecipeGroups() {
 			int[] commanGems = GemSets.CommonGems.ToArray();
 			int indexOfTopax = Array.IndexOf(commanGems, ItemID.Topaz);
@@ -352,6 +353,9 @@ namespace androLib
 
 			group = new RecipeGroup(() => GoldOrPlatinumBar.AddSpaces(), new int[] { ItemID.GoldBar, ItemID.PlatinumBar });
 			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{GoldOrPlatinumBar}", group);
+
+			group = new RecipeGroup(() => AnyIronBar.AddSpaces(), new int[] { ItemID.IronBar, ItemID.LeadBar });
+			RecipeGroup.RegisterGroup($"{AndroMod.ModName}:{AnyIronBar}", group);
 		}
 		public static SortedDictionary<ChestID, List<DropData>> chestDrops = new();
 		public override void PostWorldGen() {
