@@ -21,6 +21,7 @@ using Terraria.GameContent.ItemDropRules;
 using androLib.Tiles;
 using Terraria.DataStructures;
 using Terraria.ObjectData;
+using System.IO;
 
 namespace androLib
 {
@@ -513,6 +514,17 @@ namespace androLib
 				return descriptionFunc(player);
 
 			return orig(player, buffType);
+		}
+		public enum AndroModPacketID {
+			ItemSpaceSync,
+		}
+		public override void HandlePacket(BinaryReader reader, int whoAmI) {
+			AndroModPacketID packetID = (AndroModPacketID)reader.ReadByte();
+			switch (packetID) {
+				case AndroModPacketID.ItemSpaceSync:
+					VacuumToStorageItem.ReceiveItemSpaceStatus(whoAmI, reader);
+					break;
+			}
 		}
 	}
 }

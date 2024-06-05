@@ -42,6 +42,10 @@ namespace androLib
 				bool consumable = item.consumable;
 				int useTime = item.useTime;
 				int useAnimation = item.useAnimation;
+				int maxX = Main.maxTilesX;
+				int maxY = Main.maxTilesY;
+				string worldPathName = Main.worldPathName;
+				string worldPath = Main.WorldPath;
 				if (item.DamageType != DamageClass.Default) {
 					string temp2 = item.DamageType.Name;
 				}
@@ -76,6 +80,7 @@ namespace androLib
 			}
 
 			SoundManager.Update();
+			VacuumToStorageItem.Update();
 		}
 		public struct ChanceMultiplierInfo {
 			public int Min {
