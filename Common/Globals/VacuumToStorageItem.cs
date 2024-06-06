@@ -122,7 +122,7 @@ namespace androLib.Common.Globals
 				return;
 
 			CheckingVanillaItemSpace = true;
-			for (int itemSpaceStatusIndex = 0; itemSpaceStatusIndex < MainItemLength; itemSpaceStatusIndex++) {
+			for (int itemSpaceStatusIndex = 0; itemSpaceStatusIndex < Main.item.Length; itemSpaceStatusIndex++) {
 				Item item = Main.item[itemSpaceStatusIndex];
 				if (!item.active)
 					continue;
@@ -171,11 +171,10 @@ namespace androLib.Common.Globals
 			foreach (int itemWhoAmI in toRemove)
 				MyRequests.Remove(itemWhoAmI);
 		}
-		private const int MainItemLength = 400;
 		private const int itemSpaceStatusResetLockout = 10;
 		public override void Load() {
-			playerItemSpaceStatus = new (uint blockRequestResetTime, Dictionary<int, uint> requests)[MainItemLength];
-			for (int i = 0; i < MainItemLength; i++) {
+			playerItemSpaceStatus = new (uint blockRequestResetTime, Dictionary<int, uint> requests)[Main.item.Length];
+			for (int i = 0; i < Main.item.Length; i++) {
 				playerItemSpaceStatus[i] = (0, new());
 			}
 
