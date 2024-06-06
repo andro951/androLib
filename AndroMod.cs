@@ -22,6 +22,7 @@ using androLib.Tiles;
 using Terraria.DataStructures;
 using Terraria.ObjectData;
 using System.IO;
+using androLib.Items;
 
 namespace androLib
 {
@@ -291,11 +292,21 @@ namespace androLib
 			On_TileObjectData.CustomPlace += AndroModTile.On_TileObjectData_CustomPlace;
 			IL_ItemSlot.RightClick_ItemArray_int_int += IL_ItemSlot_RightClick_ItemArray_int_int;
 			IL_SceneMetrics.ScanAndExportToMain += IL_SceneMetrics_ScanAndExportToMain;
+			On_ItemSlot.RightClick_ItemArray_int_int += OnRightClick_ItemArray_int_int;
 
 			MagicStorageButtonsUI.RegisterWithMasterUIManager();
 			AndroLocalizationData.RegisterSDataPackage();
 		}
 
+		private void OnRightClick_ItemArray_int_int(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
+			Item clickedItem = inv[slot];
+			if (context != ItemSlot.Context.ShopItem && clickedItem.ModItem is IBagModItem) {
+				orig(inv, 0, slot);
+			}
+			else {
+				orig(inv, context, slot);
+			}
+		}
 		private void IL_ItemSlot_RightClick_ItemArray_int_int(ILContext il) {
 			//IL_0053: brfalse.s IL_0089
 

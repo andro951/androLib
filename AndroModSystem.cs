@@ -81,6 +81,7 @@ namespace androLib
 
 			SoundManager.Update();
 			VacuumToStorageItem.Update();
+			MasterUIManager.PostUpdateEverything();
 		}
 		public struct ChanceMultiplierInfo {
 			public int Min {

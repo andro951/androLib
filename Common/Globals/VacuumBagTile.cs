@@ -77,7 +77,7 @@ namespace androLib.Common.Globals
 
 			foreach (int storageID in storageIDs.Keys) {
 				Item copy = item.Clone();
-				if (StorageManager.TryQuickStackItemToTile(ref item, player, storageID)) {
+				if (StorageManager.TryQuickStackItemToTile(item, player, storageID)) {
 					Chest.VisualizeChestTransfer(player.Center, storageIDs[storageID], copy, copy.stack);
 					break;
 				}

@@ -11,9 +11,7 @@ using androLib.Common.Utility;
 
 namespace androLib.Items
 {
-	public interface INeedsSetUpAllowedList
-	{
-		public int BagStorageID { get; }
+	public interface INeedsSetUpAllowedList {
 		public AllowedItemsManager GetAllowedItemsManager { get; }
 		public virtual void PostSetup() { }
 		public static Dictionary<int, AllowedItemsManager> AllowedItemsManagers = new();

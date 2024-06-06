@@ -56,9 +56,9 @@ namespace androLib
 		public int UIResizePanelY;
 		public int LastUIResizePanelX;
 		public int LastUIResizePanelY;
-		public static int DefaultResizePanelIncrement = 100000;
-		public static int UIResizePanelDefaultX = DefaultResizePanelIncrement * 10;
-		public static int UIResizePanelDefaultY = DefaultResizePanelIncrement * 3;
+		public const int DefaultResizePanelIncrement = 100000;
+		public int UIResizePanelDefaultX => DefaultResizePanelIncrement * Math.Min(originalStorageSize, 10);
+		public int UIResizePanelDefaultY => DefaultResizePanelIncrement * Math.Min(originalStorageSize / 10, 3);
 		public int LastUIResizePanelDefaultX;
 		public int LastUIResizePanelDefaultY;
 		public Func<Item[]> GetItems;
@@ -73,9 +73,11 @@ namespace androLib
 		public bool ShouldRefreshInfoAccs { get; }
 		private string modFullName;
 		private string name = null;
-		private int myLastBagLocation = -1;
-		private int myLastIndexInTheBag = -1;
+		private Func<Player, IList<Item>> ExtraStorageLocaion = null;
+		private IList<Item> myLastInventoryLocation = null;
+		private int myLastIndexInTheInventory = -1;
 		private int foundBagType = -1;
+		private int bagFoundIn = -1;
 		private Action<int, bool> UpdateAllowedList;
 		private bool IsBlacklistGetter;
 		uint nextBagCheck = 0;
@@ -110,7 +112,8 @@ namespace androLib
 				bool isBlackListGetter,
 				Action selectItemForUIOnly,
 				bool shouldRefreshInfoAccs,
-				Func<Item, bool> canVacuumItem
+				Func<Item, bool> canVacuumItem,
+				Func<Player, IList<Item>> extraStorageLocaion
 			) {
 			StorageID = storageID;
 			Mod = mod;
@@ -137,6 +140,7 @@ namespace androLib
 			SelectItemForUIOnly = selectItemForUIOnly;
 			ShouldRefreshInfoAccs = shouldRefreshInfoAccs;
 			CanVacuumItemWhenNotContained = canVacuumItem;
+			ExtraStorageLocaion = extraStorageLocaion;
 			items = Enumerable.Repeat(new Item(), StorageSize).ToArray();
 			ShouldVacuum = IsVacuumBag != false;
 			UIResizePanelX = UIResizePanelDefaultX;
@@ -296,7 +300,8 @@ namespace androLib
 				IsBlacklistGetter,
 				SelectItemForUIOnly,
 				ShouldRefreshInfoAccs,
-				CanVacuumItemWhenNotContained
+				CanVacuumItemWhenNotContained,
+				ExtraStorageLocaion
 			);
 
 			clone.name = name;
@@ -312,6 +317,7 @@ namespace androLib
 			clone.LastUIResizePanelY = LastUIResizePanelY;
 			clone.SwitcherStorageID = SwitcherStorageID;
 			clone.ShouldDepositToMagicStorage = ShouldDepositToMagicStorage;
+			clone.ExtraStorageLocaion = ExtraStorageLocaion;
 
 			return clone;
 		}
@@ -354,25 +360,7 @@ namespace androLib
 
 			return found;
 		}
-		public static readonly int RequiredItemNotFound = -1;
-		public static readonly int ReuiredItemInABagStartingIndex = -2;
-		public static Item GetItemFromHasRequiredItemToUseStorageIndex(Player player, int lastBagUIFoundIn, int hasRequiredItemToUseStorageIndex) {
-			if (hasRequiredItemToUseStorageIndex > RequiredItemNotFound)
-				return player.inventory[hasRequiredItemToUseStorageIndex];
-
-			if (lastBagUIFoundIn < 0)
-				return null;
-
-			if (StoragePlayer.LocalStoragePlayer.Storages[lastBagUIFoundIn].GetItems != null)
-				return null;
-
-			int index = ItemsIndexFromHasRequiredItemToUseStorageIndex(hasRequiredItemToUseStorageIndex);
-			if (index < 0)
-				return null;
-
-			return StoragePlayer.LocalStoragePlayer.Storages[lastBagUIFoundIn].Items[index];
-		}
-		public static int ItemsIndexFromHasRequiredItemToUseStorageIndex(int hasRequiredItemToUseStorageIndex) => -(hasRequiredItemToUseStorageIndex - ReuiredItemInABagStartingIndex);
+		public static readonly int ItemNotFound = -1;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -380,19 +368,20 @@ namespace androLib
 		/// <param name="index">The index in the players inventory.  If found in a bag, the index will be -index + ReuiredItemInABagStartingIndex.<\br>
 		/// Use GetItemFromHasRequiredItemToUseStorageIndex() to get the item savely.</param>
 		/// <returns></returns>
-		public bool HasRequiredItemToUseStorage(Player player, out int bagFoundInID, out int index, int specifiedBagType = -1) {
+		public bool HasRequiredItemToUseStorage(Player player, out IList<Item> inventoryFoundIn, out int index, out int otherBagThisBagWasFoundIn, int specifiedBagType = -1) {
 			bool foundResult = true;
 			bool useSpecifiedBagType = specifiedBagType != -1;
 			if (foundBagType == -1 || useSpecifiedBagType && foundBagType != specifiedBagType)
 				foundResult = false;
 
 			if (foundResult) {
-				Item lastBagLocationItem = GetItemFromHasRequiredItemToUseStorageIndex(player, myLastBagLocation, myLastIndexInTheBag);
+				Item lastBagLocationItem = myLastInventoryLocation?[myLastIndexInTheInventory];
 				if (foundBagType == lastBagLocationItem?.type) {
-					bool inPlayerInventory = myLastIndexInTheBag > RequiredItemNotFound;
-					if (inPlayerInventory || StorageManager.VacuumStorageIndexesFromBagTypes.TryGetValue(foundBagType, out int bagID) && StorageManager.BagUIs[bagID].DisplayBagUI || myLastBagLocation > -1 && StorageManager.BagUIs[myLastBagLocation].DisplayBagUI) {
-						bagFoundInID = myLastBagLocation;
-						index = myLastIndexInTheBag;
+					bool foundInANonBagInventory = bagFoundIn == -1;
+					if (foundInANonBagInventory || StorageManager.VacuumStorageIndexesFromBagTypes.TryGetValue(foundBagType, out int bagID) && StorageManager.BagUIs[bagID].DisplayBagUI && bagFoundIn > -1 && StorageManager.BagUIs[bagFoundIn].DisplayBagUI) {
+						inventoryFoundIn = myLastInventoryLocation;
+						index = myLastIndexInTheInventory;
+						otherBagThisBagWasFoundIn = bagFoundIn;
 						return true;
 					}
 				}
@@ -400,16 +389,19 @@ namespace androLib
 
 			//Only look once per tick
 			if (nextBagCheck > Main.GameUpdateCount) {
-				bagFoundInID = -1;
-				index = RequiredItemNotFound;
+				inventoryFoundIn = null;
+				index = ItemNotFound;
+				otherBagThisBagWasFoundIn = -1;
 				return false;
 			}
 			else {
 				nextBagCheck = Main.GameUpdateCount + 1u;
 			}
 
-			index = RequiredItemNotFound;
-			bagFoundInID = -1;
+			bagFoundIn = -1;
+			otherBagThisBagWasFoundIn = -1;
+			index = ItemNotFound;
+			inventoryFoundIn = null;
 			SortedSet<int> bagItemTypes;
 			if (specifiedBagType != -1) {
 				bagItemTypes = new() { specifiedBagType };
@@ -419,14 +411,33 @@ namespace androLib
 				if (validItemType != true)
 					return validItemType == null;//null means no associated item.  false means the bag type was not in the valid range and not default -1.
 			}
-			
+
+			//Check extra storage locations for this bag.
+			if (ExtraStorageLocaion != null) {
+				IList<Item> extraStorageLocation = ExtraStorageLocaion(player);
+				if (extraStorageLocation != null) {
+					for (int i = 0; i < extraStorageLocation.Count; i++) {
+						Item item = extraStorageLocation[i];
+						if (bagItemTypes.Contains(item.type)) {
+							index = i;
+							inventoryFoundIn = extraStorageLocation;
+							myLastInventoryLocation = inventoryFoundIn;
+							myLastIndexInTheInventory = index;
+							foundBagType = item.type;
+							return true;
+						}
+					}
+				}
+			}
+
 			//Check player inventory for this bag.
 			for (int i = 0; i < player.inventory.Length; i++) {
 				Item item = player.inventory[i];
 				if (bagItemTypes.Contains(item.type)) {
 					index = i;
-					myLastBagLocation = bagFoundInID;
-					myLastIndexInTheBag = index;
+					inventoryFoundIn = player.inventory;
+					myLastInventoryLocation = inventoryFoundIn;
+					myLastIndexInTheInventory = index;
 					foundBagType = item.type;
 					return true;
 				}
@@ -445,11 +456,13 @@ namespace androLib
 						continue;
 
 					if (bagUI.MyStorage.ContainsSlow(bagType, out int myLastIndex)) {
-						index = -myLastIndex + ReuiredItemInABagStartingIndex;
-						bagFoundInID = j;
-						myLastBagLocation = bagFoundInID;
-						myLastIndexInTheBag = index;
+						index = myLastIndex;
+						inventoryFoundIn = bagUI.MyStorage.Items;
+						myLastInventoryLocation = inventoryFoundIn;
+						myLastIndexInTheInventory = index;
 						foundBagType = bagType;
+						bagFoundIn = j;
+						otherBagThisBagWasFoundIn = bagFoundIn;
 						return true;
 					}
 				}
@@ -460,8 +473,8 @@ namespace androLib
 				int createTile = ContentSamples.ItemsByType[bagItemType].createTile;
 				if (createTile > -1 && player.adjTile[createTile]) {
 					if (!useSpecifiedBagType || !found) {
-						myLastBagLocation = -1;
-						myLastIndexInTheBag = RequiredItemNotFound;
+						myLastInventoryLocation = null;
+						myLastIndexInTheInventory = ItemNotFound;
 					}
 					
 					return true;
@@ -469,8 +482,8 @@ namespace androLib
 			}
 
 			if (!useSpecifiedBagType) {
-				myLastBagLocation = -1;
-				myLastIndexInTheBag = RequiredItemNotFound;
+				myLastInventoryLocation = null;
+				myLastIndexInTheInventory = ItemNotFound;
 			}
 
 			return false;
@@ -481,25 +494,26 @@ namespace androLib
 				return found;
 
 			nextBagItemCheckTime = Main.GameUpdateCount + GetDelay(found);
-			found = HasRequiredItemToUseStorage(player, out _, out _);
+			found = HasRequiredItemToUseStorage(player, out _, out _, out _);
 			return found;
 		}
 		/// <summary>
 		/// Don't forget to check the type of the found item if using this method since it only checks every 10-30 ticks if that amount if time is important.
 		/// </summary>
-		public bool HasRequiredItemToUseStorageSlow(Player player, out int bagFoundInID, out int index, int specifiedBagType = -1) {
+		public bool HasRequiredItemToUseStorageSlow(Player player, out IList<Item> inventoryFoundIn, out int index, out int otherBagThisBagWasFoundIn, int specifiedBagType = -1) {
 			if (specifiedBagType != -1) {
 				bool check = Main.GameUpdateCount < nextBagItemCheckTime || found && specifiedBagType != foundBagType && Main.GameUpdateCount == nextBagItemCheckTime - GetDelay(found) + 1;
 				if (!check) {
-					bagFoundInID = myLastBagLocation;
-					index = myLastIndexInTheBag;
+					inventoryFoundIn = myLastInventoryLocation;
+					index = myLastIndexInTheInventory;
+					otherBagThisBagWasFoundIn = bagFoundIn;
 					return specificBagTypesFound.Contains(specifiedBagType); ;
 				}
 
 				specificBagTypesFound.Remove(specifiedBagType);
 
 				nextBagItemCheckTime = Main.GameUpdateCount + GetDelay(found);
-				bool foundExact = HasRequiredItemToUseStorage(player, out bagFoundInID, out index, specifiedBagType);
+				bool foundExact = HasRequiredItemToUseStorage(player, out inventoryFoundIn, out index, out otherBagThisBagWasFoundIn, specifiedBagType);
 				if (foundExact)
 					specificBagTypesFound.Add(specifiedBagType);
 
@@ -510,15 +524,16 @@ namespace androLib
 			}
 
 			if (Main.GameUpdateCount < nextBagItemCheckTime) {
-				bagFoundInID = myLastBagLocation;
-				index = myLastIndexInTheBag;
+				inventoryFoundIn = myLastInventoryLocation;
+				index = myLastIndexInTheInventory;
+				otherBagThisBagWasFoundIn = bagFoundIn;
 				return found;
 			}
 
 			specificBagTypesFound.Clear();
 
 			nextBagItemCheckTime = Main.GameUpdateCount + GetDelay(found);
-			found = HasRequiredItemToUseStorage(player, out bagFoundInID, out index, specifiedBagType);
+			found = HasRequiredItemToUseStorage(player, out inventoryFoundIn, out index, out otherBagThisBagWasFoundIn, specifiedBagType);
 
 			return found;
 		}
@@ -726,14 +741,17 @@ namespace androLib
 		/// <param name="storageBagFoundIn">Storage items that the bag is in.  storageBagFoundIn[index] is the bag of type bagType.  Make sure to null check storageBagFoundIn before using it or check index >= 0.</param>
 		/// <param name="indexFoundAt"></param>
 		/// <returns></returns>
-		public static bool HasRequiredItemToUseStorageFromBagType(Player player, int bagType, out int bagInventoryIndex, bool onlyThisBagType = false) {
+		public static bool HasRequiredItemToUseStorageFromBagType(Player player, int bagType, out IList<Item> inventoryFoundIn, out int index, out int otherBagThisBagWasFoundIn, bool onlyThisBagType = false) {
 			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
 				Storage storage = BagUIs[storageID].MyStorage;
-				if (storage.HasRequiredItemToUseStorage(player, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
+				if (storage.HasRequiredItemToUseStorage(player, out inventoryFoundIn, out index, out otherBagThisBagWasFoundIn, onlyThisBagType ? bagType : -1))
 					return true;
 			}
 
-			bagInventoryIndex = Storage.RequiredItemNotFound;
+			inventoryFoundIn = null;
+			index = Storage.ItemNotFound;
+			otherBagThisBagWasFoundIn = -1;
+
 			return false;
 		}
 		public static bool HasRequiredItemToUseStorageFromBagTypeSlow(Player player, int bagType) {
@@ -745,14 +763,17 @@ namespace androLib
 
 			return false;
 		}
-		public static bool HasRequiredItemToUseStorageFromBagTypeSlow(Player player, int bagType, out int bagInventoryIndex, bool onlyThisBagType = false) {
+		public static bool HasRequiredItemToUseStorageFromBagTypeSlow(Player player, int bagType, out IList<Item> inventoryFoundIn, out int index, out int otherBagThisBagWasFoundIn, bool onlyThisBagType = false) {
 			if (VacuumStorageIndexesFromBagTypes.TryGetValue(bagType, out int storageID)) {
 				Storage storage = BagUIs[storageID].MyStorage;
-				if (storage.HasRequiredItemToUseStorageSlow(player, out _, out bagInventoryIndex, onlyThisBagType ? bagType : -1))
+				if (storage.HasRequiredItemToUseStorageSlow(player, out inventoryFoundIn, out index, out otherBagThisBagWasFoundIn, onlyThisBagType ? bagType : -1))
 					return true;
 			}
 
-			bagInventoryIndex = Storage.RequiredItemNotFound;
+			inventoryFoundIn = null;
+			index = Storage.ItemNotFound;
+			otherBagThisBagWasFoundIn = -1;
+
 			return false;
 		}
 
@@ -1044,11 +1065,11 @@ namespace androLib
 		public static void SaveClientAndroConfig() {
 			SaveClientConfig(AndroMod.clientConfig);
 		}
-		public static bool TryQuickStackItemToTile(ref Item item, Player player, int storageID) {
+		public static bool TryQuickStackItemToTile(Item item, Player player, int storageID) {
 			if (!ValidModID(storageID))
 				return false;
 
-			return BagUIs[storageID].QuickStack(ref item, player, true, false);
+			return BagUIs[storageID].QuickStack(item, player, true, false);
 		}
 
 		#endregion
@@ -1072,7 +1093,8 @@ namespace androLib
 				bool isBlacklistGetter = false,
 				Action selectItemForUIOnly = null,
 				bool shouldRefreshInfoAccs = false,
-				Func<Item, bool> canVacuumItem = null
+				Func<Item, bool> canVacuumItem = null,
+				Func<Player, IList<Item>> extraStorageLocaion = null
 			) {
 			if (Main.netMode == NetmodeID.Server)
 				return 0;
@@ -1099,7 +1121,8 @@ namespace androLib
 				isBlacklistGetter,
 				selectItemForUIOnly,
 				shouldRefreshInfoAccs,
-				canVacuumItem
+				canVacuumItem,
+				extraStorageLocaion
 			);
 
 			RegisteredStorages.Add(storage);
@@ -1107,10 +1130,10 @@ namespace androLib
 			BagUI bagUI = new(storageID, registeredUI_ID);
 
 			CanVacuumItemHandler.Add((Item item, Player player) => bagUI.CanVacuumItem(item, player));
-			CanBeStoredHandler.Add((Item item) => bagUI.CanBeStored(item));
-			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(ref item, player));
+			CanBeStoredHandler.Add(bagUI.CanBeStored);
+			TryVacuumItemHandler.Add((Item item, Player player) => bagUI.TryVacuumItem(item, player));
 			TryRestockItemHandler.Add((Item item) => bagUI.RestockFunc(item, true, false));
-			TryQuickStackItemHandler.Add((Item item, Player player) => bagUI.QuickStack(ref item, player));
+			TryQuickStackItemHandler.Add((Item item, Player player) => bagUI.QuickStack(item, player));
 
 			MasterUIManager.IsDisplayingUI.Add(() => bagUI.DisplayBagUI);
 			MasterUIManager.DrawAllInterfaces += bagUI.PostDrawInterface;

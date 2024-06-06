@@ -70,7 +70,7 @@ namespace androLib
 
 			List<Item> items = new();
 			foreach (Storage storage in StorageManager.BagUIs.Select(b => b.MyStorage)) {
-				if (storage.ShouldAddMaterialsForCrafting && storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out _)) {
+				if (storage.ShouldAddMaterialsForCrafting && storage.HasRequiredItemToUseStorage(Main.LocalPlayer, out _, out _, out _)) {
 					for (int i = 0; i < storage.Items.Length; i++) {
 						ref Item item = ref storage.Items[i];
 						if (!item.NullOrAir() && item.stack > 0)

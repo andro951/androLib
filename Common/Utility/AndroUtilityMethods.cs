@@ -567,19 +567,19 @@ namespace androLib.Common.Utility
 
 			return inv.Deposit(item, out int _);
 		}
-		public static bool Deposit(this Item[] inv, Item item, out int index) {
+		public static bool Deposit(this IList<Item> inv, Item item, out int index) {
 			if (inv == null) {
-				index = inv.Length;
+				index = inv.Count;
 				return false;
 			}
 
 			if (item.NullOrAir()) {
-				index = inv.Length;
+				index = inv.Count;
 				return false;
 			}
 
 			if (item.favorited) {
-				index = inv.Length;
+				index = inv.Count;
 				return false;
 			}
 
@@ -587,11 +587,11 @@ namespace androLib.Common.Utility
 				return true;
 
 			index = 0;
-			while (index < inv.Length && !inv[index].IsAir) {
+			while (index < inv.Count && !inv[index].IsAir) {
 				index++;
 			}
 
-			if (index == inv.Length)
+			if (index == inv.Count)
 				return false;
 
 			inv[index] = item.Clone();
@@ -602,8 +602,8 @@ namespace androLib.Common.Utility
 
 			return true;
 		}
-		public static bool Restock(this Item[] inv, Item item, out int index) {
-			for (int i = 0; i < inv.Length; i++) {
+		public static bool Restock(this IList<Item> inv, Item item, out int index) {
+			for (int i = 0; i < inv.Count; i++) {
 				Item bagItem = inv[i];
 				if (!bagItem.NullOrAir() && bagItem.type == item.type && bagItem.stack < bagItem.maxStack) {
 					if (ItemLoader.TryStackItems(bagItem, item, out _)) {
@@ -622,7 +622,7 @@ namespace androLib.Common.Utility
 				}
 			}
 
-			index = inv.Length;
+			index = inv.Count;
 			return false;
 		}
 		public static void PercentFull(this IEnumerable<Item> inv, out float stackPercentFull, out float slotsPercentFull) {
@@ -646,17 +646,17 @@ namespace androLib.Common.Utility
 			slotsPercentFull /= count;
 			stackPercentFull = total / count;
 		}
-		public static void DoCoins(this Item[] inv) {
+		public static void DoCoins(this IList<Item> inv) {
 			int[] coins = new int[4];
 			for (int i = 0; i < coins.Length; i++) {
 				coins[i] = -1;
 			}
 
-			for (int i = 0; i < inv.Length; i++) {
+			for (int i = 0; i < inv.Count; i++) {
 				StackCoins(inv, i, coins);
 			}
 		}
-		private static void StackCoins(Item[] inv, int slot, int[] coins) {
+		private static void StackCoins(IList<Item> inv, int slot, int[] coins) {
 			Item item = inv[slot];
 			if (item.type < ItemID.CopperCoin || item.type > ItemID.PlatinumCoin)
 				return;
@@ -689,7 +689,7 @@ namespace androLib.Common.Utility
 				coinIndex = slot;
 			}
 		}
-		private static void DoCoinsUnsafe(Item[] inv, int slot, int[] coins) {
+		private static void DoCoinsUnsafe(IList<Item> inv, int slot, int[] coins) {
 			Item item = inv[slot];
 			if (item.type > ItemID.GoldCoin)
 				return;
@@ -700,7 +700,7 @@ namespace androLib.Common.Utility
 			item.SetDefaults(item.type + 1);
 			StackCoins(inv, slot, coins);
 		}
-		public static void DoCoins(this Item[] inv, int slot) {
+		public static void DoCoins(this IList<Item> inv, int slot) {
 			Item item = inv[slot];
 			if (item.type < ItemID.CopperCoin || item.type > ItemID.GoldCoin)
 				return;
@@ -709,7 +709,7 @@ namespace androLib.Common.Utility
 				return;
 
 			item.SetDefaults(item.type + 1);
-			for (int i = 0; i < inv.Length; i++) {
+			for (int i = 0; i < inv.Count; i++) {
 				Item coin = inv[i];
 				if (item.IsTheSameAs(coin) && i != slot && coin.stack < coin.maxStack) {
 					coin.stack++;

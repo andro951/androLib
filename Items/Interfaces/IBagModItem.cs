@@ -15,9 +15,9 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace VacuumBags.Items
+namespace androLib.Items
 {
-    public abstract class BagModItem : AndroModItem, ISoldByNPC {
+    public interface IBagModItem {
 		public virtual string SummaryOfFunction => SummaryOfFunctionDefault;
 		public const string SummaryOfFunctionDefault = "N/A";
 		private static IEnumerable<KeyValuePair<int, Item>> GetFirstXItemTypePairsFromBag(int storageID, Func<Item, bool> itemCondition, Player player, int firstXItemTypes, Func<Item, bool> doesntCountTowardsTotal = null) {
@@ -190,7 +190,7 @@ namespace VacuumBags.Items
 			if (!player.TryGetModPlayer(out StoragePlayer storagePlayer))
 				return null;
 
-			if (!storagePlayer.Storages[storageID].HasRequiredItemToUseStorage(player, out _, out int bagIndex) || bagIndex == Storage.RequiredItemNotFound)
+			if (!storagePlayer.Storages[storageID].HasRequiredItemToUseStorage(player, out _, out int bagIndex, out int bagFoundIn) || bagIndex == Storage.ItemNotFound)
 				return null;
 
 			IEnumerable<KeyValuePair<int, Item>> indexItemsPairs = GetFirstFromBag(storageID, itemCondition, player);
@@ -201,7 +201,7 @@ namespace VacuumBags.Items
 			Func<Item> fromBag = () => SelectAndGetItems(indexItemsPairs, storageID, context, selectItems).First();
 
 			int startOfAmmoIndex = 54;
-			if (bagIndex == Storage.ReuiredItemInABagStartingIndex || bagIndex == startOfAmmoIndex)
+			if (bagFoundIn != -1 ? bagIndex == 0 : bagIndex == startOfAmmoIndex)
 				return fromBag();
 
 			if (item == null)
@@ -235,20 +235,22 @@ namespace VacuumBags.Items
 			return fromBag();
 		}
 
-		public virtual int BagStorageID { get; set; }//Set this when registering with androLib.
-		public abstract int GetBagType();
-		protected virtual int DefaultBagSize => 100;
-		public abstract Color PanelColor { get; }
-		public abstract Color ScrollBarColor { get; }
-		public abstract Color ButtonHoverColor { get; }
-		protected virtual bool? CanVacuum => true;
-		protected virtual bool BlackListOnly => false;
-		public abstract bool ItemAllowedToBeStored(Item item);
-		protected abstract void UpdateAllowedList(int item, bool add);
-		protected virtual Action SelectItemForUIOnly => null;
-		protected virtual bool ShouldUpdateInfoAccessories => false;
+		public int BagStorageID { get; set; }//Set this when registering with androLib.
+		public int GetBagType();
+		public virtual int DefaultBagSize => 100;
+		public Color PanelColor { get; }
+		public Color ScrollBarColor { get; }
+		public Color ButtonHoverColor { get; }
+		public virtual bool? CanVacuum => true;
+		public virtual bool BlackListOnly => false;
+		public bool ItemAllowedToBeStored(Item item);
+		public void UpdateAllowedList(int item, bool add) {}
+		public virtual Action SelectItemForUIOnly => null;
+		public virtual bool ShouldUpdateInfoAccessories => false;
 		public virtual Func<Item, bool> CanVacuumItemFunc => null;
-		public virtual void RegisterWithAndroLib(Mod mod) {
+		public virtual Func<Player, IList<Item>> ExtraStorageLocation => null;
+		public void RegisterWithAndroLib(Mod mod) { RegisterWithAndroLibIBagModItem(mod); }
+		public void RegisterWithAndroLibIBagModItem(Mod mod) {
 			BagStorageID = StorageManager.RegisterVacuumStorageClass(
 				mod,//Mod
 				GetType(),//type
@@ -259,14 +261,15 @@ namespace VacuumBags.Items
 				() => PanelColor, // Get color function. Func<using Microsoft.Xna.Framework.Color>
 				() => ScrollBarColor, // Get Scroll bar color function. Func<using Microsoft.Xna.Framework.Color>
 				() => ButtonHoverColor, // Get Button hover color function. Func<using Microsoft.Xna.Framework.Color>
-				() => GetBagType(),//Get ModItem type
+				GetBagType,//Get ModItem type
 				80,//UI Left
 				675,//UI Top
 				UpdateAllowedList,
 				BlackListOnly,
 				SelectItemForUIOnly,
 				ShouldUpdateInfoAccessories,
-				CanVacuumItemFunc
+				CanVacuumItemFunc,
+				ExtraStorageLocation
 			);
 		}
 		public void CloseBag() => StorageManager.CloseBag(BagStorageID);
@@ -280,9 +283,5 @@ namespace VacuumBags.Items
 
 			AndroMod.GadgetGalore.Call("RegisterBuildInventory", () => StorageManager.GetItems(BagStorageID).Where(item => item.NullOrAir()));
 		}
-		public virtual Func<int> SoldByNPCNetID => null;
-		public virtual SellCondition SellCondition => SellCondition.Never;
-		public virtual float SellPriceModifier => 1f;
-		public override List<WikiTypeID> WikiItemTypes => new() { WikiTypeID.Storage };
 	}
 }

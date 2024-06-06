@@ -51,7 +51,7 @@ namespace androLib.UI
 		public struct ButtonProperties {
 			public int ButtonUI_ID { get; private set; }
 			public Action<BagUI> OnClicked;
-			private readonly Func<string> GetText;
+			public readonly Func<string> GetText;
 			public readonly string Text => GetText();
 			public Func<Color, Color> ButtonColor;
 			public ButtonProperties(int uiID, Action<BagUI> onClicked, Func<string> getText, Func<Color, Color> buttonColor = null) {
@@ -63,8 +63,15 @@ namespace androLib.UI
 		}
 		public List<ButtonProperties> DisplayedAllButtonProperties => DisplayedBagUI.MyButtonProperties;
 		public List<ButtonProperties> MyButtonProperties;
-
+		public int lootAllUIIndex;
 		public int depositAllUIIndex;
+		public int quickStackUIIndex;
+		public int restockUIIndex;
+		public int sortUIIndex;
+		public int toggleVacuumIndex;
+		public int depositAllMagicStorageUIIndex;
+		public int toggleMagicStorageDepositIndex;
+
 		public int ID => GetUI_ID(Bag_UI_ID.Bag);
 		public int SearchID => GetUI_ID(Bag_UI_ID.BagSearch);
 		public int RenameID => GetUI_ID(Bag_UI_ID.BagRename);
@@ -131,8 +138,8 @@ namespace androLib.UI
 			Player player = Main.LocalPlayer;
 			for (int i = 0; i < StorageManager.BagUIs.Count; i++) {
 				Storage storage = StorageManager.BagUIs[i].MyStorage;
-				if (storage.HasRequiredItemToUseStorage(player, out int bagFoundIn, out int indexInBag)) {
-					Item bagItem = Storage.GetItemFromHasRequiredItemToUseStorageIndex(player, bagFoundIn, indexInBag);
+				if (storage.HasRequiredItemToUseStorage(player, out IList<Item> inventoryFoundIn, out int index, out _)) {
+					Item bagItem = inventoryFoundIn?[index];
 					if (!bagItem.NullOrAir()) {
 						int bagItemType = bagItem.type;
 						if (storage.ValidItemTypeGetters(out SortedSet<int> bagItemTypes) == true) {
@@ -186,20 +193,29 @@ namespace androLib.UI
 		public void AddButton(Action<BagUI> OnClicked, Func<string> GetText, Func<Color, Color> buttonColor = null) {
 			MyButtonProperties.Add(new(MyButtonProperties.Count, OnClicked, GetText, buttonColor));
 		}
+		public Func<IEnumerable<Item>> GetPlayersInventory = Main.LocalPlayer.inventory.TakePlayerInventory40;
+		public Func<IList<Item>> GetLootAllTargetInventory = null;
 		public void PreSetup() {
 			MyButtonProperties = new();
 			AddButton((bagUI) => bagUI.LootAll(), () => StorageTextID.LootAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
-			AddButton((bagUI) => bagUI.DepositAll(Main.LocalPlayer.inventory.TakePlayerInventory40()), () => StorageTextID.DepositAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			lootAllUIIndex = MyButtonProperties.Count - 1;
+			AddButton((bagUI) => bagUI.DepositAll(GetPlayersInventory()), () => StorageTextID.DepositAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			depositAllUIIndex = MyButtonProperties.Count - 1;
-			AddButton((bagUI) => bagUI.QuickStackAll(Main.LocalPlayer.inventory.TakePlayerInventory40(), Main.LocalPlayer), () => StorageTextID.QuickStack.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			AddButton((bagUI) => bagUI.QuickStackAll(GetPlayersInventory(), Main.LocalPlayer), () => StorageTextID.QuickStack.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			quickStackUIIndex = MyButtonProperties.Count - 1;
 			AddButton((bagUI) => bagUI.Sort(), () => StorageTextID.Sort.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			sortUIIndex = MyButtonProperties.Count - 1;
 			
-			if (StorageManager.RegisteredStorages[storageID].IsVacuumBag != false)
+			if (StorageManager.RegisteredStorages[storageID].IsVacuumBag != false) {
 				AddButton((bagUI) => bagUI.ToggleVacuum(), () => StorageTextID.ToggleVacuum.ToString().Lang(AndroMod.ModName, L_ID1.StorageText), (defaultColor) => MyStorage.ShouldVacuum ? VacuumPurple : defaultColor);
+				toggleVacuumIndex = MyButtonProperties.Count - 1;
+			}
 			
 			if (AndroMod.magicStorageEnabled) {
 				AddButton((bagUI) => MagicStorageIntegration.DepositToMagicStorage(bagUI.MyInventory.ToList()), () => StorageTextID.DepositAllMagicStorage.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+				depositAllMagicStorageUIIndex = MyButtonProperties.Count - 1;
 				AddButton((bagUI) => MyStorage.ShouldDepositToMagicStorage = !MyStorage.ShouldDepositToMagicStorage, () => StorageTextID.ToggleMagicStorageDeposit.ToString().Lang(AndroMod.ModName, L_ID1.StorageText), (defaultColor) => MyStorage.ShouldDepositToMagicStorage ? ShouldDepositGreen : NoDepositRed);
+				toggleMagicStorageDepositIndex = MyButtonProperties.Count - 1;
 			}
 		}
 		public void PostSetup() {
@@ -900,12 +916,20 @@ namespace androLib.UI
 		
 		public void LootAll() {
 			Item[] inv = MyInventory;
+			IList<Item> lootAllTargetInventory = GetLootAllTargetInventory();
+			bool doSound = false;
 			for (int i = 0; i < inv.Length; i++) {
 				Item item = inv[i];
+				if (lootAllTargetInventory.Deposit(item, out int index))
+					doSound |= index != lootAllTargetInventory.Count;
+
 				if (item.type > ItemID.None && !item.favorited) {
 					inv[i] = Main.LocalPlayer.GetItem(Main.myPlayer, inv[i], GetItemSettings.LootAllSettings);
 				}
 			}
+
+			if (doSound)
+				SoundEngine.PlaySound(SoundID.Grab);
 		}
 		
 		#region Single
@@ -967,7 +991,7 @@ namespace androLib.UI
 
 			return true;
 		}
-		public bool TryVacuumItem(ref Item item, Player player, bool ignoreNeedBagInInventory = false, bool playSound = true) {
+		public bool TryVacuumItem(Item item, Player player, bool ignoreNeedBagInInventory = false, bool playSound = true) {
 			if (CanVacuumItemFunc(item, player, ignoreNeedBagInInventory))
 				return DepositFunc(item, playSound, false);
 
@@ -1096,22 +1120,21 @@ namespace androLib.UI
 
 		#endregion
 
-		public bool QuickStack(ref Item item, Player player, bool ignoreTile = false, bool playSound = true) {
+		public bool QuickStack(Item item, Player player, bool ignoreTile = false, bool playSound = true) {
 			if (ContainsItem(item))
-				return TryVacuumItem(ref item, player, ignoreTile, playSound);
+				return TryVacuumItem(item, player, ignoreTile, playSound);
 
 			return false;
 		}
-		public void QuickStackAll(Item[] inv, Player player) {
-			for (int i = 0; i < inv.Length; i++) {
-				ref Item item = ref inv[i];
+		public void QuickStackAll(IEnumerable<Item> inv, Player player) {
+			foreach (Item item in inv) {
 				if (item.NullOrAir())
 					continue;
 
 				if (item.favorited)
 					continue;
 
-				QuickStack(ref item, player);
+				QuickStack(item, player);
 			}
 		}
 		
