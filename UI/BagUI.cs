@@ -193,15 +193,15 @@ namespace androLib.UI
 		public void AddButton(Action<BagUI> OnClicked, Func<string> GetText, Func<Color, Color> buttonColor = null) {
 			MyButtonProperties.Add(new(MyButtonProperties.Count, OnClicked, GetText, buttonColor));
 		}
-		public Func<IEnumerable<Item>> GetPlayersInventory = Main.LocalPlayer.inventory.TakePlayerInventory40;
+		public Func<IEnumerable<Item>> GetPlayersInventory = null;
 		public Func<IList<Item>> GetLootAllTargetInventory = null;
 		public void PreSetup() {
 			MyButtonProperties = new();
 			AddButton((bagUI) => bagUI.LootAll(), () => StorageTextID.LootAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			lootAllUIIndex = MyButtonProperties.Count - 1;
-			AddButton((bagUI) => bagUI.DepositAll(GetPlayersInventory()), () => StorageTextID.DepositAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			AddButton((bagUI) => bagUI.DepositAll(GetPlayersInventory), () => StorageTextID.DepositAll.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			depositAllUIIndex = MyButtonProperties.Count - 1;
-			AddButton((bagUI) => bagUI.QuickStackAll(GetPlayersInventory(), Main.LocalPlayer), () => StorageTextID.QuickStack.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
+			AddButton((bagUI) => bagUI.QuickStackAll(GetPlayersInventory, Main.LocalPlayer), () => StorageTextID.QuickStack.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			quickStackUIIndex = MyButtonProperties.Count - 1;
 			AddButton((bagUI) => bagUI.Sort(), () => StorageTextID.Sort.ToString().Lang(AndroMod.ModName, L_ID1.StorageText));
 			sortUIIndex = MyButtonProperties.Count - 1;
@@ -916,11 +916,11 @@ namespace androLib.UI
 		
 		public void LootAll() {
 			Item[] inv = MyInventory;
-			IList<Item> lootAllTargetInventory = GetLootAllTargetInventory();
+			IList<Item> lootAllTargetInventory = GetLootAllTargetInventory?.Invoke();
 			bool doSound = false;
 			for (int i = 0; i < inv.Length; i++) {
 				Item item = inv[i];
-				if (lootAllTargetInventory.Deposit(item, out int index))
+				if (lootAllTargetInventory?.Deposit(item, out int index) == true)
 					doSound |= index != lootAllTargetInventory.Count;
 
 				if (item.type > ItemID.None && !item.favorited) {
@@ -1041,11 +1041,18 @@ namespace androLib.UI
 
 		#region Multiple
 
+		public bool DepositAll(Func<IEnumerable<Item>> inv, bool playSound = true) => DepositAll(inv?.Invoke(), playSound);
+
 		/// <summary>
 		/// Do not use for anything besides a button function unless you add an optional Func<> to make it possible to replace.
 		/// </summary>
-		public bool DepositAll(IEnumerable<Item> inv, bool playSound = true) {
+		public bool DepositAll(IEnumerable<Item> otherInv, bool playSound = true) {
+			IEnumerable<Item> inv = Main.LocalPlayer.inventory.TakePlayerInventory40();
+			if (otherInv != null)
+				inv = inv.Concat(otherInv);
+
 			IEnumerable<Item> items = inv.Where(i => !i.NullOrAir() && !i.favorited && CanBeStored(i));
+			Item[] arr = inv.ToArray();
 			bool transferredAnyItem = RestockAll(items, false);
 			int index = 0;
 			Item[] bagInventory = MyInventory;
@@ -1120,13 +1127,18 @@ namespace androLib.UI
 
 		#endregion
 
+		public void QuickStackAll(Func<IEnumerable<Item>> inv, Player player) => QuickStackAll(inv?.Invoke(), player);
 		public bool QuickStack(Item item, Player player, bool ignoreTile = false, bool playSound = true) {
 			if (ContainsItem(item))
 				return TryVacuumItem(item, player, ignoreTile, playSound);
 
 			return false;
 		}
-		public void QuickStackAll(IEnumerable<Item> inv, Player player) {
+		public void QuickStackAll(IEnumerable<Item> otherInv, Player player) {
+			IEnumerable<Item> inv = Main.LocalPlayer.inventory.TakePlayerInventory40();
+			if (otherInv != null)
+				inv = inv.Concat(otherInv);
+
 			foreach (Item item in inv) {
 				if (item.NullOrAir())
 					continue;
