@@ -94,12 +94,38 @@ namespace androLib.Common.Utility
 		}
 
 		/// <summary>
+		/// Adds n2 to n1 and caps n1 at int.MaxValue.
+		/// </summary>
+		public static void AddCheckOverflow(this ref long n1, long n2) {
+			long maxN2 = long.MaxValue - n1;
+			if (n2 > maxN2) {
+				n1 = long.MaxValue;
+				return;
+			}
+
+			n1 += n2;
+		}
+
+		/// <summary>
 		/// Multiplies n1 by n2 and caps n1 at float.MaxValue.
 		/// </summary>
 		public static void MultiplyCheckOverflow(this ref float n1, float n2) {
 			float maxN2 = float.MaxValue / n1;
 			if (n2 > maxN2) {
 				n1 = float.MaxValue;
+				return;
+			}
+
+			n1 *= n2;
+		}
+
+		/// <summary>
+		/// Multiplies n1 by n2 and caps n1 at float.MaxValue.
+		/// </summary>
+		public static void MultiplyCheckOverflow(this ref long n1, long n2) {
+			long maxN2 = long.MaxValue / n1;
+			if (n2 > maxN2) {
+				n1 = long.MaxValue;
 				return;
 			}
 
@@ -178,6 +204,14 @@ namespace androLib.Common.Utility
 		/// Multiplies n1 by n2 and caps n1 at float.MaxValue.
 		/// </summary>
 		public static float MultiplyCheckOverflow(float n1, float n2) {
+			n1.MultiplyCheckOverflow(n2);
+			return n1;
+		}
+
+		/// <summary>
+		/// Multiplies n1 by n2 and caps n1 at float.MaxValue.
+		/// </summary>
+		public static long MultiplyCheckOverflow(long n1, long n2) {
 			n1.MultiplyCheckOverflow(n2);
 			return n1;
 		}

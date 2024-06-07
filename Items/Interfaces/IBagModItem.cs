@@ -18,7 +18,7 @@ using Terraria.ModLoader;
 namespace androLib.Items
 {
     public interface IBagModItem {
-		public virtual string SummaryOfFunction => SummaryOfFunctionDefault;
+		public string SummaryOfFunction => SummaryOfFunctionDefault;
 		public const string SummaryOfFunctionDefault = "N/A";
 		private static IEnumerable<KeyValuePair<int, Item>> GetFirstXItemTypePairsFromBag(int storageID, Func<Item, bool> itemCondition, Player player, int firstXItemTypes, Func<Item, bool> doesntCountTowardsTotal = null) {
 			if (Main.netMode == NetmodeID.MultiplayerClient && player.whoAmI != Main.myPlayer)
@@ -237,18 +237,18 @@ namespace androLib.Items
 
 		public int BagStorageID { get; set; }//Set this when registering with androLib.
 		public int GetBagType();
-		public virtual int DefaultBagSize => 100;
+		public int DefaultBagSize => 100;
 		public Color PanelColor { get; }
 		public Color ScrollBarColor { get; }
 		public Color ButtonHoverColor { get; }
-		public virtual bool? CanVacuum => true;
-		public virtual bool BlackListOnly => false;
+		public bool? CanVacuum => true;
+		public bool BlackListOnly => false;
 		public bool ItemAllowedToBeStored(Item item);
 		public void UpdateAllowedList(int item, bool add) {}
-		public virtual Action SelectItemForUIOnly => null;
-		public virtual bool ShouldUpdateInfoAccessories => false;
-		public virtual Func<Item, bool> CanVacuumItemFunc => null;
-		public virtual Func<Player, IList<Item>> ExtraStorageLocation => null;
+		public Action SelectItemForUIOnly => null;
+		public bool ShouldUpdateInfoAccessories => false;
+		public Func<Item, bool> CanVacuumItemFunc => null;
+		public Func<Player, IList<Item>> ExtraStorageLocation => null;
 		public void RegisterWithAndroLib(Mod mod) { RegisterWithAndroLibIBagModItem(mod); }
 		public void RegisterWithAndroLibIBagModItem(Mod mod) {
 			BagStorageID = StorageManager.RegisterVacuumStorageClass(
