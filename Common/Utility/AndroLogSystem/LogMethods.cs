@@ -36,6 +36,9 @@ namespace androLib.Common.Utility
 		public readonly static bool debugging = false;
 		public readonly static bool debuggingOnTick = false;
 		private static Dictionary<string, double> logsT = new Dictionary<string, double>();
+		public static void ResetLogTimers() {
+			logsT.Clear();
+		}
 		public static string reportMessage => $"\n{AndroLibGameMessages.ReportErrorToAndro.ToString().Lang(AndroMod.ModName, L_ID1.GameMessages)}";
 		public static HashSet<int> LoggedChatMessagesIDs = new HashSet<int>();
 

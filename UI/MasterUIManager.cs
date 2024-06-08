@@ -91,6 +91,9 @@ namespace androLib.UI
 		public static int TypingBarInUse = UI_ID.None;
 		public static bool TypingOnAnyBar = false;
 		public static Action PreDrawUIStaticFunctions;
+		public static void Load() {
+			AndroMod.OnResetGameCounter += () => lastClickTime = 0;
+		}
 		public static void PostDrawInterface(SpriteBatch spriteBatch) {
 			StoragePlayer genericModPlayer = StoragePlayer.LocalStoragePlayer;
 			if (genericModPlayer.disableLeftShiftTrashCan) {

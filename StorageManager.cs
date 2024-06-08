@@ -681,6 +681,13 @@ namespace androLib
 		public override string ToString() {
 			return $"{GetModFullName()} ({StorageID})";
 		}
+
+		internal void ResetTimers() {
+			nextBagCheck = 0;
+			nextContainsUpdate = 0;
+			nextBagItemCheckTime = 0;
+			nextSlowUpdate = 0;
+		}
 	}
 	public static class StorageManager {
 		public static int DefaultLeftLocationOnScreen => 80;
@@ -701,6 +708,21 @@ namespace androLib
 		private static SortedDictionary<int, int> vacuumStorageIndexesFromBagTypes = null;
 		public static List<BagUI> BagUIs = new();
 		public static List<Storage> RegisteredStorages = new();
+		public static void Load() {
+			AndroMod.OnResetGameCounter += () => ResetAllStorageTimers();
+		}
+		private static void ResetAllStorageTimers() {
+			foreach (Storage storage in RegisteredStorages) {
+				storage.ResetTimers();
+			}
+
+			if (Main.LocalPlayer?.TryGetModPlayer(out StoragePlayer storagePlayer) == true && storagePlayer != null) {
+				foreach (Storage storage in storagePlayer.Storages) {
+					storage.ResetTimers();
+				}
+			}
+		}
+
 		public static void Unload() {
 			RegisteredStorages.Clear();
 			BagUIs.Clear();

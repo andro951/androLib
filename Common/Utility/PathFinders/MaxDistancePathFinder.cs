@@ -8,8 +8,8 @@ using Terraria;
 using static androLib.Common.Utility.PathFinderSharedFunctions;
 
 namespace androLib.Common.Utility {
-	public static class MaxDistancePathFinder {
-		public static bool HasPath(int x, int y, int MaxDistance, Func<int, int, bool> CountsAsPath, Func<int, int, bool> CountsAsTarget, int XMax, int YMax, int XMin = 0, int YMin = 0) {
+	public class MaxDistancePathFinder {
+		public bool HasPath(int x, int y, Func<int, int, bool> CountsAsPath, Func<int, int, bool> CountsAsTarget, int XMax, int YMax, int MaxDistance = -1, int XMin = 0, int YMin = 0) {
 			countsAsPath = CountsAsPath;
 			countsAsTarget = CountsAsTarget;
 			maxDistance = MaxDistance;
@@ -43,7 +43,7 @@ namespace androLib.Common.Utility {
 
 			return hasPath;
 		}
-		private static void PrintPathGrid() {
+		private void PrintPathGrid() {
 			string path = "\n";
 			int longest = 0;
 			for (int x = xMin; x <= xMax; x++) {
@@ -86,22 +86,22 @@ namespace androLib.Common.Utility {
 			path += "\n";
 			path.LogSimple();
 		}
-		private static int[,] PathGrid;
-		private static int xStart;
-		private static int yStart;
-		private static int centerX;
-		private static int centerY;
-		private static Func<int, int, bool> countsAsPath;
-		private static Func<int, int, bool> countsAsTarget;
-		private static int maxDistance;
-		private static int xMax;
-		private static int yMax;
-		private static int xMin;
-		private static int yMin;
+		private int[,] PathGrid;
+		private int xStart;
+		private int yStart;
+		private int centerX;
+		private int centerY;
+		private Func<int, int, bool> countsAsPath;
+		private Func<int, int, bool> countsAsTarget;
+		private int maxDistance;
+		private int xMax;
+		private int yMax;
+		private int xMin;
+		private int yMin;
 		/// <summary>
 		/// Searches for a path to a position satisfied by countsAsTarget only through positions satisfied by countsAsPath.<br/>
 		/// </summary>
-		private static bool FindPath(int x, int y, int currentDistance, int fromDirection = -1, int previousFrom = -1) {
+		private bool FindPath(int x, int y, int currentDistance, int fromDirection = -1, int previousFrom = -1) {
 			//$"{x}, {y}, ({x + xStart}, {y + yStart}), currentDistance: {currentDistance}, fromDirection: {fromDirection}, previousFrom: {previousFrom}".LogSimple();
 			//opposite and previousOpposite are the opposite directionIDs for the path taken to get to this point.
 			//For instance, if the path taken to get here was directionID 0 (down), opposite will be 2 (up).

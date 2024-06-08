@@ -543,8 +543,13 @@ namespace androLib.Common.Utility
         }
         public const int InventoryHotbarCount = 10;
         public const int InventoryStorageCount = 40;
+		public const int InventoryCoinCount = 4;
+		public const int InventoryAmmoCount = 4;
+		public const int InventoryStorageAndHotbarCount = InventoryHotbarCount + InventoryStorageCount;
+		public const int InventoryStorageHotbarCoinsAndAmmo = InventoryStorageAndHotbarCount + InventoryCoinCount + InventoryAmmoCount;
         public static Item[] TakePlayerInventory40(this Item[] inv) => inv.Skip(inv.Length >= InventoryHotbarCount ? InventoryHotbarCount : inv.Length)
-            .Take(inv.Length >= InventoryHotbarCount + InventoryStorageCount ? InventoryStorageCount : inv.Length - InventoryHotbarCount).ToArray();
+            .Take(inv.Length >= InventoryStorageAndHotbarCount ? InventoryStorageCount : inv.Length - InventoryHotbarCount).ToArray();
+		public static IEnumerable<Item> TakePlayerInventory58(this Item[] inv) => inv.Take(inv.Length >= InventoryStorageHotbarCoinsAndAmmo ? InventoryStorageHotbarCoinsAndAmmo : inv.Length);
 		public static int GetRealDefense(this Player player) => (int)Math.Round((player.statDefense.Positive * (1 + player.statDefense.AdditiveBonus.Value) - player.statDefense.Negative) * player.statDefense.FinalMultiplier.Value);
         public static bool InheritsFrom(this ModType modType, Type parent) => modType.GetType().InheritsFrom(parent);
         public static bool InheritsFrom(this Type type, Type parent) {
@@ -728,7 +733,7 @@ namespace androLib.Common.Utility
 			itemCount = 0;
 			IEnumerable<IEnumerable<Item>> locationsToSearch = new List<IEnumerable<Item>>();
 			if (inventory)
-				locationsToSearch = locationsToSearch.Concat(new List<IEnumerable<Item>>() { Main.LocalPlayer.inventory });
+				locationsToSearch = locationsToSearch.Append(Main.LocalPlayer.inventory.TakePlayerInventory58());
 
 			if (banks) {
 				List<IEnumerable<Item>> bankItems = new() {
@@ -751,6 +756,34 @@ namespace androLib.Common.Utility
 			}
 
 			return items;
+		}
+		public static bool SearchForFirstItem(int itemType, out Item foundItem, IEnumerable<IEnumerable<Item>> otherLocations = null, bool inventory = true, bool banks = true) {
+			foundItem = null;
+			IEnumerable<IEnumerable<Item>> locationsToSearch = new List<IEnumerable<Item>>();
+			if (inventory)
+				locationsToSearch = locationsToSearch.Append(Main.LocalPlayer.inventory);
+
+			if (banks) {
+				List<IEnumerable<Item>> bankItems = new() {
+					Main.LocalPlayer.bank.item,
+					Main.LocalPlayer.bank2.item,
+					Main.LocalPlayer.bank3.item,
+					Main.LocalPlayer.bank4.item,
+				};
+
+				locationsToSearch = locationsToSearch.Concat(bankItems);
+			}
+
+			foreach (IEnumerable<Item> locationToSearch in otherLocations != null ? locationsToSearch.Concat(otherLocations) : locationsToSearch) {
+				foreach (Item item in locationToSearch) {
+					if (item.type == itemType) {
+						foundItem = item;
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 		public static void DrawItem(this Item item, SpriteBatch spriteBatch, Vector2 position, float inventoryScale = 1f, bool alwaysDrawStack = true) {
 			Color color = Color.White;
@@ -854,6 +887,34 @@ namespace androLib.Common.Utility
 			TileObjectData.OriginToTopLeft(tileType, 0, ref baseCoords);
 			return baseCoords;
 		}
+		public static IEnumerable<Point16> MultiTileTiles(int x, int y) => MultiTileTilesTopLeft(new Point16(x, y));
+		public static IEnumerable<Point16> MultiTileTilesTopLeft(Point16 point16) {
+			Point16 topLeft = TilePositionToTileTopLeft(point16.X, point16.Y);
+			int width;
+			int height;
+			Tile tile = Main.tile[topLeft.X, topLeft.Y];
+			TileObjectData tileData = TileObjectData.GetTileData(tile.TileType, 0);
+			if (tileData == null) {
+				width = 1;
+				height = 1;
+			}
+			else {
+				width = tileData.Width;
+				height = tileData.Height;
+			}
+
+			int xEnd = topLeft.X + width;
+			int yEnd = topLeft.Y + height;
+			for (int x = topLeft.X; x < xEnd; x++) {
+				for (int y = topLeft.Y; y < yEnd; y++) {
+					Tile checkTile = Main.tile[x, y];
+					if (checkTile.TileType != tile.TileType)
+						continue;
+
+					yield return new Point16(x, y);
+				}
+			}
+		}
 		public static bool TryGetChest(this Point16 topLeft, out int chest) => TryGetChest(topLeft.X, topLeft.Y, out chest);
 		public static bool TryGetChest(int x, int y, out int chestId) {
 			chestId = Chest.FindChest(x, y);
@@ -863,7 +924,6 @@ namespace androLib.Common.Utility
 			return false;
 		}
 		public static bool AnyWire(this Tile tile) => tile.BlueWire || tile.YellowWire || tile.RedWire || tile.GreenWire;
-
 		public static bool AnyTileWireTopLeft(this Point16 topLeft) => AnyTileWireTopLeft(topLeft.X, topLeft.Y);
 		public static bool AnyTileWireTopLeft(int topLeftX, int topLeftY) {
 			int width;

@@ -1,5 +1,6 @@
 ﻿using androLib.Common.Globals;
 using androLib.Common.Utility;
+using androLib.IO.TerrariaAutomations;
 using androLib.Items;
 using androLib.UI;
 using Microsoft.Xna.Framework;
@@ -132,6 +133,7 @@ namespace androLib
 		public override void OnEnterWorld() {
 			StorageManager.CanVacuumItem(new(1), Player);//Sets up all allowed Lists
 			CheckClientConfigChanged(true);
+			TA_WorldFile.OnEnterWorld();
 		}
 		public override void PreUpdateMovement() {
 			CenterBeforeMoveUpdate = Player.Center;

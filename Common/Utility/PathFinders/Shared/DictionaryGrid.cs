@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 using Terraria;
 
 namespace androLib.Common.Utility {
-	public class DictionaryGrid<T> {
+	public class DictionaryGrid<T> : IEnumerable<(int x, int y, T value)> {
 		private SortedDictionary<int, SortedDictionary<int, T>> Grid;
 		public DictionaryGrid() {
 			Grid = new();
@@ -30,6 +31,19 @@ namespace androLib.Common.Utility {
 
 			if (yDict.AddOrSet(y, value))
 				Count++;
+		}
+		public bool TryAdd(int x, int y, T value) {
+			if (!Grid.TryGetValue(x, out SortedDictionary<int, T> yDict)) {
+				yDict = new();
+				Grid.Add(x, yDict);
+			}
+
+			if (yDict.TryAdd(y, value)) {
+				Count++;
+				return true;
+			}
+
+			return false;
 		}
 		public void Set(int x, int y, T value) => Grid[x][y] = value;
 		public bool TryGetValue(int x, int y, out T value) {
@@ -89,7 +103,7 @@ namespace androLib.Common.Utility {
 
 			throw new Exception("DictionaryGrid is empty");
 		}
-		public IEnumerable<(int x, int y)> Values {
+		public IEnumerable<(int x, int y)> Keys {
 			get {
 				foreach (KeyValuePair<int, SortedDictionary<int, T>> p in Grid) {
 					foreach (KeyValuePair<int, T> p2 in p.Value) {
@@ -97,6 +111,25 @@ namespace androLib.Common.Utility {
 					}
 				}
 			}
+		}
+		public IEnumerable<T> Values {
+			get {
+				foreach (KeyValuePair<int, SortedDictionary<int, T>> p in Grid) {
+					foreach (KeyValuePair<int, T> p2 in p.Value) {
+						yield return p2.Value;
+					}
+				}
+			}
+		}
+		public IEnumerator<(int x, int y, T value)> GetEnumerator() {
+			foreach (KeyValuePair<int, SortedDictionary<int, T>> p in Grid) {
+				foreach (KeyValuePair<int, T> p2 in p.Value) {
+					yield return (p.Key, p2.Key, p2.Value);
+				}
+			}
+		}
+		IEnumerator IEnumerable.GetEnumerator() {
+			return GetEnumerator();
 		}
 
 		public bool IsEmpty() => Grid.Count == 0;

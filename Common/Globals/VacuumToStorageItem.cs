@@ -171,15 +171,18 @@ namespace androLib.Common.Globals
 			foreach (int itemWhoAmI in toRemove)
 				MyRequests.Remove(itemWhoAmI);
 		}
-		private const int itemSpaceStatusResetLockout = 10;
-		public override void Load() {
+		private static void ResetPlayerItemSpaceStatus() {
 			playerItemSpaceStatus = new (uint blockRequestResetTime, Dictionary<int, uint> requests)[Main.item.Length];
 			for (int i = 0; i < Main.item.Length; i++) {
 				playerItemSpaceStatus[i] = (0, new());
 			}
+		}
+		public override void Load() {
+			ResetPlayerItemSpaceStatus();
 
 			On_Player.ItemSpace += On_Player_ItemSpace;
 			On_Item.PickAnItemSlotToSpawnItemOn += On_Item_PickAnItemSlotToSpawnItemOn;
+			AndroMod.OnResetGameCounter += ResetPlayerItemSpaceStatus;
 		}
 
 		private int On_Item_PickAnItemSlotToSpawnItemOn(On_Item.orig_PickAnItemSlotToSpawnItemOn orig, bool reverseLookup, int nextItem) {

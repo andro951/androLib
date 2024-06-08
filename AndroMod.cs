@@ -23,6 +23,8 @@ using Terraria.DataStructures;
 using Terraria.ObjectData;
 using System.IO;
 using androLib.Items;
+using androLib.IO;
+using androLib.Items.Interfaces;
 
 namespace androLib
 {
@@ -77,6 +79,9 @@ namespace androLib
 		public const string ammoToolModName = "AmmoTool";
 		public static Mod ammoToolMod;
 		public static bool ammoToolModEnabled = ModLoader.TryGetMod(ammoToolModName, out ammoToolMod);
+		public const string terrariaAutomationsModName = "TerrariaAutomations";
+		public static Mod terrariaAutomationsMod;
+		public static bool terrariaAutomationsModEnabled = ModLoader.TryGetMod(terrariaAutomationsModName, out terrariaAutomationsMod);
 
 		public static int VanillaRecipeCount = -1;
 		private enum CallID {
@@ -293,9 +298,49 @@ namespace androLib
 			IL_ItemSlot.RightClick_ItemArray_int_int += IL_ItemSlot_RightClick_ItemArray_int_int;
 			IL_SceneMetrics.ScanAndExportToMain += IL_SceneMetrics_ScanAndExportToMain;
 			On_ItemSlot.RightClick_ItemArray_int_int += OnRightClick_ItemArray_int_int;
+			IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += IL_ItemSlot_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color;
+			On_Main.ResetGameCounter += On_Main_ResetGameCounter;
+			OnResetGameCounter += LogMethods.ResetLogTimers;
 
 			MagicStorageButtonsUI.RegisterWithMasterUIManager();
 			AndroLocalizationData.RegisterSDataPackage();
+			WorldFileManager.Load();
+		}
+		public static Action OnResetGameCounter = null;
+		private void On_Main_ResetGameCounter(On_Main.orig_ResetGameCounter orig) {
+			orig();
+			OnResetGameCounter?.Invoke();
+		}
+
+		public static Func<Item, int, int> OnCountAmmoForDrawItemSlot = null;
+		private void IL_ItemSlot_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color(ILContext il) {
+			var c = new ILCursor(il);
+
+			//// if (num11 != -1)
+			//IL_0e0e: ldloc.s 30
+			//IL_0e10: ldc.i4.m1
+			//IL_0e11: beq.s IL_0e64
+
+			if (!c.TryGotoNext(MoveType.Before,
+				i => i.MatchLdloc(30),
+				i => i.MatchLdcI4(-1),
+				i => i.MatchBeq(out _)
+			)) { throw new Exception("Failed to find instructions IL_ItemSlot_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color"); }
+
+			c.Index++;
+			c.EmitLdloc1();
+			c.EmitDelegate((int stackCount, Item item) => {
+				if (OnCountAmmoForDrawItemSlot != null) {
+					foreach (Func<Item, int, int> action in OnCountAmmoForDrawItemSlot.GetInvocationList()) {
+						stackCount = action(item, stackCount);
+					}
+				}
+
+				return stackCount;
+			});
+
+			c.EmitStloc(30);
+			c.EmitLdloc(30);
 		}
 
 		private void OnRightClick_ItemArray_int_int(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {

@@ -9,6 +9,14 @@ using Terraria;
 namespace androLib.Common.Utility {
 	public static class PathFinderSharedFunctions {
 		public static void GetBoundaries(int x, int y, int xMin, int xMax, int yMin, int yMax, int radius, out int left, out int up, out int right, out int down) {
+			if (radius == -1) {
+				left = xMin - x;
+				up = yMin - y;
+				right = xMax - x;
+				down = yMax - y;
+				return;
+			}
+
 			left = Math.Max(-radius, xMin - x);
 			up = Math.Max(-radius, yMin - y);
 			right = Math.Min(radius, xMax - x);
@@ -104,6 +112,30 @@ namespace androLib.Common.Utility {
 			else {
 				directionID = yDiff > 0 ? (short)PathDirectionID.Down : (short)PathDirectionID.Up;
 			}
+		}
+
+		public static bool GetDirectionCheckInWorld(int directionID, int tileX, int tileY, out int x, out int y) {
+			GetDirection(directionID, tileX, tileY, out x, out y);
+			switch (directionID) {
+				case Down:
+					if (y >= Main.maxTilesY)
+						return false;
+					break;
+				case Right:
+					if (x >= Main.maxTilesX)
+						return false;
+					break;
+				case Up:
+					if (y < 0)
+						return false;
+					break;
+				case Left:
+					if (x < 0)
+						return false;
+					break;
+			}
+
+			return true;
 		}
 	}
 }

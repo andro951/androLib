@@ -1,6 +1,7 @@
 ﻿using androLib.Common.Globals;
 using androLib.Common.Utility;
 using androLib.Common.Utility.LogSystem;
+using androLib.Items.Interfaces;
 using androLib.UI;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -82,6 +83,7 @@ namespace androLib
 			SoundManager.Update();
 			VacuumToStorageItem.Update();
 			MasterUIManager.PostUpdateEverything();
+			IRightClickUse.Setup();
 		}
 		public struct ChanceMultiplierInfo {
 			public int Min {
