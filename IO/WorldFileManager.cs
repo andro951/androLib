@@ -3,6 +3,7 @@ using androLib.IO.TerrariaAutomations;
 using log4net;
 using MagicStorage;
 using MonoMod.RuntimeDetour;
+using ReLogic.OS;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -193,22 +194,56 @@ namespace androLib.IO {
 			}
 		}
 		private static void MoveToCloud(string localPath, string cloudPath) {
-			$"MoveToCloud Not Implemented".LogSimpleNT();
+			localPath = Path.ChangeExtension(localPath, AndroModWorldFileExtension);
+			cloudPath = Path.ChangeExtension(cloudPath, AndroModWorldFileExtension);
+			if (File.Exists(localPath)) {
+				FileUtilities.MoveToCloud(localPath, cloudPath);
+			}
 		}
 		private static void MoveToLocal(string cloudPath, string localPath) {
-			$"MoveToLocal Not Implemented".LogSimpleNT();
+			cloudPath = Path.ChangeExtension(cloudPath, AndroModWorldFileExtension);
+			localPath = Path.ChangeExtension(localPath, AndroModWorldFileExtension);
+			if (FileUtilities.Exists(cloudPath, true)) {
+				FileUtilities.MoveToLocal(cloudPath, localPath);
+			}
 		}
 		private static void LoadBackup(string path, bool cloudSave) {
-			$"LoadBackup Not Implemented".LogSimpleNT();
+			path = Path.ChangeExtension(path, AndroModWorldFileExtension);
+			if (FileUtilities.Exists(path + ".bak", cloudSave)) {
+				FileUtilities.Move(path + ".bak", path, cloudSave, true);
+			}
 		}
 		private static void LoadDedServBackup(string path, bool cloudSave) {
-			$"LoadDedServBackup Not Implemented".LogSimpleNT();
+			path = Path.ChangeExtension(path, AndroModWorldFileExtension);
+			if (FileUtilities.Exists(path, cloudSave)) {
+				FileUtilities.Copy(path, path + ".bad", cloudSave, true);
+			}
+
+			if (FileUtilities.Exists(path + ".bak", cloudSave)) {
+				FileUtilities.Copy(path + ".bak", path, cloudSave, true);
+				FileUtilities.Delete(path + ".bak", cloudSave);
+			}
 		}
 		private static void RevertDedServBackup(string path, bool cloudSave) {
-			$"RevertDedServBackup Not Implemented".LogSimpleNT();
+			path = Path.ChangeExtension(path, AndroModWorldFileExtension);
+			if (FileUtilities.Exists(path, cloudSave)) {
+				FileUtilities.Copy(path, path + ".bak", cloudSave, true);
+			}
+
+			if (FileUtilities.Exists(path + ".bad", cloudSave)) {
+				FileUtilities.Copy(path + ".bad", path, cloudSave, true);
+				FileUtilities.Delete(path + ".bad", cloudSave);
+			}
 		}
 		private static void EraseWorld(string path, bool cloudSave) {
-			$"EraseWorld Not Implemented".LogSimpleNT();
+			path = Path.ChangeExtension(path, AndroModWorldFileExtension);
+			if (!cloudSave) {
+				Platform.Get<IPathService>().MoveToRecycleBin(path);
+				Platform.Get<IPathService>().MoveToRecycleBin(path + ".bak");
+			}
+			else if (SocialAPI.Cloud != null) {
+				SocialAPI.Cloud.Delete(path);
+			}
 		}
 	}
 }
