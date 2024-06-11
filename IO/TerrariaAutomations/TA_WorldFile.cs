@@ -11,8 +11,8 @@ using Terraria;
 using androLib.Tiles.TileData;
 
 namespace androLib.IO.TerrariaAutomations {
-	internal static class TA_WorldFile {
-		public static void Load() {
+	public static class TA_WorldFile {
+		internal static void Load() {
 			WorldFileManager.RegisterWorldFileData(WorldFileManager.WorldFileID.TerrariaAutomations, Save, Load);
 		}
 		private static void Save(BinaryWriter writer) {
@@ -56,7 +56,7 @@ namespace androLib.IO.TerrariaAutomations {
 			bool usesIdLookup = numBitsNeededForPipeId < 8;
 			writer.Write(usesIdLookup);
 			//$"SavingWorld; numBitsNeededForPipeId: {numBitsNeededForPipeId}, maxBitsInTileCountRepresentation: {maxBitsInTileCountRepresentation}, usesIdLookup: {usesIdLookup}, pipeTypes: {pipeTypes}".LogSimple();
-			if (true || usesIdLookup) {
+			if (usesIdLookup) {
 				Dictionary<byte, uint_b> pipeIds = new();
 				for (uint i = 0; i <= pipeTypes; i++) {
 					byte pipeType = pipeTypesArr[i];
@@ -141,7 +141,7 @@ namespace androLib.IO.TerrariaAutomations {
 			bool usesIdLookup = reader.ReadBoolean();
 			TilePipeData[] tilePipeData = Main.tile.GetData<TilePipeData>();
 			//$"\n\nLoadingWorld; numBitsNeededForPipeId: {numBitsNeededForPipeId}, maxBitsInTileCountRepresentation: {maxBitsInTileCountRepresentation}, usesIdLookup: {usesIdLookup}, pipeTypes: {pipeTypes}".LogSimple();
-			if (true || usesIdLookup) {
+			if (usesIdLookup) {
 				Dictionary<uint, byte> pipeIds = new();//reverse of reader
 				for (uint i = 0; i <= pipeTypes; i++) {
 					byte pipeId2 = reader.ReadByte();
@@ -149,7 +149,6 @@ namespace androLib.IO.TerrariaAutomations {
 					//$"pipeIds[{i} ({i.ToBinaryString(numBitsNeededForPipeId)})]: {pipeId2} ({pipeId2.ToBinaryString()})".LogSimple();
 				}
 
-				reader.Start();
 				byte pipeData = 0;
 				uint tileCount = 0;
 				uint pipeId = 0;
@@ -160,18 +159,17 @@ namespace androLib.IO.TerrariaAutomations {
 							pipeId = reader.ReadNum(numBitsNeededForPipeId);
 							pipeData = pipeIds[pipeId];
 							tileCount = reader.ReadNum(maxBitsInTileCountRepresentation);
-							//$"pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
+							$"pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
 						}
 
 						tilePipeData[z].PipeData = pipeData;
 						tileCount--;
 
-						//if (tileCount == 0) $"-pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
+						if (tileCount == 0) $"-pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
 					}
 				}
 			}
 			else {
-				reader.Start();
 				byte pipeData = 0;
 				uint tileCount = 0;
 				for (uint x = 0; x < maxTilesX; x++) {
@@ -193,21 +191,26 @@ namespace androLib.IO.TerrariaAutomations {
 
 			reader.Finish();
 		}
-
 		private static bool RandonPipesOnPlayerEnterWorld => false;
 		private static void TestingPopulateTiles() {
-			if (!Debugger.IsAttached || !RandonPipesOnPlayerEnterWorld)
-				return;
-
 			TilePipeData[] tilePipeData = Main.tile.GetData<TilePipeData>();
+			if (Debugger.IsAttached && RandonPipesOnPlayerEnterWorld) {
+				for (int x = 0; x < Main.maxTilesX; x++) {
+					for (int y = 0; y < Main.maxTilesY; y++) {
+						int z = x * Main.tile.Height + y;
+						if (Main.rand.Next(10) == 1) {
+							tilePipeData[z].PipeData = (byte)Main.rand.Next(256);
+						}
+
+						worldDataBeforeSave[x, y] = tilePipeData[z].PipeData;
+					}
+				}
+			}
+
 			worldDataBeforeSave = new byte[Main.maxTilesX, Main.maxTilesY];
 			for (int x = 0; x < Main.maxTilesX; x++) {
 				for (int y = 0; y < Main.maxTilesY; y++) {
 					int z = x * Main.tile.Height + y;
-					if (Main.rand.Next(10) == 1) {
-						tilePipeData[z].PipeData = (byte)Main.rand.Next(256);
-					}
-
 					worldDataBeforeSave[x, y] = tilePipeData[z].PipeData;
 				}
 			}
@@ -216,6 +219,11 @@ namespace androLib.IO.TerrariaAutomations {
 		internal static void CheckLoadVsBeforeSave() {
 			TilePipeData[] tilePipeData = Main.tile.GetData<TilePipeData>();
 			List<uint> diff = new();
+			if (worldDataBeforeSave == null) {
+				$"LoadVsBeforeSave failed; worldDataBeforeSave is null".LogSimple();
+				return;
+			}
+
 			for (int x = 0; x < Main.maxTilesX; x++) {
 				for (int y = 0; y < Main.maxTilesY; y++) {
 					int z = x * Main.tile.Height + y;
@@ -237,5 +245,12 @@ namespace androLib.IO.TerrariaAutomations {
 		internal static void OnEnterWorld() {
 			TestingPopulateTiles();
 		}
+
+		#region Net
+
+		public static void WriteAllPipeData(BinaryWriter writer) => Save(writer);
+		public static void RecieveAllPipeData(BinaryReader reader) => Load(reader);
+
+		#endregion
 	}
 }

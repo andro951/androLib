@@ -74,15 +74,15 @@ namespace androLib.Common.Utility {
 		}
 		private static void Reset() {
 			value = 0;
-			shift = 0;
-		}
-		public static void Start(this BinaryReader reader) {
-			Reset();
-			value = reader.ReadUInt32();
-			//$"{value.ToBinaryString()} Start Reader; value: {value} ({value.ToBinaryString().Substring(0, uintNum - shift)}), shift: {shift}, full value: {value.ToBinaryString()}".LogSimple();
+			shift = -1;
 		}
 		public static bool ReadBool(this BinaryReader reader) => reader.ReadNum(1) == 1;
 		public static uint ReadNum(this BinaryReader reader, int length) {
+			if (shift == -1) {
+				shift = 0;
+				value = reader.ReadUInt32();
+			}
+
 			//$"\n{value.ToBinaryString()} ReadNum(length: {length}); value: {value} ({value.ToBinaryString().Substring(0, uintNum - shift)}), shift: {shift}, full value: {value.ToBinaryString()}".LogSimple();
 			int originalShift = shift;
 			shift += length;
@@ -96,19 +96,21 @@ namespace androLib.Common.Utility {
 					int leftShift = uintNum - shift;
 					//uint rightValue = ((value << (leftShift)) >> (leftShift - (uintNum - originalShift)));//(length - leftShift));
 					result = (originalValue >> originalShift) | ((value << (leftShift)) >> (leftShift - (uintNum - originalShift)));//(length - leftShift));
-																																	//if (length == 3 && result > 4) {
-																																	//	$"{value.ToBinaryString()} leftValue: {leftValue} ({leftValue.ToBinaryString()}), rightValue: {rightValue} ({rightValue.ToBinaryString()}), result: {result} ({result.ToBinaryString()}), shiftLeft; leftShift => {leftShift} => {leftShift}, shiftRight; length - leftShift => {length} - {leftShift} => {length - leftShift}".LogSimple();
-																																	//}
+					//if (length == 3 && result > 4) {
+					//	$"{value.ToBinaryString()} leftValue: {leftValue} ({leftValue.ToBinaryString()}), rightValue: {rightValue} ({rightValue.ToBinaryString()}), result: {result} ({result.ToBinaryString()}), shiftLeft; leftShift => {leftShift} => {leftShift}, shiftRight; length - leftShift => {length} - {leftShift} => {length - leftShift}".LogSimple();
+					//}
 				}
 				else {
 					int leftShift = uintNum - shift;
 					result = (value << leftShift) >> leftShift + originalShift;
-					shift -= uintNum;
+					Reset();
+					//shift -= uintNum;
+
 					//if (length == 3 && result > 4) {
 					//	$"{value.ToBinaryString()} result: {result} ({result.ToBinaryString()}), shift: {shift}, originalShift: {originalShift}".LogSimple();
 					//}
 
-					value = reader.ReadUInt32();
+					//value = reader.ReadUInt32();
 				}
 			}
 			else {

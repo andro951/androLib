@@ -89,9 +89,7 @@ namespace androLib.Common.Utility {
 			i += x;
 			j += y;
 		}
-
 		public static int GetOppositeDirection(int directionID) => directionID >= 0 ? (directionID + 2) % 4 : -1;
-
 		public static void GetDirectionID(this Player player, int tileX, int tileY, out short directionID) {
 			Point playerCenterTile = player.Center.ToTileCoordinates();
 			int xDiff = tileX - playerCenterTile.X;
@@ -113,7 +111,6 @@ namespace androLib.Common.Utility {
 				directionID = yDiff > 0 ? (short)PathDirectionID.Down : (short)PathDirectionID.Up;
 			}
 		}
-
 		public static bool GetDirectionCheckInWorld(int directionID, int tileX, int tileY, out int x, out int y) {
 			GetDirection(directionID, tileX, tileY, out x, out y);
 			switch (directionID) {

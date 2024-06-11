@@ -20,6 +20,7 @@ using Terraria.UI.Chat;
 using Terraria.DataStructures;
 using Terraria.ObjectData;
 using Terraria.Audio;
+using ReLogic.Content;
 
 namespace androLib.Common.Utility
 {
@@ -979,6 +980,15 @@ namespace androLib.Common.Utility
 			return transferedAll;
 		}
 		public static bool Snowing => Main.SceneMetrics.EnoughTilesForSnow;
+		private static Asset<Texture2D> testingDotTexture = ModContent.Request<Texture2D>($"{AndroMod.ModName}/UI/Sprites/TestingDot");
+		public static void DrawTestingDot(int tileX, int tileY, Color color, SpriteBatch spriteBatch) => DrawTestingDot(new Point16(tileX, tileY), color, spriteBatch);
+		public static void DrawTestingDot(this Point16 tilePosition, Color color, SpriteBatch spriteBatch) => DrawTestingDot(tilePosition.ToWorldCoordinates(), color, spriteBatch);
+		public static void DrawTestingDot(float worldX, float worldY, Color color, SpriteBatch spriteBatch) => DrawTestingDot(new Vector2(worldX, worldY), color, spriteBatch);
+		public static void DrawTestingDot(this Vector2 worldPosition, Color color, SpriteBatch spriteBatch) {
+			Vector2 zero = (Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange, Main.offScreenRange)) + new Vector2(-3f, -3f);
+			Vector2 stackIndicatorPosition = worldPosition;
+			spriteBatch.Draw(testingDotTexture.Value, stackIndicatorPosition - Main.screenPosition + zero, color);
+		}
 
 		#endregion
 	}

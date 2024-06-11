@@ -25,6 +25,7 @@ using System.IO;
 using androLib.Items;
 using androLib.IO;
 using androLib.Items.Interfaces;
+using Terraria.GameContent.Creative;
 
 namespace androLib
 {
@@ -301,10 +302,16 @@ namespace androLib
 			IL_ItemSlot.Draw_SpriteBatch_ItemArray_int_int_Vector2_Color += IL_ItemSlot_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color;
 			On_Main.ResetGameCounter += On_Main_ResetGameCounter;
 			OnResetGameCounter += LogMethods.ResetLogTimers;
+			On_CreativePowerManager.SyncThingsToJoiningPlayer += On_CreativePowerManager_SyncThingsToJoiningPlayer;
 
 			MagicStorageButtonsUI.RegisterWithMasterUIManager();
 			AndroLocalizationData.RegisterSDataPackage();
 			WorldFileManager.Load();
+		}
+		public static Action<int> OnSendWorldDataToConnectingPlayer;
+		private static void On_CreativePowerManager_SyncThingsToJoiningPlayer(On_CreativePowerManager.orig_SyncThingsToJoiningPlayer orig, CreativePowerManager self, int playerIndex) {
+			orig(self, playerIndex);
+			OnSendWorldDataToConnectingPlayer?.Invoke(playerIndex);
 		}
 		public static Action OnResetGameCounter = null;
 		private void On_Main_ResetGameCounter(On_Main.orig_ResetGameCounter orig) {

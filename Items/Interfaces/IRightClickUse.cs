@@ -44,12 +44,28 @@ namespace androLib.Items.Interfaces {
 		public bool InInteractionRange(Player player, Item item);
 		public static bool InWireRenchUseRange(Player player, Item sItem) => (player.position.X / 16f - (float)Player.tileRangeX - (float)sItem.tileBoost - (float)player.blockRange <= (float)Player.tileTargetX) && ((player.position.X + (float)player.width) / 16f + (float)Player.tileRangeX + (float)sItem.tileBoost - 1f + (float)player.blockRange >= (float)Player.tileTargetX) && (player.position.Y / 16f - (float)Player.tileRangeY - (float)sItem.tileBoost - (float)player.blockRange <= (float)Player.tileTargetY) && ((player.position.Y + (float)player.height) / 16f + (float)Player.tileRangeY + (float)sItem.tileBoost - 2f + (float)player.blockRange >= (float)Player.tileTargetY);
 		public static bool InSimpleTileRange(Player player, Item item) => player.IsInTileInteractionRange(Player.tileTargetX, Player.tileTargetY, TileReachCheckSettings.Simple);
+		public bool PreventTileInteraction(Player player, Item item, int tileTargetX, int tileTargetY);
 	}
 
 	public class RightClickUseGlobalItem : GlobalItem {
 		public override void Load() {
 			On_Player.ItemCheck_Inner += On_Player_ItemCheck_Inner;
+			On_Player.TileInteractionsUse += On_Player_TileInteractionsUse;
 		}
+		private void On_Player_TileInteractionsUse(On_Player.orig_TileInteractionsUse orig, Player self, int myX, int myY) {
+			Item item = self.HeldItem;
+			bool releaseUseTile = self.releaseUseTile;
+			if (item?.ModItem is IRightClickUse rightClickUse) {
+				if (self.controlUseTile && self.releaseUseTile && rightClickUse.PreventTileInteraction(self, item, Player.tileTargetX, Player.tileTargetY)) {
+					self.releaseUseTile = false;
+				}
+			}
+
+			orig(self, myX, myY);
+
+			self.releaseUseTile = releaseUseTile;
+		}
+
 		private static void On_Player_ItemCheck_Inner(On_Player.orig_ItemCheck_Inner orig, Player self) {
 			orig(self);
 

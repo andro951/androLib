@@ -13,6 +13,7 @@
     <None Remove="UI\Sprites\Inventory_Back4(Favorited).png" />
     <None Remove="UI\Sprites\Inventory_Back_BrightGreen(Favorited).png" />
     <None Remove="UI\Sprites\Inventory_Back_BrightGreen.png" />
+    <None Remove="UI\Sprites\TestingDot.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="tModLoader.CodeAssist" Version="0.1.*" />
