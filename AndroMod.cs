@@ -335,9 +335,10 @@ namespace androLib
 			)) { throw new Exception("Failed to find instructions IL_ItemSlot_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color"); }
 
 			c.Index++;
+			c.EmitLdarg(2);
 			c.EmitLdloc1();
-			c.EmitDelegate((int stackCount, Item item) => {
-				if (OnCountAmmoForDrawItemSlot != null) {
+			c.EmitDelegate((int stackCount, int context, Item item) => {
+				if (context == 13 && OnCountAmmoForDrawItemSlot != null) {
 					foreach (Func<Item, int, int> action in OnCountAmmoForDrawItemSlot.GetInvocationList()) {
 						stackCount = action(item, stackCount);
 					}
