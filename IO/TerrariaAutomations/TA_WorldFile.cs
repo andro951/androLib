@@ -159,13 +159,13 @@ namespace androLib.IO.TerrariaAutomations {
 							pipeId = reader.ReadNum(numBitsNeededForPipeId);
 							pipeData = pipeIds[pipeId];
 							tileCount = reader.ReadNum(maxBitsInTileCountRepresentation);
-							$"pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
+							//$"pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
 						}
 
 						tilePipeData[z].PipeData = pipeData;
 						tileCount--;
 
-						if (tileCount == 0) $"-pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
+						//if (tileCount == 0) $"-pipeData: {pipeData.ToBinaryString()}, pipeID: {pipeId} ({pipeId.ToBinaryString(numBitsNeededForPipeId)}), tileCount: {tileCount} ({tileCount.ToBinaryString(maxBitsInTileCountRepresentation)}), z: {z}, x: {x}, y: {y}".LogSimple();
 					}
 				}
 			}
