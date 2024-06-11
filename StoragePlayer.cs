@@ -142,7 +142,8 @@ namespace androLib
 			if (Main.netMode == NetmodeID.Server)
 				return;
 
-			if (Main.LocalPlayer == null)
+			Player player = Main.LocalPlayer;
+			if (player == null)
 				return;
 
 			if (Main.gameMenu)
@@ -152,11 +153,22 @@ namespace androLib
 				if (!storage.ShouldRefreshInfoAccs)
 					continue;
 
+				if (!storage.HasRequiredItemToUseStorageSlow(player))
+					continue;
+
 				foreach (Item item in storage.Items) {
+					if (item.NullOrAir() || item.stack < 1)
+						continue;
+
+					if (!ItemID.Sets.WorksInVoidBag[item.type])
+						continue;
+
 					if (!item.favorited)
 						continue;
 
+					ItemLoader.UpdateInventory(item, player);
 					Player.RefreshInfoAccsFromItemType(item);
+					Player.RefreshMechanicalAccsFromItemType(item.type);
 				}
 			}
 		}
