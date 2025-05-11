@@ -1,4 +1,5 @@
 ﻿using androLib.Common.Utility;
+using androLib.Items;
 using androLib.ModIntegration;
 using System;
 using System.Collections.Generic;
@@ -309,6 +310,21 @@ namespace androLib.Common.Globals
 		protected virtual void GetDefaultDropStats(NPC npc, bool normalNPCThatDropsBossBag, out float hp, out float value, out float total) {
 			//Defense
 			float defenseMultiplier = 1f + (float)npc.defDefense / 40f;
+			if (AndroMod.calamityEnabled) {
+				switch (npc.ModFullName()) {
+					case "CalamityMod/DevilFish":
+					case "CalamityMod/DevilFishAlt":
+						defenseMultiplier = 1f + 15f / 40f;
+						break;
+					case "CalamityMod/SlabCrab":
+					case "CalamityMod/GiantClam":
+						defenseMultiplier = 1f + 10f / 40f;
+						break;
+					case "CalamityMod/Clam":
+						defenseMultiplier = 1f + 6f / 40f;
+						break;
+				}
+			}
 
 			//HP
 			int lifeMax = npc.RealLifeMax();
