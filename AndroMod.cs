@@ -324,12 +324,16 @@ namespace androLib
 			var c = new ILCursor(il);
 
 			//// if (num11 != -1)
-			//IL_0e0e: ldloc.s 30
-			//IL_0e10: ldc.i4.m1
-			//IL_0e11: beq.s IL_0e64
+			//IL_0e44: ldloc.s 31
+			//IL_0e46: ldc.i4.m1
+			//IL_0e47: beq.s IL_0e9a
+
+			//// ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.ItemStack.get_Value(), num11.ToString(), position + new Vector2(8f, 30f) * inventoryScale, val, 0f, Vector2.get_Zero(), new Vector2(inventoryScale * 0.8f), -1f, inventoryScale);
+			
+			int num11Arg = -1;
 
 			if (!c.TryGotoNext(MoveType.Before,
-				i => i.MatchLdloc(30),
+				i => i.MatchLdloc(out num11Arg),
 				i => i.MatchLdcI4(-1),
 				i => i.MatchBeq(out _)
 			)) { throw new Exception("Failed to find instructions IL_ItemSlot_Draw_SpriteBatch_ItemArray_int_int_Vector2_Color"); }
@@ -347,8 +351,8 @@ namespace androLib
 				return stackCount;
 			});
 
-			c.EmitStloc(30);
-			c.EmitLdloc(30);
+			c.EmitStloc(num11Arg);
+			c.EmitLdloc(num11Arg);
 		}
 
 		private void OnRightClick_ItemArray_int_int(On_ItemSlot.orig_RightClick_ItemArray_int_int orig, Item[] inv, int context, int slot) {
