@@ -35,6 +35,7 @@ namespace androLib.Common.Utility
 
 		public static Item CSI(this int type) => ContentSamples.ItemsByType[type];
         public static Item CSI(this short type) => ContentSamples.ItemsByType[type];
+		public static Item CSI_FromItemIDOrName(this string itemIDOrName) => ContentSamples.ItemsByType[ItemID.Search.GetId(itemIDOrName.Contains("ItemID.") ? itemIDOrName[(itemIDOrName.IndexOf('.') + 1)..] : itemIDOrName)];
 		public static NPC CSNPC(this int netID) => ContentSamples.NpcsByNetId[netID];
         public static NPC CSNPC(this short netID) => ContentSamples.NpcsByNetId[netID];
 		public static void ReplaceItemWithCoins(ref Item item, int coins) {
